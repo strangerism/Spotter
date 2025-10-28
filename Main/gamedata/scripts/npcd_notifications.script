@@ -1,4 +1,6 @@
 local npcdu = npcd_utils
+local FEAT_SETTING = NPCD.FEAT_SETTING
+local gc = game.translate_string
 
 function get_printer()
 	if not Printer then
@@ -9,17 +11,36 @@ function get_printer()
 end
 RegisterScriptCallback("npcd_on_log_update", get_printer)
 
-if ui_popup_messages then
-    local gc = game.translate_string
+local settings = {
+    npcd_news = false,
+    npcd_notifications = false,
+    npcd_display_time = 10,
+}
 
-    function on_game_start()
-        
-        RegisterScriptCallback("npcd_on_npc_perk_registered", perk_registered)
-        RegisterScriptCallback("npcd_on_npc_feat_registered", feat_registered)
+local perks_icons_registry = {}
+
+function build_perks_icons_registry()
+    perks_icons_registry = {}
+    perks_icons_registry["ui_npcd_perk_registered"] = true
+    perks_icons_registry["ui_npcd_feat_registered"] = true
+    for perk_id, perk in pairs(npcd.get_perks()) do
+        perks_icons_registry[perk.icon] = true
+        if perk.feats then
+            for feat_id, feat in pairs(perk.feats) do
+                if feat.icon then
+                    perks_icons_registry[feat.icon] = true
+                end
+            end
+        end
     end
+    Printer:Debug(LOG.INFO, CAT.UI, "Built perks icons registry with %d entries", size_table(perks_icons_registry))
+    Printer:DebugTable(LOG.DEBUG, CAT.UI, perks_icons_registry)
+end
+
+if ui_popup_messages then
 
     function perk_registered(npc_id, perk_id)
-        if not ui_popup_messages.GUI then return end
+        if not ui_popup_messages.GUI or not settings.npcd_notifications then return end
 
         local perk = npcd.get_perk(perk_id)
         local npc = level.object_by_id(npc_id)
@@ -30,7 +51,7 @@ if ui_popup_messages then
     end
 
     function feat_registered(npc_id, perk_id, feat_id)
-        if not ui_popup_messages.GUI then return end
+        if not ui_popup_messages.GUI or not settings.npcd_notifications then return end
         local feat = npcd.get_perk_feat(perk_id, feat_id)
         local npc = level.object_by_id(npc_id)
         if feat and npc then
@@ -42,23 +63,28 @@ if ui_popup_messages then
     OG_AddMessage = ui_popup_messages.UIPopupMessages.AddMessage
     function ui_popup_messages.UIPopupMessages:AddMessage(msg, icon)
         local wnd = OG_AddMessage(self, msg, icon)
-        if wnd and (icon == "ui_npcd_perk_registered" or icon == "ui_npcd_feat_registered") then
-            wnd.time_end = time_global() + self.options.display_time + self.options.animation_time + 30000
+        if wnd and perks_icons_registry[icon] then
+            wnd.time_end = time_global() + ((settings.npcd_display_time > 0 and settings.npcd_display_time) * 1000 or self.options.display_time) + self.options.animation_time
         else
             Printer:Debug(LOG.WARN, CAT.UI, "NPCD notification message window not found or icon mismatch")
         end
         return wnd
     end
+end
 
-    -- modules api
+-- modules api
 
-    function add_message(msg, icon)
-        if ui_popup_messages and ui_popup_messages.GUI then
-            ui_popup_messages.GUI:AddMessage(msg, icon)
-        end
-    end
+function add_message(msg, icon)
+    if not ui_popup_messages or not ui_popup_messages.GUI or not settings.npcd_notifications then return end
+    ui_popup_messages.GUI:AddMessage(msg, icon)
+end
 
-    function add_feat_activation_message(npc_id, perk_id, feat_id)
+function add_feat_activation_message(npc_id, perk_id, feat_id)
+    if not ui_popup_messages or not ui_popup_messages.GUI or not settings.npcd_notifications then return end
+    local perk = npcd.get_perk(perk_id)
+    if not perk then return end
+    local enabled = npcd_mcm.get_module_perk_feat_setting(perk.module, perk_id, feat_id, FEAT_SETTING.TYPE.GENERAL, "notifications")
+    if enabled then
         local feat = npcd.get_perk_feat(perk_id, feat_id)
         local npc = level.object_by_id(npc_id)
         if feat and npc then
@@ -66,4 +92,62 @@ if ui_popup_messages then
             add_message(message, feat.icon or "ui_npcd_feat_registered")
         end
     end
+end
+
+-- news system tip function
+
+print_tip = function(text,delay, ...)
+
+    if settings.npcd_news then
+		local text = tostring(text)
+		printf(text, ...)
+		if not db.actor then
+			return
+		end
+		
+		local ico = "ui_inGame2_Dengi_otdani"
+		local text_color = utils_xml.get_color("pda_white")
+		local arg_color = utils_xml.get_color("d_green")
+		local function colorize(s)
+			return arg_color .. s .. text_color
+		end
+		local i = 0
+		local t = {...}
+		if #t > 0 then
+			local function sr(a)
+				i = i + 1
+				if (type(t[i]) == 'userdata') then
+					if (t[i].x and t[i].y) then
+						return colorize(vec_to_str(t[i]))
+					end
+					return colorize('userdata')
+				end
+				return colorize(tostring(t[i]))
+			end
+			text = string.gsub(game.translate_string(text), "%%s", sr)
+		else
+			text = game.translate_string(text)
+		end
+		text = text_color .. text
+		if delay == nil then
+			delay = 6000
+		end
+		news_manager.send_tip(db.actor, text, nil, ico, delay)
+	end
+end
+
+function on_option_change()
+    settings.npcd_news = npcd_mcm.get_setting("main", "news") or false
+    settings.npcd_notifications = npcd_mcm.get_setting("main", "notifications") or false
+    settings.npcd_display_time = npcd_mcm.get_setting("main", "display_time") or 10
+end
+
+function on_game_start()
+    if ui_popup_messages then
+        RegisterScriptCallback("npcd_on_npc_perk_registered", perk_registered)
+        RegisterScriptCallback("npcd_on_npc_feat_registered", feat_registered)
+    end
+    RegisterScriptCallback("npcd_started", build_perks_icons_registry)
+    RegisterScriptCallback("on_option_change", on_option_change)
+    on_option_change()
 end

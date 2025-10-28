@@ -131,6 +131,10 @@ INPUT_MANAGER = {
 
 -- Perks API
 
+function get_perks()
+	return perks
+end
+
 function get_perk(perk_id)
 	if not perk_id then return end -- cannot continue
 	return perks[perk_id]

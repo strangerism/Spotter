@@ -20,6 +20,24 @@
 	<string id="ui_mcm_npcd_main_enable_desc">
 		<text>Enable/Disable all the NPDC installed modules</text>
 	</string>
+	<string id="ui_mcm_npcd_main_news">
+		<text>Enable pda messages</text>
+	</string>
+	<string id="ui_mcm_npcd_main_news_desc">
+		<text>Enable/Disable NPCD messages sent with the pda news system</text>
+	</string>
+	<string id="ui_mcm_npcd_main_notifications">
+		<text>Enable Popup messages</text>
+	</string>
+	<string id="ui_mcm_npcd_main_notifications_desc">
+		<text>Enable/Disable NPCD messages sent with the Anomaly Pop Up Message system (requires mod installed)</text>
+	</string>
+	<string id="ui_mcm_npcd_main_display_time">
+		<text>Display time</text>
+	</string>
+	<string id="ui_mcm_npcd_main_display_time_desc">
+		<text>The time in seconds the popup messages stay on. If set to 0, the global value from the original mod will be used instead. This delay value only applies to NPCD messsages.</text>
+	</string>			
 <!-- npcs menu	 -->
 	<string id="ui_mcm_menu_npcd_npcs">
 		<text>NPCs</text>
@@ -133,6 +151,12 @@
 	</string>	
 	<string id="ui_mcm_st_npcd_feat_enabled_desc">
 		<text>Enables the registration of this feat. If set to no, an npc that has this feat will not use it or receive any benefits from it. The actor also won't benefit from it as well.</text>
+	</string>	
+	<string id="ui_mcm_st_npcd_feat_notifications">
+		<text>Enable notifications</text>
+	</string>	
+	<string id="ui_mcm_st_npcd_feat_notifications_desc">
+		<text>Enable ui notifications when feats are registered in the active deck and, where available, after certain abilities effects are activated. Notifications are shown according to the settings in the NPCD menu.</text>
 	</string>	
 	<!-- Perk Type  -->
 	<string id="ui_mcm_lst_st_npcd_perk_type_archetype">

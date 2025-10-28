@@ -16,14 +16,21 @@ end
 	RegisterScriptCallback("npcd_on_log_update", get_printer)
 -- end
 
+function pum_available()
+	return ui_popup_messages ~= nil
+end
+
 function on_mcm_load()
 
 		op = { id= "main", sh=true, text="ui_mcm_menu_npcd_main", gr ={
 				{ id = "title",type= "slide",link= "ui_options_slider_disguise",text="ui_mcm_npcd_main_title",size= {512,50},spacing= 20 },
 				{ id = "desc", type = "desc", clr = {200, 200, 255, 200}, text = "ui_mcm_npcd_main_desc" },
 				{ id = "enable", type = "check", val = 1, def=true},
-				},
-			}
+				{ id = "news", type = "check", val = 1, def=true},
+				{ id = "notifications", precondition= {pum_available}, type = "check", val = 1, def=true},
+				{ id = "display_time", precondition= {pum_available}, type = "track", val = 2, def = 10, min = 0, max = 30, step = 1,},
+			},
+		}
 	return op, "npcd"
 end
 
@@ -254,6 +261,7 @@ function get_module_menu(module_deck)
 				add_readonly_field(perk_menu.gr, feat.type, feat.id .. "_type", "st_npcd_feat_type")
 				add_readonly_field(perk_menu.gr, feat.mode, feat.id .. "_mode", "st_npcd_feat_mode")
 				table.insert(perk_menu.gr, { id = feat.id .. "_enabled", val = 1, type = "check", def = true, hint = "st_npcd_feat_enabled", })
+				table.insert(perk_menu.gr, { id = feat.id .. "_notifications", val = 1, type = "check", precondition= {pum_available}, def = true, hint = "st_npcd_feat_notifications", })
 				if feat.mcm_menu then
 					for _, general_setting in pairs(feat.mcm_menu) do
 						local setting = npcdu.copy(general_setting)

@@ -202,7 +202,7 @@ local function update_discovered(perk)
 		if perk.discovery_desc then
 			npcd_notification = perk.discovery_desc
 		end
-		npcdu.print_tip(npcd_notification, 10000, perk.name and game.translate_string(perk.name))
+		npcd_notifications.print_tip(npcd_notification, 10000, perk.name and game.translate_string(perk.name))
 	end
 end
 
