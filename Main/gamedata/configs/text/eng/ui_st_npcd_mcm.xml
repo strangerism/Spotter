@@ -97,6 +97,12 @@
 	<string id="ui_mcm_st_npcd_perk_chance_desc">
 		<text>Chance for an NPC to spawn with this perk. The value as a percentage.</text>
 	</string>	
+	<string id="ui_mcm_st_npcd_perk_enabled">
+		<text>Enabled</text>
+	</string>	
+	<string id="ui_mcm_st_npcd_perk_enabled_desc">
+		<text>Enables the registration of this perk. If set to no, an npc that has this perk will not use this perk and its feats. The actor also won't benefit from it as well. You must reload the game for this change to be in effect.</text>
+	</string>	
 	<string id="ui_mcm_st_npcd_feat_type">
 		<text>Feat type</text>
 	</string>
@@ -121,6 +127,12 @@
 		\n- %c[orange]STANCE%c[white]: Stance is a special case of Event mode. Activation is available when the player enters a particular stance, and activation happens when one or more contexts occurs. The effect is %c[yellow]evaluated%c[white] only following activation and not stance entering.
 		\n- %c[orange]CUSTOM%c[white]: A custom activation mechanism defined by the perk's implementation.
 		</text>
+	</string>	
+	<string id="ui_mcm_st_npcd_feat_enabled">
+		<text>Enabled</text>
+	</string>	
+	<string id="ui_mcm_st_npcd_feat_enabled_desc">
+		<text>Enables the registration of this feat. If set to no, an npc that has this feat will not use it or receive any benefits from it. The actor also won't benefit from it as well.</text>
 	</string>	
 	<!-- Perk Type  -->
 	<string id="ui_mcm_lst_st_npcd_perk_type_archetype">

@@ -457,6 +457,7 @@ function roll_npc_perk(npc_id, perk_id)
 	if roll_perk(npc_id, perk.roll_functor) then
 		npcs[npc_id].Perk[perk.id] = {}
 		npcs[npc_id].Perk[perk.id]["id"]  = perk.id
+		npcs[npc_id].Perk[perk.id]["enabled"]  = false
 		return true
 	end
 	return false
@@ -586,6 +587,34 @@ function setup_profile(npc_id)
 	end
 end
 
+function setup_npc_perk(npc_id, perk_id)
+	if not npc_id or not npcs[npc_id] or not perk_id then return end
+	if not npcs[npc_id].Perk[perk_id] then return end
+	local perk = get_perk(perk_id)
+	if perk and perk.feats then
+		for _, feat in pairs(perk.feats) do
+			-- if feat.type == FEAT_TYPE.ACTIVE then
+				-- we want to add feat abilities for when they are registered
+				-- they also linger for a moment, to hold the state, for when they are are unregistered
+			if not add_ability(npc_id, feat) then
+				update_ability(npc_id, feat)
+			end
+			-- end
+			-- if feat.type == FEAT_TYPE.PASSIVE then
+			-- 	-- there not seems to be a reason to instantiate abilities for passive feats
+			-- end
+		end
+	end
+	npcs[npc_id].Perk[perk_id].enabled = true
+end
+
+function disable_npc_perk(npc_id, perk_id)
+	if not npc_id or not npcs[npc_id] or not perk_id then return end
+	if not npcs[npc_id].Perk[perk_id] then return end
+	npcs[npc_id].Perk[perk_id].enabled = false
+end
+
+
 function get_npc_feat(npc_id, feat)
 	if not npc_id or not npcs[npc_id] or not feat then return end
 	local rank = npcdu.get_perk_rank(npc_id)
@@ -674,6 +703,7 @@ function add_ability(npc_id, feat)
 	npcs[npc_id].Ability[a_id]["icon_slot"] = feat.icon_slot or "ui_npcd_hud_default_icon"
 	npcs[npc_id].Ability[a_id]["state"] = ABILITY_STATE.READY
 	npcs[npc_id].Ability[a_id]["registered"] = false
+	npcs[npc_id].Ability[a_id]["enabled"] = false
 	-- TODO ability should be rank independent 
 	local rank = npcdu.get_perk_rank(npc_id, feat.id) -- TODO EXP framework can give this otherwise
 	npcs[npc_id].Ability[a_id]["cooldown"] = feat.stats[rank].cooldown or 1 -- TODO move this out from ability

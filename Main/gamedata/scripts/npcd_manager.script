@@ -867,25 +867,27 @@ local function register_npc_perks(npc_id, register)
 	local npc_deck = npcd.get_npc(npc_id)
 	if not npc_deck then return false end -- npc died?
 
-	if register then
-		npcd.setup_profile(npc_id)
-	end
-
 	for _, npc_perk in pairs(npc_deck.Perk) do
 		local perk = npcd.get_perk(npc_perk.id)
 		if perk then
 			Printer:Debug(LOG.INFO, CAT.CONF,"npc %s perk %s %s", npc_id, npc_perk.id, register and "register" or "unregister")
-			run_register_perk(npc_id, perk, register)
+			local success = run_register_perk(npc_id, perk, register)
+			if register and success then
+				Printer:Debug(LOG.INFO, CAT.CONF,"npc %s perk %s registered", npc_id, npc_perk.id)
+				npcd.setup_npc_perk(npc_id, npc_perk.id)
+			else
+				npcd.disable_npc_perk(npc_id, npc_perk.id)
+			end
 		end
 	end
 	return true
 end
-
+-- TODO: looks dodge as unregistration can mix with disabled with different states
 local function unregister_feat(npc_id, feat)
 	Printer:Debug(LOG.RUN, CAT.CONF,"unregistering npc %s feat %s", npc_id, feat.id)
 	if run_register_feat(npc_id, feat, false) then
+		npcd.set_ability_settings(npc_id, feat.uid, { registered = false})
 		if feat.type == FEAT_TYPE.ACTIVE then
-			npcd.set_ability_settings(npc_id, feat.uid, { registered = false })
 			unbind_ability(npc_id, feat)
 		end
 		if feat.type == FEAT_TYPE.PASSIVE then
@@ -907,7 +909,6 @@ local function register_feat(npc_id, feat)
 	if run_register_feat(npc_id, feat, true) then
 		-- only active feats are registered as abilities
 		if feat.type == FEAT_TYPE.ACTIVE then
-			npcd.set_ability_settings(npc_id, feat.uid, { registered = true })
 			bind_ability(npc_id, feat)
 		end
 		if feat.type == FEAT_TYPE.PASSIVE then
@@ -916,9 +917,11 @@ local function register_feat(npc_id, feat)
 		if feat.mode == FEAT_MODE.STANCE then
 			register_feat_stance(feat.uid, feat.stance.type)
 		end
+		npcd.set_ability_settings(npc_id, feat.uid, { registered = true})
 		return true
 	else
 		Printer:Debug(LOG.WARN, CAT.CONF,"npc %s cannot register feat %s", npc_id, feat.id)
+		npcd.set_ability_settings(npc_id, feat.uid, { registered = false})
 		return false
 	end
 end
@@ -1108,6 +1111,11 @@ function build_deck()
 			local npc_deck = npcd.get_npc(npc_id)
 			if npc_deck and npc_deck.Perk then
 				for _, npc_perk in pairs(npc_deck.Perk) do
+					if not npc_perk.enabled then
+						Printer:Debug(LOG.INFO, CAT.CONF, "skipping disabled perk %s from npc %s", npc_perk.id, npc_id)
+						-- unregister_perk_feats(npc_id, npc_perk.id)
+						goto continue
+					end
 					if not player_deck.Perk[npc_perk.id] then
 						Printer:Debug(LOG.INFO, CAT.CONF, "adding perk %s from npc %s", npc_perk.id, npc_id)
 						player_deck.Perk[npc_perk.id] = { id = npc_perk.id, npc_id = npc_id, rank = npcdu.get_perk_rank(npc_id) }
@@ -1119,10 +1127,11 @@ function build_deck()
 							player_deck.Perk[npc_perk.id] = { id = npc_perk.id, npc_id = npc_id, rank = rank1, type = npc_perk.type }
 						else
 							Printer:Debug(LOG.INFO, CAT.CONF, "skipping duplicate perk %s from npc %s", npc_perk.id, npc_id)
-							unregister_perk_feats(npc_id, npc_perk.id)
+							-- unregister_perk_feats(npc_id, npc_perk.id)
 						end
 						-- TODO compare ranks and keep the highest
 					end
+					::continue::
 				end
 			end
 		end
@@ -1131,18 +1140,24 @@ function build_deck()
 end
 
 function get_actionable_abilities_in_deck()
+	Printer:Debug(LOG.RUN, CAT.NPC,"getting actions list from active deck")
 	local action_list = {}
 	for perk_id, perk_info in pairs(player_deck.Perk) do
 		local perk = npcd.get_perk(perk_id)
 		if perk and perk.feats then
 			for _, feat in pairs(perk.feats) do
 				if feat.type == FEAT_TYPE.ACTIVE and (feat.mode == FEAT_MODE.MANUAL or feat.mode == FEAT_MODE.MODAL) then
-					local action = get_action(perk_info.npc_id, feat)
-					table.insert(action_list, action)
+					local ability = npcd.get_ability(perk_info.npc_id, feat.uid)
+					if ability.registered then
+						local action = get_action(perk_info.npc_id, feat)
+						table.insert(action_list, action)
+						Printer:Debug(LOG.ADD, CAT.NPC,"added npc %s feat %s to action list", perk_info.npc_id, feat.id)
+					end
 				end
 			end
 		end
 	end
+	Printer:DebugTable("-- New action list", action_list)
 	return action_list
 end
 
@@ -1325,7 +1340,6 @@ function actor_on_first_update()
 end
 
 function on_option_change()
-	npcd_actionbar.update_actionbar(get_actionable_abilities_in_deck())
 end
 
 ---- BOOT

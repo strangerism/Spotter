@@ -235,6 +235,7 @@ function get_module_menu(module_deck)
 		add_readonly_field(perk_menu.gr, perk.type, perk.id .. "_type", "st_npcd_perk_type")
 		add_readonly_field(perk_menu.gr, perk.category, perk.id .. "_category", "st_npcd_perk_category")
 		table.insert(perk_menu.gr, { id = "perk_chance", type = "track", val = 2, min = 1, max = 100, step = 1, def = perk.roll_chance or 100, hint = "st_npcd_perk_chance", })
+		table.insert(perk_menu.gr, { id = "enabled", val = 1, type = "check", def = true, hint = "st_npcd_perk_enabled", })
 		-- add settings
 		if perk.mcm_menu then
 			for _, setting in pairs(perk.mcm_menu) do
@@ -252,6 +253,7 @@ function get_module_menu(module_deck)
 				-- type and mode
 				add_readonly_field(perk_menu.gr, feat.type, feat.id .. "_type", "st_npcd_feat_type")
 				add_readonly_field(perk_menu.gr, feat.mode, feat.id .. "_mode", "st_npcd_feat_mode")
+				table.insert(perk_menu.gr, { id = feat.id .. "_enabled", val = 1, type = "check", def = true, hint = "st_npcd_feat_enabled", })
 				if feat.mcm_menu then
 					for _, general_setting in pairs(feat.mcm_menu) do
 						local setting = npcdu.copy(general_setting)
