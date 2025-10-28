@@ -15,7 +15,7 @@ local FEAT_TYPE = npcd.FEAT_TYPE
 local FEAT_MODE = npcd.FEAT_MODE
 local ABILITY_STATE = npcd.ABILITY_STATE
 
-local player_deck = {
+local active_deck = {
 	Perk = {},
 }
 
@@ -780,8 +780,8 @@ local STANCE_HANDLERS = {
 							add_stance_indicator(feat_idx.perk_id, feat_idx.feat_id)
 						end
 						-- register stance callbacks
-						if player_deck.Perk[feat_idx.perk_id] then
-							register_feat_activations(player_deck.Perk[feat_idx.perk_id].npc_id, feat, ACTIVATION_CONTEXT.STANCE)
+						if active_deck.Perk[feat_idx.perk_id] then
+							register_feat_activations(active_deck.Perk[feat_idx.perk_id].npc_id, feat, ACTIVATION_CONTEXT.STANCE)
 						end
 					end
 				end
@@ -932,7 +932,7 @@ local function unregister_feats(npc_id)
 	if not npc_deck then return false end -- npc died?
 
 	for _, npc_perk in pairs(npc_deck.Perk) do
-		if is_perk_in_deck(npc_id, npc_perk.id) then
+		if is_active_perk(npc_id, npc_perk.id) then
 			local perk = npcd.get_perk(npc_perk.id)
 			if perk and perk.feats  then
 				Printer:Debug(LOG.INFO, CAT.CONF,"npc %s unregister feats for perk %s", npc_id, npc_perk.id)
@@ -1057,8 +1057,8 @@ end
 --------------- Player Deck MGMT
 ---
 
-function is_perk_in_deck(npc_id, perk_id)
-	if player_deck.Perk[perk_id] and player_deck.Perk[perk_id].npc_id == npc_id then
+function is_active_perk(npc_id, perk_id)
+	if active_deck.Perk[perk_id] and active_deck.Perk[perk_id].npc_id == npc_id then
 		return true
 	else
 		return false
@@ -1066,17 +1066,17 @@ function is_perk_in_deck(npc_id, perk_id)
 end
 
 function update_actor_deck()
-	Printer:Debug(LOG.RUN, CAT.CONF,"updating actor deck")
-	unregister_deck()
-	build_deck()
-	register_deck()
-	local abilities = get_actionable_abilities_in_deck()
-	npcd_actionbar.update_actionbar(abilities)
+	Printer:Debug(LOG.RUN, CAT.CONF,"updating active deck")
+	unregister_active_deck()
+	build_active_deck()
+	register_active_deck()
+	local actions = get_actions_list()
+	npcd_actionbar.update_actionbar(actions)
 end
 
-function unregister_deck()
-	Printer:Debug(LOG.RUN, CAT.CONF,"unregistering actor deck")
-	for perk_id, perk_info in pairs(player_deck.Perk) do
+function unregister_active_deck()
+	Printer:Debug(LOG.RUN, CAT.CONF,"unregistering active deck")
+	for perk_id, perk_info in pairs(active_deck.Perk) do
 		local npc_id = perk_info.npc_id
 		local perk = npcd.get_perk(perk_id)
 		if perk and perk.feats then
@@ -1087,9 +1087,9 @@ function unregister_deck()
 	end
 end
 
-function register_deck()
-	Printer:Debug(LOG.RUN, CAT.NPC,"registering actor deck")
-	for perk_id, perk_info in pairs(player_deck.Perk) do
+function register_active_deck()
+	Printer:Debug(LOG.RUN, CAT.NPC,"registering active deck")
+	for perk_id, perk_info in pairs(active_deck.Perk) do
 		local npc_id = perk_info.npc_id
 		local perk = npcd.get_perk(perk_id)
 		if perk and perk.feats then
@@ -1100,9 +1100,9 @@ function register_deck()
 	end
 end
 
-function build_deck()
-	Printer:Debug(LOG.RUN, CAT.CONF,"building actor deck")
-	player_deck.Perk = {}
+function build_active_deck()
+	Printer:Debug(LOG.RUN, CAT.CONF,"building active deck")
+	active_deck.Perk = {}
 	local clist = npcd_squad.squad_get_clist()
 	for i=1, #clist do
 		local npc = npcdu.get_npc_obj(clist[i])
@@ -1116,15 +1116,15 @@ function build_deck()
 						-- unregister_perk_feats(npc_id, npc_perk.id)
 						goto continue
 					end
-					if not player_deck.Perk[npc_perk.id] then
+					if not active_deck.Perk[npc_perk.id] then
 						Printer:Debug(LOG.INFO, CAT.CONF, "adding perk %s from npc %s", npc_perk.id, npc_id)
-						player_deck.Perk[npc_perk.id] = { id = npc_perk.id, npc_id = npc_id, rank = npcdu.get_perk_rank(npc_id) }
+						active_deck.Perk[npc_perk.id] = { id = npc_perk.id, npc_id = npc_id, rank = npcdu.get_perk_rank(npc_id) }
 					else
 						local rank1 = npcdu.get_perk_rank(npc_id)
-						local rank2 = npcdu.get_perk_rank(player_deck.Perk[npc_perk.id].npc_id)
+						local rank2 = npcdu.get_perk_rank(active_deck.Perk[npc_perk.id].npc_id)
 						if rank1 > rank2 then
-							Printer:Debug(LOG.INFO, CAT.CONF, "upgrading perk %s from npc %s (rank %s) to npc %s (rank %s)", npc_perk.id, player_deck.Perk[npc_perk.id].npc_id, rank2, npc_id, rank1)
-							player_deck.Perk[npc_perk.id] = { id = npc_perk.id, npc_id = npc_id, rank = rank1, type = npc_perk.type }
+							Printer:Debug(LOG.INFO, CAT.CONF, "upgrading perk %s from npc %s (rank %s) to npc %s (rank %s)", npc_perk.id, active_deck.Perk[npc_perk.id].npc_id, rank2, npc_id, rank1)
+							active_deck.Perk[npc_perk.id] = { id = npc_perk.id, npc_id = npc_id, rank = rank1, type = npc_perk.type }
 						else
 							Printer:Debug(LOG.INFO, CAT.CONF, "skipping duplicate perk %s from npc %s", npc_perk.id, npc_id)
 							-- unregister_perk_feats(npc_id, npc_perk.id)
@@ -1136,13 +1136,13 @@ function build_deck()
 			end
 		end
 	end
-	Printer:LogTable("Actor Deck", player_deck)
+	Printer:LogTable("Actor Deck", active_deck)
 end
 
-function get_actionable_abilities_in_deck()
+function get_actions_list()
 	Printer:Debug(LOG.RUN, CAT.NPC,"getting actions list from active deck")
 	local action_list = {}
-	for perk_id, perk_info in pairs(player_deck.Perk) do
+	for perk_id, perk_info in pairs(active_deck.Perk) do
 		local perk = npcd.get_perk(perk_id)
 		if perk and perk.feats then
 			for _, feat in pairs(perk.feats) do
@@ -1164,13 +1164,13 @@ end
 local function remove_from_deck(npc_id)
 	Printer:Debug(LOG.RUN, CAT.NPC,"remove_from_deck npc %s", npc_id)
 	local perks_to_remove = {}
-	for perk_id, perk_info in pairs(player_deck.Perk) do
+	for perk_id, perk_info in pairs(active_deck.Perk) do
 		if perk_info.npc_id == npc_id then
 			table.insert(perks_to_remove, perk_id)
 		end
 	end
 	for i=1, #perks_to_remove do
-		player_deck.Perk[perks_to_remove[i]] = nil
+		active_deck.Perk[perks_to_remove[i]] = nil
 	end
 	unregister_feats(npc_id)
 end
