@@ -18,5 +18,10 @@
 		<texture height="123" width="123" y="1548" x="123" id="ui_rank_2"/>
 		<texture height="123" width="123" y="1548" x="0" id="ui_rank_1"/>
 		<texture height="123" width="123" y="1548" x="861" id="ui_rank_0"/>
-    </file>         
+    </file>      
+	<file name="ui\ui_actor_newsmanager_icons">
+		<texture id="ui_npcd_feat_registered" x="83" y="940" width="83" height="47" />
+		<texture id="ui_npcd_perk_registered" x="249" y="564" width="83" height="47" />
+	</file>  
+
 </w>

@@ -875,6 +875,7 @@ local function register_npc_perks(npc_id, register)
 			if register and success then
 				Printer:Debug(LOG.INFO, CAT.CONF,"npc %s perk %s registered", npc_id, npc_perk.id)
 				npcd.setup_npc_perk(npc_id, npc_perk.id)
+				-- SendScriptCallback("npcd_on_npc_perk_registered", npc_id, npc_perk.id)
 			else
 				npcd.disable_npc_perk(npc_id, npc_perk.id)
 			end
@@ -904,7 +905,7 @@ local function unregister_feat(npc_id, feat)
 end
 -- TODO: sort out rifleman perk issue where npc cannot register feats
 -- how to manage type and mode
-local function register_feat(npc_id, feat)
+local function register_feat(npc_id, feat, active)
 	Printer:Debug(LOG.RUN, CAT.CONF,"registering npc %s feat %s", npc_id, feat.id)
 	if run_register_feat(npc_id, feat, true) then
 		-- only active feats are registered as abilities
@@ -918,6 +919,9 @@ local function register_feat(npc_id, feat)
 			register_feat_stance(feat.uid, feat.stance.type)
 		end
 		npcd.set_ability_settings(npc_id, feat.uid, { registered = true})
+		if active then
+			SendScriptCallback("npcd_on_npc_feat_registered", npc_id, feat.perk_id, feat.id)
+		end
 		return true
 	else
 		Printer:Debug(LOG.WARN, CAT.CONF,"npc %s cannot register feat %s", npc_id, feat.id)
@@ -1089,12 +1093,13 @@ end
 
 function register_active_deck()
 	Printer:Debug(LOG.RUN, CAT.NPC,"registering active deck")
+	local ACTIVE = true
 	for perk_id, perk_info in pairs(active_deck.Perk) do
 		local npc_id = perk_info.npc_id
 		local perk = npcd.get_perk(perk_id)
 		if perk and perk.feats then
 			for _, feat in pairs(perk.feats) do
-				register_feat(npc_id, feat)
+				register_feat(npc_id, feat, ACTIVE)
 			end
 		end
 	end

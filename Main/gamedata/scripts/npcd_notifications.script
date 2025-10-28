@@ -1,0 +1,69 @@
+local npcdu = npcd_utils
+
+function get_printer()
+	if not Printer then
+		Printer = npcd_logging.get_printer("npcd_notifications")
+	end 
+	LOG = Printer:GetLogTypes()
+	CAT = Printer:GetLogCategories()
+end
+RegisterScriptCallback("npcd_on_log_update", get_printer)
+
+if ui_popup_messages then
+    local gc = game.translate_string
+
+    function on_game_start()
+        
+        RegisterScriptCallback("npcd_on_npc_perk_registered", perk_registered)
+        RegisterScriptCallback("npcd_on_npc_feat_registered", feat_registered)
+    end
+
+    function perk_registered(npc_id, perk_id)
+        if not ui_popup_messages.GUI then return end
+
+        local perk = npcd.get_perk(perk_id)
+        local npc = level.object_by_id(npc_id)
+        if perk and npc then
+            local message = string.format(gc("st_npcd_perk_registered"), npc:character_name(), gc(perk.name))
+            ui_popup_messages.GUI:AddMessage(message, "ui_npcd_perk_registered")
+        end
+    end
+
+    function feat_registered(npc_id, perk_id, feat_id)
+        if not ui_popup_messages.GUI then return end
+        local feat = npcd.get_perk_feat(perk_id, feat_id)
+        local npc = level.object_by_id(npc_id)
+        if feat and npc then
+            local message = string.format(gc("st_npcd_active_feat_registered"), gc(feat.name), npcdu.get_perk_rank_desc(npc_id, perk_id))
+            ui_popup_messages.GUI:AddMessage(message, "ui_npcd_feat_registered")
+        end
+    end
+
+    OG_AddMessage = ui_popup_messages.UIPopupMessages.AddMessage
+    function ui_popup_messages.UIPopupMessages:AddMessage(msg, icon)
+        local wnd = OG_AddMessage(self, msg, icon)
+        if wnd and (icon == "ui_npcd_perk_registered" or icon == "ui_npcd_feat_registered") then
+            wnd.time_end = time_global() + self.options.display_time + self.options.animation_time + 30000
+        else
+            Printer:Debug(LOG.WARN, CAT.UI, "NPCD notification message window not found or icon mismatch")
+        end
+        return wnd
+    end
+
+    -- modules api
+
+    function add_message(msg, icon)
+        if ui_popup_messages and ui_popup_messages.GUI then
+            ui_popup_messages.GUI:AddMessage(msg, icon)
+        end
+    end
+
+    function add_feat_activation_message(npc_id, perk_id, feat_id)
+        local feat = npcd.get_perk_feat(perk_id, feat_id)
+        local npc = level.object_by_id(npc_id)
+        if feat and npc then
+            local message = string.format(gc("st_npcd_active_feat_activation"), npc:character_name(), gc(feat.name))
+            add_message(message, feat.icon or "ui_npcd_feat_registered")
+        end
+    end
+end

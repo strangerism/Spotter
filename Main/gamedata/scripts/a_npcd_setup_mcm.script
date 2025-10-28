@@ -10,6 +10,8 @@
     AddScriptCallback("npcd_on_loaded_state")
     AddScriptCallback("npcd_monster_on_before_hit")
     AddScriptCallback("npcd_npc_on_before_hit")
+    AddScriptCallback("npcd_on_npc_perk_registered")
+    AddScriptCallback("npcd_on_npc_feat_registered")
 -- end
 
 function on_game_start()
