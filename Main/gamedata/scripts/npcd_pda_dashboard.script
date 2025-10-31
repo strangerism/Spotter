@@ -1,0 +1,79 @@
+local string_format = string.format
+function printlog_table(text, node, ...)
+    
+    text = string_format(text, ...)
+    printf("NPCD | %s | \n" .. utils_data.print_table(node, text, true), time_global(), ...)
+end
+
+
+if not mac_mcm then
+    printf("npcd_pda_dashboard: mac_mcm not found, skipping MCM integration")
+    local original_set_active_subdialog = pda.set_active_subdialog
+    pda.set_active_subdialog = function (section)
+        if (section == "eptNPCD") then
+            return get_ui()
+        else
+            return original_set_active_subdialog(section)
+        end
+    end
+end
+
+local xml = CScriptXmlInit()
+xml:ParseFile("npcd_pda_dashboard.xml")
+
+local SINGLETON = nil
+function get_ui()
+	SINGLETON = SINGLETON or npcd_dashboard_tab()
+	return SINGLETON
+end
+
+-- Constructor.
+class "npcd_dashboard_tab" (CUIScriptWnd)
+function npcd_dashboard_tab:__init() super()
+	self:InitControls()
+end
+
+-- Initialise the interface.
+function npcd_dashboard_tab:InitControls()
+	self:SetWndRect(Frect():set(0, 0, 1024, 768))
+	
+	-- NPCD window.
+	self.header = xml:InitStatic("header", self)
+	self.main = xml:InitStatic("main", self)
+    self.sidebar = xml:InitStatic("sidebar", self)
+    self.footer = xml:InitStatic("footer", self)
+end
+
+function on_key_release(key)
+    if key == DIK_keys.DIK_J then
+        local pda_menu = ActorMenu.get_pda_menu()
+        local pda3d = get_console_cmd(1,"g_3d_pda")
+        if not (pda_menu:IsShown()) and db.actor:item_in_slot(8) then
+            if (pda3d) then
+                db.actor:activate_slot(8)
+            else
+                pda_menu:ShowDialog(true)
+            end
+            
+            pda_menu:SetActiveSubdialog("eptNPCD")
+        elseif (pda_menu:IsShown()) then
+            if (pda3d) then
+                db.actor:activate_slot(0)
+            else
+                pda_menu:HideDialog()
+            end
+        end
+    end
+end
+
+function on_game_start()
+    if mac_mcm then
+        mac_mcm.add_app("npcd", {
+            name = "pda_btn_npcd",
+            texture = "pda_npcd_app",
+            tab = "eptNPCD",
+            func = npcd_pda_dashboard.get_ui
+        })
+    end
+	RegisterScriptCallback("on_key_release",on_key_release)
+end

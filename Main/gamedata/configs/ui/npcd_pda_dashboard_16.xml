@@ -1,0 +1,19 @@
+<w>
+	<main_wnd x="0" y="0" width="1024" height="768"/>
+		
+	<header x="30" y="95" width="764" height="90" stretch="1">
+		<texture>ui_npcd_pda_dashboard_header</texture>
+	</header>
+	
+	<main x="30" y="185" width="764" height="500" stretch="1">
+		<texture a="100">ui_npcd_pda_dashboard_main</texture>
+	</main>
+
+	<sidebar x="80" y="185" width="150" height="500" stretch="1">
+		<texture>ui_npcd_pda_dashboard_vsidescroll</texture>
+	</sidebar>	
+
+	<footer x="30" y="680" width="764" height="35" stretch="1">
+		<texture>ui_npcd_pda_dashboard_footer</texture>
+	</footer>
+</w>

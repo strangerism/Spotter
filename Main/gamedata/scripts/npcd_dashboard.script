@@ -1,0 +1,757 @@
+local npcdu = npcd_utils
+local gc = game.translate_string
+
+function get_printer()
+    if not Printer then
+        Printer = npcd_logging.get_printer("npcd_dashboard")
+    end 
+    LOG = Printer:GetLogTypes()
+    CAT = Printer:GetLogCategories()
+end
+
+RegisterScriptCallback("npcd_on_log_update", get_printer)
+
+-- UI Constants
+local UI_DASHBOARD = {}
+UI_DASHBOARD.xml_name = "npcd_dashboard.xml"
+UI_DASHBOARD.tex_name = "npcd_dashboard"
+
+-- Tab types
+local TAB_TYPE = {
+    NPC = "npc",
+    PERKS = "perks",
+    DECK = "deck"
+}
+
+-- NPC Sub-menu types
+local NPC_MENU = {
+    SQUAD = "squad",
+    FAVORITE = "favorite", 
+    ALL = "all",
+    RECRUITABLE = "recruitable",
+    DEAD = "dead"
+}
+
+-- Perks Sub-menu types
+local PERKS_MENU = {
+    DISCOVERED = "discovered",
+    ALL = "all_perks"
+}
+
+-- Deck Sub-menu types
+local DECK_MENU = {
+    PERKS = "deck_perks",
+    FEATS = "deck_feats",
+    EFFECTS = "deck_effects"
+}
+
+-- Dashboard UI Class
+class "ui_npcd_dashboard" (CUIScriptWnd)
+
+function ui_npcd_dashboard:__init() super()
+    self.owner = nil
+    self.current_top_tab = TAB_TYPE.NPC
+    self.current_side_tab = NPC_MENU.SQUAD
+    self.current_perks_tab = PERKS_MENU.DISCOVERED  -- Add this line
+    self.current_deck_tab = DECK_MENU.PERKS  -- Add this line
+    self.selected_item_id = nil
+    
+    self:InitControls()
+    self:InitCallBacks()
+    
+    get_printer()
+    Printer:Debug(LOG.START, CAT.UI, "Dashboard UI initialized")
+end
+
+function ui_npcd_dashboard:__finalize()
+    Printer:Debug(LOG.STOP, CAT.UI, "Dashboard UI finalized")
+end
+
+function ui_npcd_dashboard:InitControls()
+    self:SetWndRect(Frect():set(0, 0, 1024, 768))
+    
+    local xml = CScriptXmlInit()
+    xml:ParseFile(UI_DASHBOARD.xml_name)
+    
+    -- Main window background
+    self.main_window = xml:InitStatic("main_window", self)
+    
+    -- Top tab bar
+    self.top_tab_bar = xml:InitStatic("top_tab_bar", self.main_window)
+    
+    -- Top tab buttons
+    self.top_tabs = {}
+    self.top_tabs[TAB_TYPE.NPC] = xml:Init3tButton("tab_npc", self.top_tab_bar)
+    self.top_tabs[TAB_TYPE.PERKS] = xml:Init3tButton("tab_perks", self.top_tab_bar)
+    self.top_tabs[TAB_TYPE.DECK] = xml:Init3tButton("tab_deck", self.top_tab_bar)
+    
+    -- Side tab bar (vertical)
+    self.side_tab_bar = xml:InitStatic("side_tab_bar", self.main_window)
+    
+    -- Side tab buttons (contextual)
+    self.side_tabs = {}
+    self.side_tabs[NPC_MENU.SQUAD] = xml:Init3tButton("side_squad", self.side_tab_bar)
+    self.side_tabs[NPC_MENU.FAVORITE] = xml:Init3tButton("side_favorite", self.side_tab_bar)
+    self.side_tabs[NPC_MENU.ALL] = xml:Init3tButton("side_all", self.side_tab_bar)
+    self.side_tabs[NPC_MENU.RECRUITABLE] = xml:Init3tButton("side_recruitable", self.side_tab_bar)
+    self.side_tabs[NPC_MENU.DEAD] = xml:Init3tButton("side_dead", self.side_tab_bar)
+    
+    -- Perks side tab buttons
+    self.perks_tabs = {}
+    self.perks_tabs[PERKS_MENU.DISCOVERED] = xml:Init3tButton("side_discovered", self.side_tab_bar)
+    self.perks_tabs[PERKS_MENU.ALL] = xml:Init3tButton("side_perks_all", self.side_tab_bar)
+    
+    -- Deck side tab buttons
+    self.deck_tabs = {}
+    self.deck_tabs[DECK_MENU.PERKS] = xml:Init3tButton("side_deck_perks", self.side_tab_bar)
+    self.deck_tabs[DECK_MENU.FEATS] = xml:Init3tButton("side_deck_feats", self.side_tab_bar)
+    self.deck_tabs[DECK_MENU.EFFECTS] = xml:Init3tButton("side_deck_effects", self.side_tab_bar)
+    
+    -- Main content area
+    self.content_area = xml:InitStatic("content_area", self.main_window)
+    
+    -- Left scroll list
+    self.scroll_list = xml:InitScrollView("scroll_list", self.content_area)
+    
+    -- Right content panel
+    self.content_panel = xml:InitStatic("content_panel", self.content_area)
+    self.content_text = xml:InitTextWnd("content_text", self.content_panel)
+    
+    -- Close button
+    self.btn_close = xml:Init3tButton("btn_close", self.main_window)
+    
+    -- Initialize with default state
+    self:UpdateTopTabState()
+    self:UpdateSideTabState()
+    self:RefreshContent()
+end
+
+function ui_npcd_dashboard:InitCallBacks()
+    -- Top tab callbacks
+    self:Register(self.top_tabs[TAB_TYPE.NPC], "btn_npc")
+    self:Register(self.top_tabs[TAB_TYPE.PERKS], "btn_perks")
+    self:Register(self.top_tabs[TAB_TYPE.DECK], "btn_deck")
+    
+    -- Side tab callbacks  
+    self:Register(self.side_tabs[NPC_MENU.SQUAD], "btn_squad")
+    self:Register(self.side_tabs[NPC_MENU.FAVORITE], "btn_favorite")
+    self:Register(self.side_tabs[NPC_MENU.ALL], "btn_all")
+    self:Register(self.side_tabs[NPC_MENU.RECRUITABLE], "btn_recruitable")
+    self:Register(self.side_tabs[NPC_MENU.DEAD], "btn_dead")
+    
+    -- Perks side tab callbacks
+    self:Register(self.perks_tabs[PERKS_MENU.DISCOVERED], "btn_discovered")
+    self:Register(self.perks_tabs[PERKS_MENU.ALL], "btn_perks_all")
+    
+    -- Deck side tab callbacks
+    self:Register(self.deck_tabs[DECK_MENU.PERKS], "btn_deck_perks")
+    self:Register(self.deck_tabs[DECK_MENU.FEATS], "btn_deck_feats")
+    self:Register(self.deck_tabs[DECK_MENU.EFFECTS], "btn_deck_effects")
+    
+    -- Close button callback
+    self:Register(self.btn_close, "btn_close")
+    
+    self:AddCallback("btn_npc", ui_events.BUTTON_CLICKED, self.OnTopTabClicked, self)
+    self:AddCallback("btn_perks", ui_events.BUTTON_CLICKED, self.OnTopTabClicked, self)
+    self:AddCallback("btn_deck", ui_events.BUTTON_CLICKED, self.OnTopTabClicked, self)
+    
+    self:AddCallback("btn_squad", ui_events.BUTTON_CLICKED, self.OnSideTabClicked, self)
+    self:AddCallback("btn_favorite", ui_events.BUTTON_CLICKED, self.OnSideTabClicked, self)
+    self:AddCallback("btn_all", ui_events.BUTTON_CLICKED, self.OnSideTabClicked, self)
+    self:AddCallback("btn_recruitable", ui_events.BUTTON_CLICKED, self.OnSideTabClicked, self)
+    self:AddCallback("btn_dead", ui_events.BUTTON_CLICKED, self.OnSideTabClicked, self)
+    
+    self:AddCallback("btn_discovered", ui_events.BUTTON_CLICKED, self.OnPerksTabClicked, self)
+    self:AddCallback("btn_perks_all", ui_events.BUTTON_CLICKED, self.OnPerksTabClicked, self)
+    
+    self:AddCallback("btn_deck_perks", ui_events.BUTTON_CLICKED, self.OnDeckTabClicked, self)
+    self:AddCallback("btn_deck_feats", ui_events.BUTTON_CLICKED, self.OnDeckTabClicked, self)
+    self:AddCallback("btn_deck_effects", ui_events.BUTTON_CLICKED, self.OnDeckTabClicked, self)
+    
+    self:AddCallback("btn_close", ui_events.BUTTON_CLICKED, self.OnClose, self)
+end
+
+function ui_npcd_dashboard:OnTopTabClicked(ctrl)
+    local new_tab = nil
+    if ctrl == self.top_tabs[TAB_TYPE.NPC] then
+        new_tab = TAB_TYPE.NPC
+        self.current_side_tab = NPC_MENU.SQUAD
+    elseif ctrl == self.top_tabs[TAB_TYPE.PERKS] then
+        new_tab = TAB_TYPE.PERKS
+        self.current_perks_tab = PERKS_MENU.DISCOVERED  -- Set default perks tab
+    elseif ctrl == self.top_tabs[TAB_TYPE.DECK] then
+        new_tab = TAB_TYPE.DECK
+        self.current_deck_tab = DECK_MENU.PERKS  -- Set default deck tab
+    end
+    
+    if new_tab and new_tab ~= self.current_top_tab then
+        self.current_top_tab = new_tab
+        self:UpdateTopTabState()
+        self:UpdateSideTabState()
+        self:RefreshContent()
+        Printer:Debug(LOG.INFO, CAT.UI, "Switched to top tab: %s", new_tab)
+    end
+end
+
+function ui_npcd_dashboard:OnSideTabClicked(ctrl)
+    local new_tab = nil
+    for tab_type, button in pairs(self.side_tabs) do
+        if ctrl == button then
+            new_tab = tab_type
+            break
+        end
+    end
+    
+    if new_tab and new_tab ~= self.current_side_tab then
+        self.current_side_tab = new_tab
+        self:UpdateSideTabState()
+        self:RefreshContent()
+        Printer:Debug(LOG.INFO, CAT.UI, "Switched to side tab: %s", new_tab)
+    end
+end
+
+function ui_npcd_dashboard:OnPerksTabClicked(ctrl)
+    local new_tab = nil
+    for tab_type, button in pairs(self.perks_tabs) do
+        if ctrl == button then
+            new_tab = tab_type
+            break
+        end
+    end
+    
+    if new_tab and new_tab ~= self.current_perks_tab then
+        self.current_perks_tab = new_tab
+        self:UpdateSideTabState()
+        self:RefreshContent()
+        Printer:Debug(LOG.INFO, CAT.UI, "Switched to perks tab: %s", new_tab)
+    end
+end
+
+function ui_npcd_dashboard:OnDeckTabClicked(ctrl)
+    local new_tab = nil
+    for tab_type, button in pairs(self.deck_tabs) do
+        if ctrl == button then
+            new_tab = tab_type
+            break
+        end
+    end
+    
+    if new_tab and new_tab ~= self.current_deck_tab then
+        self.current_deck_tab = new_tab
+        self:UpdateSideTabState()
+        self:RefreshContent()
+        Printer:Debug(LOG.INFO, CAT.UI, "Switched to deck tab: %s", new_tab)
+    end
+end
+
+function ui_npcd_dashboard:UpdateTopTabState()
+    for tab_type, button in pairs(self.top_tabs) do
+        if tab_type == self.current_top_tab then
+            button:SetTextColor(GetARGB(255, 255, 255, 255)) -- Active color
+        else
+            button:SetTextColor(GetARGB(255, 128, 128, 128)) -- Inactive color
+        end
+    end
+end
+
+function ui_npcd_dashboard:UpdateSideTabState()
+    if self.current_top_tab == TAB_TYPE.NPC then
+        self.side_tab_bar:Show(true)
+        -- Show NPC tabs, hide perks/deck tabs
+        for tab_type, button in pairs(self.side_tabs) do
+            button:Show(true)
+            if tab_type == self.current_side_tab then
+                button:SetTextColor(GetARGB(255, 255, 255, 255))
+            else
+                button:SetTextColor(GetARGB(255, 128, 128, 128))
+            end
+        end
+        for tab_type, button in pairs(self.perks_tabs) do
+            button:Show(false)
+        end
+        for tab_type, button in pairs(self.deck_tabs) do
+            button:Show(false)
+        end
+    elseif self.current_top_tab == TAB_TYPE.PERKS then
+        self.side_tab_bar:Show(true)
+        -- Show perks tabs, hide NPC/deck tabs
+        for tab_type, button in pairs(self.side_tabs) do
+            button:Show(false)
+        end
+        for tab_type, button in pairs(self.perks_tabs) do
+            button:Show(true)
+            if tab_type == self.current_perks_tab then
+                button:SetTextColor(GetARGB(255, 255, 255, 255))
+            else
+                button:SetTextColor(GetARGB(255, 128, 128, 128))
+            end
+        end
+        for tab_type, button in pairs(self.deck_tabs) do
+            button:Show(false)
+        end
+    elseif self.current_top_tab == TAB_TYPE.DECK then
+        self.side_tab_bar:Show(true)
+        -- Show deck tabs, hide NPC/perks tabs
+        for tab_type, button in pairs(self.side_tabs) do
+            button:Show(false)
+        end
+        for tab_type, button in pairs(self.perks_tabs) do
+            button:Show(false)
+        end
+        for tab_type, button in pairs(self.deck_tabs) do
+            button:Show(true)
+            if tab_type == self.current_deck_tab then
+                button:SetTextColor(GetARGB(255, 255, 255, 255))
+            else
+                button:SetTextColor(GetARGB(255, 128, 128, 128))
+            end
+        end
+    else
+        self.side_tab_bar:Show(false)
+    end
+end
+
+function ui_npcd_dashboard:RefreshContent()
+    self:ClearScrollList()
+    
+    if self.current_top_tab == TAB_TYPE.NPC then
+        self:LoadNPCContent()
+    elseif self.current_top_tab == TAB_TYPE.PERKS then
+        self:LoadPerksContent()
+    elseif self.current_top_tab == TAB_TYPE.DECK then
+        self:LoadDeckContent()
+    end
+end
+
+function ui_npcd_dashboard:ClearScrollList()
+    self.scroll_list:Clear()
+    self.selected_item_id = nil
+    self:UpdateContentPanel()
+end
+
+function ui_npcd_dashboard:LoadNPCContent()
+    local npcs_list = {}
+    
+    if self.current_side_tab == NPC_MENU.SQUAD then
+        npcs_list = self:GetSquadNPCs()
+    elseif self.current_side_tab == NPC_MENU.FAVORITE then
+        npcs_list = self:GetFavoriteNPCs()
+    elseif self.current_side_tab == NPC_MENU.ALL then
+        npcs_list = self:GetAllNPCs()
+    elseif self.current_side_tab == NPC_MENU.RECRUITABLE then
+        npcs_list = self:GetRecruitableNPCs()
+    elseif self.current_side_tab == NPC_MENU.DEAD then
+        npcs_list = self:GetDeadNPCs()
+    end
+    
+    self:PopulateScrollList(npcs_list, "npc")
+end
+
+function ui_npcd_dashboard:LoadPerksContent()
+    local perks_list = {}
+    
+    if self.current_perks_tab == PERKS_MENU.DISCOVERED then
+        perks_list = self:GetDiscoveredPerks()
+    elseif self.current_perks_tab == PERKS_MENU.ALL then
+        perks_list = self:GetAllPerks()
+    end
+    
+    self:PopulateScrollList(perks_list, "perk")
+end
+
+function ui_npcd_dashboard:LoadDeckContent()
+    local deck_list = {}
+    
+    if self.current_deck_tab == DECK_MENU.PERKS then
+        deck_list = self:GetDeckPerks()
+    elseif self.current_deck_tab == DECK_MENU.FEATS then
+        deck_list = self:GetDeckFeats()
+    elseif self.current_deck_tab == DECK_MENU.EFFECTS then
+        deck_list = self:GetDeckEffects()
+    end
+    
+    self:PopulateScrollList(deck_list, "deck")
+end
+
+function ui_npcd_dashboard:PopulateScrollList(items_list, item_type)
+    for i, item in ipairs(items_list) do
+        local xml = CScriptXmlInit()
+        xml:ParseFile(UI_DASHBOARD.xml_name)
+        
+        local list_item = xml:InitStatic("list_item_template", nil)
+        local item_text = xml:InitTextWnd("item_text", list_item)
+        
+        item_text:SetText(item.name or "Unknown")
+        list_item.item_id = item.id
+        list_item.item_type = item_type
+        
+        self:Register(list_item, "list_item_" .. i)
+        self:AddCallback("list_item_" .. i, ui_events.BUTTON_CLICKED, self.OnListItemClicked, self)
+        
+        self.scroll_list:AddWindow(list_item, true)
+    end
+end
+
+function ui_npcd_dashboard:OnListItemClicked(ctrl)
+    self.selected_item_id = ctrl.item_id
+    self:UpdateContentPanel()
+    Printer:Debug(LOG.INFO, CAT.UI, "Selected item: %s", tostring(self.selected_item_id))
+end
+
+function ui_npcd_dashboard:UpdateContentPanel()
+    if not self.selected_item_id then
+        self.content_text:SetText("Select an item from the list")
+        return
+    end
+    
+    local content = ""
+    if self.current_top_tab == TAB_TYPE.NPC then
+        content = self:GetNPCDetails(self.selected_item_id)
+    elseif self.current_top_tab == TAB_TYPE.PERKS then
+        content = self:GetPerkDetails(self.selected_item_id)
+    elseif self.current_top_tab == TAB_TYPE.DECK then
+        content = self:GetDeckDetails(self.selected_item_id)
+    end
+    
+    self.content_text:SetText(content)
+end
+
+-- Data retrieval methods
+function ui_npcd_dashboard:GetSquadNPCs()
+    local npcs = {}
+    local clist = npcd_squad.squad_get_clist()
+    for i, npc_id in ipairs(clist) do
+        local npc_obj = npcdu.get_npc_obj(npc_id)
+        if npc_obj then
+            table.insert(npcs, {
+                id = npc_id,
+                name = npc_obj:character_name() or npc_obj:name()
+            })
+        end
+    end
+    return npcs
+end
+
+function ui_npcd_dashboard:GetFavoriteNPCs()
+    local npcs = {}
+    local npcs_list = npcd.get_npcs_id_list()
+    for _, npc_id in ipairs(npcs_list) do
+        if npcd.get_favorite(npc_id) then
+            local npc_obj = npcdu.get_npc_obj(npc_id)
+            if npc_obj then
+                table.insert(npcs, {
+                    id = npc_id,
+                    name = npc_obj:character_name() or npc_obj:name()
+                })
+            end
+        end
+    end
+    return npcs
+end
+
+function ui_npcd_dashboard:GetAllNPCs()
+    local npcs = {}
+    local npcs_list = npcd.get_npcs_id_list()
+    for _, npc_id in ipairs(npcs_list) do
+        local npc_obj = npcdu.get_npc_obj(npc_id)
+        if npc_obj then
+            table.insert(npcs, {
+                id = npc_id,
+                name = npc_obj:character_name() or npc_obj:name()
+            })
+        end
+    end
+    return npcs
+end
+
+function ui_npcd_dashboard:GetRecruitableNPCs()
+    local npcs = {}
+    local npcs_list = npcd.get_npcs_id_list()
+    for _, npc_id in ipairs(npcs_list) do
+        local npc_info = npcd.get_npc_info(npc_id)
+        if npc_info and npc_info.can_recruit then
+            local npc_obj = npcdu.get_npc_obj(npc_id)
+            if npc_obj then
+                table.insert(npcs, {
+                    id = npc_id,
+                    name = npc_obj:character_name() or npc_obj:name()
+                })
+            end
+        end
+    end
+    return npcs
+end
+
+function ui_npcd_dashboard:GetDeadNPCs()
+    local npcs = {}
+    local npcs_list = npcd.get_npcs_id_list()
+    for _, npc_id in ipairs(npcs_list) do
+        local npc_deck = npcd.get_npc(npc_id)
+        if npc_deck and not npc_deck.alive then
+            table.insert(npcs, {
+                id = npc_id,
+                name = "Dead NPC " .. npc_id -- Dead NPCs may not have objects
+            })
+        end
+    end
+    return npcs
+end
+
+function ui_npcd_dashboard:GetDiscoveredPerks()
+    local perks = {}
+    local discovered_perks = npcd.get_discovered_perks() -- Assuming this function exists
+    for _, perk_id in ipairs(discovered_perks) do
+        local perk = npcd.get_perk(perk_id)
+        if perk then
+            table.insert(perks, {
+                id = perk_id,
+                name = gc(perk.name)
+            })
+        end
+    end
+    return perks
+end
+
+function ui_npcd_dashboard:GetAllPerks()
+    local perks = {}
+    local perks_list = npcd.get_perks_id_list()
+    for _, perk_id in ipairs(perks_list) do
+        local perk = npcd.get_perk(perk_id)
+        if perk then
+            table.insert(perks, {
+                id = perk_id,
+                name = gc(perk.name)
+            })
+        end
+    end
+    return perks
+end
+
+function ui_npcd_dashboard:GetNPCDetails(npc_id)
+    local npc_deck = npcd.get_npc(npc_id)
+    local npc_obj = npcdu.get_npc_obj(npc_id)
+    
+    if not npc_deck then
+        return "NPC data not found"
+    end
+    
+    local details = {}
+    table.insert(details, "NPC ID: " .. npc_id)
+    
+    if npc_obj then
+        table.insert(details, "Name: " .. (npc_obj:character_name() or npc_obj:name()))
+        table.insert(details, "Community: " .. npc_obj:character_community())
+        table.insert(details, "Rank: " .. npc_obj:rank())
+    end
+    
+    table.insert(details, "Alive: " .. (npc_deck.alive and "Yes" or "No"))
+    table.insert(details, "Recruited: " .. (npc_deck.recruited and "Yes" or "No"))
+    
+    if npc_deck.Perk then
+        table.insert(details, "\nPerks:")
+        for _, npc_perk in pairs(npc_deck.Perk) do
+            local perk = npcd.get_perk(npc_perk.id)
+            local perk_name = perk and gc(perk.name) or npc_perk.id
+            table.insert(details, "- " .. perk_name .. (npc_perk.enabled and " (Active)" or " (Inactive)"))
+        end
+    end
+    
+    return table.concat(details, "\n")
+end
+
+function ui_npcd_dashboard:GetPerkDetails(perk_id)
+    local perk = npcd.get_perk(perk_id)
+    if not perk then
+        return "Perk not found"
+    end
+    
+    local details = {}
+    table.insert(details, "Perk: " .. (gc(perk.name) or perk_id))
+    table.insert(details, "Description: " .. (gc(perk.description) or "No description available"))
+
+    if perk.feats then
+        table.insert(details, "\nAbilities:")
+        for _, feat in pairs(perk.feats) do
+            table.insert(details, "- " .. gc(feat.name))
+            table.insert(details, "  Type: " .. gc(feat.type))
+            table.insert(details, "  Mode: " .. gc(feat.mode))
+        end
+    end
+    
+    return table.concat(details, "\n")
+end
+
+-- Deck Data retrieval methods
+function ui_npcd_dashboard:GetDeckPerks()
+    local deck_perks = {}
+    -- Get all active perks from the player's deck
+    local deck = npcd.get_deck()
+    if deck then
+        for _, npc_deck in pairs(deck) do
+            if npc_deck.Perk then
+                for _, npc_perk in pairs(npc_deck.Perk) do
+                    if npc_perk.enabled then
+                        local perk = npcd.get_perk(npc_perk.id)
+                        if perk then
+                            table.insert(deck_perks, {
+                                id = npc_perk.id,
+                                name = gc(perk.name),
+                                npc_id = npc_deck.id
+                            })
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return deck_perks
+end
+
+function ui_npcd_dashboard:GetDeckFeats()
+    local deck_feats = {}
+    -- Get all active feats from deck perks
+    local deck = npcd.get_deck()
+    if deck then
+        for _, npc_deck in pairs(deck) do
+            if npc_deck.Perk then
+                for _, npc_perk in pairs(npc_deck.Perk) do
+                    if npc_perk.enabled then
+                        local perk = npcd.get_perk(npc_perk.id)
+                        if perk and perk.feats then
+                            for _, feat in pairs(perk.feats) do
+                                table.insert(deck_feats, {
+                                    id = feat.id,
+                                    name = gc(feat.name),
+                                    perk_id = npc_perk.id,
+                                    npc_id = npc_deck.id
+                                })
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return deck_feats
+end
+
+function ui_npcd_dashboard:GetDeckEffects()
+    local deck_effects = {}
+    -- Get all active effects from the deck
+    local effects = npcd.get_active_effects() -- Assuming this function exists
+    if effects then
+        for _, effect in pairs(effects) do
+            table.insert(deck_effects, {
+                id = effect.id,
+                name = gc(effect.name) or effect.id,
+                source = gc(effect.source) or "Unknown"
+            })
+        end
+    end
+    return deck_effects
+end
+
+function ui_npcd_dashboard:GetDeckDetails(item_id)
+    local details = {}
+    
+    if self.current_deck_tab == DECK_MENU.PERKS then
+        -- Show perk details with NPC source
+        local perk = npcd.get_perk(item_id)
+        if perk then
+            table.insert(details, "Deck Perk: " .. (perk.name or item_id))
+            table.insert(details, "Description: " .. (perk.description or "No description available"))
+            
+            -- Find which NPC this perk comes from
+            local deck = npcd.get_deck()
+            if deck then
+                for _, npc_deck in pairs(deck) do
+                    if npc_deck.Perk then
+                        for _, npc_perk in pairs(npc_deck.Perk) do
+                            if npc_perk.id == item_id and npc_perk.enabled then
+                                local npc_obj = npcdu.get_npc_obj(npc_deck.id)
+                                local npc_name = npc_obj and (npc_obj:character_name() or npc_obj:name()) or "Unknown NPC"
+                                table.insert(details, "Source NPC: " .. npc_name)
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        
+    elseif self.current_deck_tab == DECK_MENU.FEATS then
+        -- Show feat details with perk and NPC source
+        local feat = npcd.get_feat(item_id)
+        if feat then
+            table.insert(details, "Deck Feat: " .. (gc(feat.name) or item_id))
+            table.insert(details, "Type: " .. gc(feat.type))
+            table.insert(details, "Mode: " .. gc(feat.mode))
+            table.insert(details, "Description: " .. (gc(feat.description) or "No description available"))
+        end
+        
+    elseif self.current_deck_tab == DECK_MENU.EFFECTS then
+        -- Show effect details
+        table.insert(details, "Active Effect: " .. item_id)
+        table.insert(details, "Status: Active")
+        -- Add more effect details as needed
+    end
+    
+    return table.concat(details, "\n")
+end
+
+function ui_npcd_dashboard:OnClose()
+    self.owner:Show(false)
+    GetCConsole():execute("main_menu off")
+end
+
+function ui_npcd_dashboard:OnKeyboard(dik, keyboard_action)
+    CUIScriptWnd.OnKeyboard(self, dik, keyboard_action)
+    
+    if keyboard_action == ui_events.WINDOW_KEY_PRESSED then
+        if dik == DIK_keys.DIK_ESCAPE then
+            self:OnClose()
+        end
+    end
+    
+    return true
+end
+
+-- Dashboard management functions
+function open_dashboard()
+    if not ui_npcd_dashboard_instance then
+        ui_npcd_dashboard_instance = ui_npcd_dashboard()
+        ui_npcd_dashboard_instance.owner = ui_npcd_dashboard_instance
+    end
+    
+    if ui_npcd_dashboard_instance then
+        ui_npcd_dashboard_instance:ShowDialog(true)
+        GetCConsole():execute("main_menu on")
+        Printer:Debug(LOG.INFO, CAT.UI, "Dashboard opened")
+    end
+end
+
+function close_dashboard()
+    if ui_npcd_dashboard_instance then
+        ui_npcd_dashboard_instance:ShowDialog(false)
+        ui_npcd_dashboard_instance = nil
+        GetCConsole():execute("main_menu off")
+        Printer:Debug(LOG.INFO, CAT.UI, "Dashboard closed")
+    end
+end
+
+-- Global instance
+ui_npcd_dashboard_instance = nil
+
+-- Key handler for opening dashboard
+function on_key_press(dik)
+    -- if dik == DIK_keys.DIK_J then
+    --     open_dashboard()
+    --     return true
+    -- end
+    -- return false
+end
+
+-- Register the key handler
+function on_game_start()
+    RegisterScriptCallback("on_key_press", on_key_press)
+end

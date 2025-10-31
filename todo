@@ -2,31 +2,51 @@ ideas for archetypes
 
 - spotter
     category: warfare
-    desc: focus on precision/accuracy, playfield awareness, rifles, warfare vs humans
+    desc: focus on precision/accuracy, playfield awareness, human warfare expertise, rifles, warfare vs humans
     archetype: spotter
         callmark
         spot
     perks
         rifleman
         deadeye
-        dikec eye
-        trooping
+        cybereye
+        dikec stance
+        teamcom
 
 - medic
     * defibrillate   
+    * zone medicine (daily med brew (long buff) after sleeping near camp)
+    * portable farmacy (cutting more powerful meds)
+    * bandages always available
+
+- zone professor
+    - expert in anomalous entities
+    * human mutation expertise 
+
 - trapper
-    * aoe tracking
+    - beast mutation expertise 
+    * aoe tracking (mark all nearby beast upon entering combat)
     * echolocation: aoe tracking near monsters as long as they are visible. excluding invisible monsters
     * track: tracks nearby smarts to create heatmaps
     * dersu spirit: chance to spawn a ghost pseudodog during an encounter  
         - https://www.moddb.com/mods/stalker-anomaly/addons/phantoms-01
 - arena master
-    * extra ammo, smuggled gun, chance to join with you
+    * (in arena matches) extra ammo, smuggled gun, chance to join with you
+    * extra wagers
+    * la zhola (active auto random proc) + dispersion
+    * curva sud (active auto random) + resistence 
 - smuggler
-    - enable trade with npc, black market discount 
+    * enable trade with all npc
+    * black market discount 
+    * workshop parts inventory
+
+- tech buddy
+  * let you use his toolkits for repair
+  * workshop parts inventory when trading: parts, guns, armour (based on rank)
+  
 - diplomat
-    - can talk with everyone, change alliance of 1 random npc in encounters 
-    - increase intimidation chance
+    - can talk with everyone
+    - increase intimidation chance (when required)
     - chance for an enemy to turn friendly during combat for a time
 - radioman
     - can radio anyone (no friendship required)
@@ -45,20 +65,41 @@ ideas for archetypes
     Activate feats when drunk
     - double dee: double vision double damage (only the player) (passive on drunk status)
     - halitosis: aoe effect inhebriation, increase damage for anyone close to actor (5 meters) (active)
+
 - gunman
-    a gunslinging class, focused on feats of 
+    a gunslinging class, focused on destrous feats 
     check on your mark perk from exp
 
-- reward based (corrupter)
- - increase chance of getting stashes from reward
+- squad leader
+ - stance based class
+ * drill sergeant (formation stance)
+ * resistence stance
+ * speed stance
+ * stealth stance buffs (crouch, prone) 
+
+- reward based (slim shady, briber, Baksheesh)
+ - increase chance of getting stashes from task completion
  - increase money from tasks
  - trading boons?
+ - increase money from loot
 
- - deep zone (aka deep state)
-    
+- troubadour
+ * gives buffs by playing instruments
+
+- deep zone (aka deep state)
+ - spy based class, based on knowledge unlock
+ * unlocks npcs menu (all nps, profiles always shown, etc)
+ * unlocks identification widget
+ * unlocks real price in trades
+ * and other unlocks
+
+
+- monolith class
+ * mind control
 
 stuff to do
-
+- add artifact perk mutators
+- reworkd all script on game start to depend on NPCD_BOOTED
 - modal icon updates on action bar have some delay
 - spotter combat events are a bit delayed. probably due to npcd_squad.squad_get_combat() not very reliable
 - add to mcm menu actor active effects page
@@ -69,13 +110,13 @@ stuff to do
 - add custom npc progression and npcd configuration menu
 - rework squad ranking (min or max npc rank based instead of section)
 - add npc identification widget
-- rework notifications (new profile, npc joined, npc leaves)
-- remove old input management
-- add mcm always_register?
 - check correct usage of objects_id instead of passing objects
 - module_mcm must update npdc.perk from mcm settings changes (keybind, stats done - anything else?)
 - implement enable NPCD
-- implements enable/uninstall modules
+- implements uninstall modules
+- add feat resources consumption for actor (power, health, psy)
+- add reserve resource when using stance feats 
+- add 
 - add npc stats (power, recovery)
 - add active feat to use npc power
 - add power consumption to feat stat

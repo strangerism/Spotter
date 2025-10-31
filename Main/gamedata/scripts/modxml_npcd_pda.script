@@ -1,0 +1,79 @@
+function on_xml_read()
+    RegisterScriptCallback("on_xml_read", function(xml_file_name, xml_obj)
+        -- XML file i want to change
+        local xml_to_change = [[ui\pda_16.xml]]
+
+        -- Check if its the file i want to change
+        if not mac_mcm and xml_file_name == xml_to_change then
+            -- Here is my code to change XML
+            local res = xml_obj:query("tab > button[id='eptTasks']")
+            if res[1] then
+                local el = res[1]
+                xml_obj:setElementAttr(el, {width="79"})
+            end
+
+            res = xml_obj:query("tab > button[id='eptRanking']")
+            if res[1] then
+                local el = res[1]
+                xml_obj:setElementAttr(el, {x="136", width="79"})
+            end
+
+            res = xml_obj:query("tab > button[id='eptRelations']")
+            if res[1] then
+                local el = res[1]
+                xml_obj:setElementAttr(el, {x="204", width="79"})
+            end
+
+            res = xml_obj:query("tab > button[id='eptContacts']")
+            if res[1] then
+                local el = res[1]
+                xml_obj:setElementAttr(el, {x="272", width="79"})
+            end
+
+            res = xml_obj:query("tab > button[id='eptEncyclopedia']")
+            if res[1] then
+                local el = res[1]
+                xml_obj:setElementAttr(el, {x="340", width="79"})
+            end
+
+            res = xml_obj:query("tab > button[id='eptRadio']")
+            if res[1] then
+                local el = res[1]
+                xml_obj:setElementAttr(el, {x="408", width="79"})
+            end
+
+            res = xml_obj:query("tab > button[id='eptLogs']")
+            if res[1] then
+                local el = res[1]
+                xml_obj:setElementAttr(el, {x="476", width="79"})
+            end
+
+            local npcd_tab = 
+[[
+    <button x="68" y="0" width="79" height="27" id="eptNPCD" frame_mode="0">
+        <text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd</text>
+        <texture>ui_inGame2_pda_button</texture>
+        <text_color>
+            <t r="255" g="255" b="255"/>
+            <d r="255" g="255" b="255"/>
+            <e r="200" g="200" b="200"/>
+            <h r="170" g="170" b="170"/>
+        </text_color>
+    </button>
+]]
+            local tabs = xml_obj:query("tab")
+            local el = tabs[1]
+            xml_obj:insertFromXMLString(npcd_tab, el, 2)
+        elseif mac_mcm and xml_file_name == xml_to_change then
+            local pda_app_launcher_bind =
+[[
+    <button x="1000" y="0" width="0" height="0" id="eptNPCD" frame_mode="0">
+        <text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd</text>
+    </button>
+]]
+            local tabs = xml_obj:query("tab")
+            local el = tabs[1]
+            xml_obj:insertFromXMLString(pda_app_launcher_bind, el, #el.kids)
+        end
+    end)
+end

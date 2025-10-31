@@ -23,5 +23,16 @@
 		<texture id="ui_npcd_feat_registered" x="83" y="940" width="83" height="47" />
 		<texture id="ui_npcd_perk_registered" x="249" y="564" width="83" height="47" />
 	</file>  
-
+	<file name="ui\npcd\ui_pda_dashboard">
+		<texture id="ui_npcd_pda_dashboard_header" x="173" y="9" width="598" height="50" />
+		<texture id="ui_npcd_pda_dashboard_footer" x="172" y="394" width="598" height="35" />
+		<texture id="ui_npcd_pda_dashboard_main" x="172" y="79" width="598" height="300" />
+		<texture id="ui_npcd_pda_dashboard_vsidescroll" x="0" y="71" width="161" height="326" />
+	</file>
+	<file name="ui\npcd\ui_npcd_icons">
+		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />
+		<texture id="pda_npcd_app_h" x="178" y="48" width="121" height="121" />
+		<texture id="pda_npcd_app_t" x="40" y="172" width="121" height="121" />
+		<texture id="pda_npcd_app_d" x="178" y="172" width="121" height="121" />
+	</file>
 </w>

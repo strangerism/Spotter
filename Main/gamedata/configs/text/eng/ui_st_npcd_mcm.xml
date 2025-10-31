@@ -238,5 +238,9 @@
 	</string>
 	<string id="st_npcd_active_feat_activation">
 		<text>%s activated %s</text>
-	</string>  			
+	</string>  	
+	<!-- PDA Dashboard		 -->
+	<string id="pda_btn_npcd">
+		<text>NPCD</text>
+	</string>	
 </string_table>
