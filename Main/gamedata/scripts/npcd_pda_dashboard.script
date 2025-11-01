@@ -100,21 +100,27 @@ function npcd_dashboard_tab:InitControls()
 
     self.app = {}
     self.app[APP.NPCS] = {}
-    self.app[APP.NPCS].button = xml:Init3tButton("app:button_npcs", self)
+    self.app[APP.NPCS].tab = xml:InitStatic("app:tab_npcs", self)
+    xml:InitStatic("app:tab_npcs:tab_left", self.app[APP.NPCS].tab)
+    self.app[APP.NPCS].button = xml:Init3tButton("app:tab_npcs:button", self.app[APP.NPCS].tab)
     self.app[APP.NPCS].button:Enable(true)
-
+    xml:InitStatic("app:tab_npcs:tab_right", self.app[APP.NPCS].tab)
     self:Register(self.app[APP.NPCS].button, "app_button_" .. APP.NPCS)
 
     self.app[APP.PERKS] = {}
-    self.app[APP.PERKS].button = xml:Init3tButton("app:button_perks", self)
+    self.app[APP.PERKS].tab = xml:InitStatic("app:tab_perks", self)
+    xml:InitStatic("app:tab_perks:tab_left", self.app[APP.PERKS].tab)
+    self.app[APP.PERKS].button = xml:Init3tButton("app:tab_perks:button", self.app[APP.PERKS].tab)
     self.app[APP.PERKS].button:Enable(true)
-
+    xml:InitStatic("app:tab_perks:tab_right", self.app[APP.PERKS].tab)
     self:Register(self.app[APP.PERKS].button, "app_button_" .. APP.PERKS)
 
     self.app[APP.DECK] = {}
-    self.app[APP.DECK].button = xml:Init3tButton("app:button_deck", self)
+    self.app[APP.DECK].tab = xml:InitStatic("app:tab_deck", self)
+    xml:InitStatic("app:tab_deck:tab_left", self.app[APP.DECK].tab)
+    self.app[APP.DECK].button = xml:Init3tButton("app:tab_deck:button", self.app[APP.DECK].tab)
     self.app[APP.DECK].button:Enable(true)
-
+    xml:InitStatic("app:tab_deck:tab_right", self.app[APP.DECK].tab)
     self:Register(self.app[APP.DECK].button, "app_button_" .. APP.DECK)
 
 end

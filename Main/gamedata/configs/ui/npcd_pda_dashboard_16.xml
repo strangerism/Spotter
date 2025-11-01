@@ -1,44 +1,68 @@
 <w>
 	<main_wnd x="0" y="0" width="1024" height="768"/>
 		
-	<header x="30" y="95" width="764" height="90" stretch="1">
+	<header x="34" y="95" width="751" height="90" stretch="1">
 		<texture>ui_npcd_pda_dashboard_header</texture>
 	</header>
 
 	<app>
-		<button_npcs x="150" y="114" width="100" height="30" stretch="1">
-			<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_npcs</text>
-			<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
-			<text_color>
-				<e r="200" g="200" b="200"/>
-				<t color ="ui_white"/>
-				<e r="200" g="200" b="200"/>
-				<h r="255" g="255" b="255"/>
-			</text_color>
-		</button_npcs>
-		<button_perks x="350" y="114" width="100" height="30" stretch="1">
-			<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_perks</text>
-			<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
-			<text_color>
-				<e r="200" g="200" b="200"/>
-				<t color ="ui_white"/>
-				<e r="200" g="200" b="200"/>
-				<h r="255" g="255" b="255"/>
-			</text_color>
-		</button_perks>	
-		<button_deck x="550" y="114" width="100" height="30" stretch="1">
-			<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_deck</text>
-			<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
-			<text_color>
-				<e r="200" g="200" b="200"/>
-				<t color ="ui_white"/>
-				<e r="200" g="200" b="200"/>
-				<h r="255" g="255" b="255"/>
-			</text_color>
-		</button_deck>			
+		<tab_npcs x="80" y="114" width="240" height="30">
+			<tab_left x="0" y="0" width="70" height="30" stretch="1">
+				<texture>ui_npcd_pda_dashboard_app_tab_l</texture>
+			</tab_left>
+			<button x="70" y="0" width="100" height="30" stretch="1">
+				<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_npcs</text>
+				<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
+				<text_color>
+					<e r="200" g="200" b="200"/>
+					<t color ="ui_white"/>
+					<e r="200" g="200" b="200"/>
+					<h r="255" g="255" b="255"/>
+				</text_color>
+			</button>		
+			<tab_right x="170" y="0" width="70" height="30" stretch="1">
+				<texture>ui_npcd_pda_dashboard_app_tab_r</texture>
+			</tab_right>			
+		</tab_npcs>
+		<tab_perks x="290" y="114" width="240" height="30">
+			<tab_left x="0" y="0" width="70" height="30" stretch="1">
+				<texture>ui_npcd_pda_dashboard_app_tab_l</texture>
+			</tab_left>
+			<button x="70" y="0" width="100" height="30" stretch="1">
+				<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_perks</text>
+				<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
+				<text_color>
+					<e r="200" g="200" b="200"/>
+					<t color ="ui_white"/>
+					<e r="200" g="200" b="200"/>
+					<h r="255" g="255" b="255"/>
+				</text_color>
+			</button>		
+			<tab_right x="170" y="0" width="70" height="30" stretch="1">
+				<texture>ui_npcd_pda_dashboard_app_tab_r</texture>
+			</tab_right>			
+		</tab_perks>
+		<tab_deck x="500" y="114" width="240" height="30">
+			<tab_left x="0" y="0" width="70" height="30" stretch="1">
+				<texture>ui_npcd_pda_dashboard_app_tab_l</texture>
+			</tab_left>
+			<button x="70" y="0" width="100" height="30" stretch="1">
+				<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_deck</text>
+				<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
+				<text_color>
+					<e r="200" g="200" b="200"/>
+					<t color ="ui_white"/>
+					<e r="200" g="200" b="200"/>
+					<h r="255" g="255" b="255"/>
+				</text_color>
+			</button>		
+			<tab_right x="170" y="0" width="70" height="30" stretch="1">
+				<texture>ui_npcd_pda_dashboard_app_tab_r</texture>
+			</tab_right>			
+		</tab_deck>				
 	</app>	
 
-	<main x="30" y="185" width="764" height="500" stretch="1">
+	<main x="34" y="185" width="751" height="500" stretch="1">
 		<texture a="100">ui_npcd_pda_dashboard_main</texture>
 	</main>
 
@@ -50,7 +74,7 @@
 		<texture>ui_npcd_pda_dashboard_vsidescroll</texture>
 	</sidebar>	
 
-	<footer x="30" y="680" width="764" height="35" stretch="1">
+	<footer x="34" y="680" width="751" height="35" stretch="1">
 		<texture>ui_npcd_pda_dashboard_footer</texture>
 	</footer>
 </w>
