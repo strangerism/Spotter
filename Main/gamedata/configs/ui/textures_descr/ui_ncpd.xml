@@ -26,8 +26,12 @@
 	<file name="ui\npcd\ui_pda_dashboard">
 		<texture id="ui_npcd_pda_dashboard_header" x="173" y="9" width="598" height="50" />
 		<texture id="ui_npcd_pda_dashboard_footer" x="172" y="394" width="598" height="35" />
-		<texture id="ui_npcd_pda_dashboard_main" x="172" y="79" width="598" height="300" />
+		<texture id="ui_npcd_pda_dashboard_panel_bg" x="182" y="79" width="580" height="300" />
+		<texture id="ui_npcd_pda_dashboard_panel_left_shoulder" x="173" y="79" width="9" height="300" />
+		<texture id="ui_npcd_pda_dashboard_panel_right_shoulder" x="762" y="79" width="9" height="300" />
 		<texture id="ui_npcd_pda_dashboard_vseparator" x="807" y="79" width="9" height="300" />
+		<texture id="ui_npcd_pda_dashboard_vseparator_dark_1" x="153" y="71" width="9" height="326" />
+		<texture id="ui_npcd_pda_dashboard_vseparator_dark_2" x="1" y="71" width="9" height="326" />
 		<texture id="ui_npcd_pda_dashboard_vsidescroll" x="0" y="71" width="161" height="326" />
 		<texture id="ui_npcd_pda_dashboard_app_tab_l" x="8" y="9" width="70" height="43" />
 		<texture id="ui_npcd_pda_dashboard_app_tab_button_d" x="776" y="486" width="110" height="43" />
@@ -36,6 +40,8 @@
 		<texture id="ui_npcd_pda_dashboard_app_tab_button_t" x="888" y="434" width="110" height="43" />
 		<texture id="ui_npcd_pda_dashboard_app_tab_r" x="84" y="9" width="74" height="42" />
 		<texture id="ui_npcd_pda_dashboard_npcd_logo_1_bw" x="1" y="416" width="122" height="122" />
+		<texture id="ui_npcd_pda_dashboard_vsidescroll_top" x="177" y="440" width="113" height="91" />
+		<texture id="ui_npcd_pda_dashboard_vsidescroll_bottom" x="177" y="552" width="113" height="94" />
 	</file>
 	<file name="ui\npcd\ui_npcd_icons">
 		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />

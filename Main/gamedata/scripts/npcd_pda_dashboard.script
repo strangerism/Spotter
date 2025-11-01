@@ -96,7 +96,8 @@ function npcd_dashboard_tab:InitControls()
 
     -- Apps Bar
     self:InitAppsBar()
-    
+    xml:InitStatic("left_side", self)
+
     -- App Panel
     self:InitHomePanel()
     self:InitNPCSPanel()
@@ -104,6 +105,7 @@ function npcd_dashboard_tab:InitControls()
     self:InitDeckPanel()
     self:ActivateAppPanel(APP.HOME)
 
+    xml:InitStatic("right_side", self)
     -- Footer
     self.footer = xml:InitStatic("footer", self)
 
@@ -166,7 +168,11 @@ function npcd_dashboard_tab:InitNPCSPanel()
     xml:InitStatic("npcs_panel:v_main_separator", panel_bg)
     xml:InitStatic("npcs_panel:panel_logo", panel_bg)
 
-    xml:InitStatic("npcs_panel:npcs_scroller", UI_APP[APP.NPCS].dialog)
+    local scroller = xml:InitStatic("npcs_panel:npcs_scroller", UI_APP[APP.NPCS].dialog)
+    xml:InitStatic("npcs_panel:npcs_scroller:anchor_top", scroller)
+    xml:InitStatic("npcs_panel:npcs_scroller:scroller", scroller)
+    xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", scroller)
+
     UI_APP[APP.NPCS].dialog:Show(false)
 end
 
@@ -192,7 +198,7 @@ function npcd_dashboard_tab:ActivateAppPanel(app_name)
     if self.app_panel then
         self.app_panel:Show(false)
     end
-    
+
     UI_APP[app_name].active = true
     self.app_panel = UI_APP[app_name].dialog
     self.app_panel:Show(true)
