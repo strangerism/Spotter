@@ -5,6 +5,9 @@
 		<background x="0" y="0" width="751" height="90" stretch="1">
 			<texture>ui_npcd_pda_dashboard_header</texture>
 		</background>	
+        <scanline x="15" y="5" width="751" height="1" stretch="1">
+            <texture a="100">ui_npe_mgs2_codec_750_scanline</texture>
+        </scanline> 		
 		<npcs x="55" y="19" width="240" height="30">
 			<tab_left x="0" y="0" width="70" height="30" stretch="1">
 				<texture>ui_npcd_pda_dashboard_app_tab_l</texture>
