@@ -81,7 +81,6 @@ class "npcd_dashboard_tab" (CUIScriptWnd)
 function npcd_dashboard_tab:__init() super()
     xml:ParseFile("npcd_pda_dashboard.xml")
 	self:InitControls()
-    self:InitCallbacks()
 end
 
 -- Initialise the interface.
@@ -89,15 +88,22 @@ function npcd_dashboard_tab:InitControls()
     Printer:Debug(LOG.INFO, CAT.UI, "Initialising NPCD PDA Dashboard UI")
 	self:SetWndRect(Frect():set(0, 0, 1024, 768))
 	
-	-- NPCD window.
-	self.apps_bar = xml:InitStatic("apps_bar", self)
-    xml:InitStatic("apps_bar:background", self.apps_bar)
+
+    -- Apps Bar
+    self:InitAppsBar()
+
+
 	self.main = xml:InitStatic("main", self)
     self.vsep_main = xml:InitStatic("v_main_separator", self)
     self.sidebar = xml:InitStatic("sidebar", self)
     self.footer = xml:InitStatic("footer", self)
 
-    -- APP
+end
+
+function npcd_dashboard_tab:InitAppsBar()
+
+    self.apps_bar = xml:InitStatic("apps_bar", self)
+    xml:InitStatic("apps_bar:background", self.apps_bar)
 
     self.app = {}
     self.app[APP.NPCS] = {}
@@ -124,13 +130,11 @@ function npcd_dashboard_tab:InitControls()
     xml:InitStatic("apps_bar:deck:tab_right", self.app[APP.DECK].tab)
     self:Register(self.app[APP.DECK].button, "app_button_" .. APP.DECK)
 
-end
-
-function npcd_dashboard_tab:InitCallbacks()
     Printer:Debug(LOG.INFO, CAT.UI, "Initialising NPCD PDA Dashboard UI Callbacks")
     self:AddCallback("app_button_" .. APP.NPCS, ui_events.BUTTON_CLICKED, self.On_NPCS_Button_Clicked, self)
     self:AddCallback("app_button_" .. APP.PERKS, ui_events.BUTTON_CLICKED, self.On_Perks_Button_Clicked, self)
     self:AddCallback("app_button_" .. APP.DECK, ui_events.BUTTON_CLICKED, self.On_Deck_Button_Clicked, self)
+
 end
 
 function npcd_dashboard_tab:On_NPCS_Button_Clicked()
