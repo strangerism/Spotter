@@ -32,6 +32,7 @@ end
 
 -- APP
 local APP = {
+    HOME = "home",
     NPCS = "npcs",
     PERKS = "perks",
     DECK = "deck"
@@ -39,6 +40,10 @@ local APP = {
 
 local UI_APP = {}
 UI_APP = {
+    [APP.HOME] = {
+        active = nil,
+        dialog = nil,
+    },
     [APP.NPCS] = {
         active = nil,
         dialog = nil,
@@ -50,7 +55,7 @@ UI_APP = {
     [APP.DECK] = {
         active = nil,
         dialog = nil,
-    }
+    },
 }
 -- NPCS menu
 local UI_MENU = {}
@@ -91,11 +96,15 @@ function npcd_dashboard_tab:InitControls()
 
     -- Apps Bar
     self:InitAppsBar()
+    
+    -- App Panel
+    self:InitHomePanel()
+    self:InitNPCSPanel()
+    self:InitPerksPanel()
+    self:InitDeckPanel()
+    self:ActivateAppPanel(APP.HOME)
 
-
-	self.main = xml:InitStatic("main", self)
-    self.vsep_main = xml:InitStatic("v_main_separator", self)
-    self.sidebar = xml:InitStatic("sidebar", self)
+    -- Footer
     self.footer = xml:InitStatic("footer", self)
 
 end
@@ -137,11 +146,64 @@ function npcd_dashboard_tab:InitAppsBar()
 
 end
 
+function npcd_dashboard_tab:InitHomePanel()
+    -- Home Panel
+    UI_APP[APP.HOME].active = false
+    UI_APP[APP.HOME].dialog = xml:InitStatic("home_panel", self)
+    local panel_bg = xml:InitStatic("home_panel:panel_bg", UI_APP[APP.HOME].dialog)
+    xml:InitStatic("home_panel:panel_logo", panel_bg)
+    UI_APP[APP.HOME].dialog:Show(false)
+end
+
+function npcd_dashboard_tab:InitNPCSPanel()
+    -- NPCS Panel
+    UI_APP[APP.NPCS].active = false
+    UI_APP[APP.NPCS].dialog = xml:InitStatic("npcs_panel", self)
+
+    local menu_bar = xml:InitStatic("npcs_panel:menu_bar", UI_APP[APP.NPCS].dialog)
+
+    local panel_bg = xml:InitStatic("npcs_panel:panel_bg", UI_APP[APP.NPCS].dialog)
+    xml:InitStatic("npcs_panel:v_main_separator", panel_bg)
+    xml:InitStatic("npcs_panel:panel_logo", panel_bg)
+
+    xml:InitStatic("npcs_panel:npcs_scroller", UI_APP[APP.NPCS].dialog)
+    UI_APP[APP.NPCS].dialog:Show(false)
+end
+
+function npcd_dashboard_tab:InitPerksPanel()
+    -- Perks Panel
+    UI_APP[APP.PERKS].active = false
+    UI_APP[APP.PERKS].dialog = xml:InitStatic("perks_panel", self)
+    local panel_bg = xml:InitStatic("perks_panel:panel_bg", UI_APP[APP.PERKS].dialog)
+    xml:InitStatic("perks_panel:panel_logo", panel_bg)
+    UI_APP[APP.PERKS].dialog:Show(false)
+end
+
+function npcd_dashboard_tab:InitDeckPanel()
+    -- Deck Panel
+    UI_APP[APP.DECK].active = false
+    UI_APP[APP.DECK].dialog = xml:InitStatic("deck_panel", self)
+    local panel_bg = xml:InitStatic("deck_panel:panel_bg", UI_APP[APP.DECK].dialog)
+    xml:InitStatic("deck_panel:panel_logo", panel_bg)
+    UI_APP[APP.DECK].dialog:Show(false)
+end
+
+function npcd_dashboard_tab:ActivateAppPanel(app_name)
+    if self.app_panel then
+        self.app_panel:Show(false)
+    end
+    
+    UI_APP[app_name].active = true
+    self.app_panel = UI_APP[app_name].dialog
+    self.app_panel:Show(true)
+end
+
 function npcd_dashboard_tab:On_NPCS_Button_Clicked()
     Printer:Debug(LOG.INFO, CAT.UI, "NPCS Button Clicked")
     self.app[APP.NPCS].button:Enable(false)
     self.app[APP.PERKS].button:Enable(true)
     self.app[APP.DECK].button:Enable(true)
+    self:ActivateAppPanel(APP.NPCS)
 end
 
 function npcd_dashboard_tab:On_Perks_Button_Clicked()
@@ -149,6 +211,7 @@ function npcd_dashboard_tab:On_Perks_Button_Clicked()
     self.app[APP.NPCS].button:Enable(true)
     self.app[APP.PERKS].button:Enable(false)
     self.app[APP.DECK].button:Enable(true)
+    self:ActivateAppPanel(APP.PERKS)
 end
 
 function npcd_dashboard_tab:On_Deck_Button_Clicked()
@@ -156,6 +219,7 @@ function npcd_dashboard_tab:On_Deck_Button_Clicked()
     self.app[APP.NPCS].button:Enable(true)
     self.app[APP.PERKS].button:Enable(true)
     self.app[APP.DECK].button:Enable(false)
+    self:ActivateAppPanel(APP.DECK)
 end
 
 function npcd_dashboard_tab:EnableAppButtons(enable)

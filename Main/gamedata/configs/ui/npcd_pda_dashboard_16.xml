@@ -61,15 +61,59 @@
 		</deck>				
 	</apps_bar>
 
+	<home_panel x="34" y="185" width="751" height="500" stretch="1">
+		<panel_bg x="0" y="0" width="751" height="500" stretch="1">
+			<texture a="100">ui_npcd_pda_dashboard_main</texture>
+		</panel_bg>
+		<panel_logo x="275" y="150" width="200" height="200" stretch="1">
+			<texture a="30">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
+		</panel_logo>
+	</home_panel>	
+
+	<npcs_panel x="34" y="185" width="751" height="500" stretch="1">
+		<menu_bar x="0" y="0" width="130" height="500" stretch="1">
+		</menu_bar>
+		<v_main_separator x="130" y="0" width="9" height="500" stretch="1">
+			<texture a="100">ui_npcd_pda_dashboard_vseparator</texture>
+		</v_main_separator>		
+		<panel_bg x="0" y="0" width="751" height="500" stretch="1">
+			<texture a="100">ui_npcd_pda_dashboard_main</texture>
+		</panel_bg>			
+		<panel_logo x="420" y="150" width="200" height="200" stretch="1">
+			<texture a="50">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
+		</panel_logo>
+		<npcs_scroller x="160" y="30" width="125" height="440" stretch="1">
+			<texture>ui_npcd_pda_dashboard_vsidescroll</texture>
+		</npcs_scroller>		
+	</npcs_panel>
+
+	<perks_panel x="34" y="185" width="751" height="500" stretch="1">
+		<panel_bg x="0" y="0" width="751" height="500" stretch="1">
+			<texture a="100">ui_npcd_pda_dashboard_main</texture>
+		</panel_bg>
+		<panel_logo x="275" y="150" width="200" height="200" stretch="1">
+			<texture a="30">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
+		</panel_logo>
+	</perks_panel>	
+
+	<deck_panel x="34" y="185" width="751" height="500" stretch="1">
+		<panel_bg x="0" y="0" width="751" height="500" stretch="1">
+			<texture a="100">ui_npcd_pda_dashboard_main</texture>
+		</panel_bg>
+		<panel_logo x="275" y="150" width="200" height="200" stretch="1">
+			<texture a="30">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
+		</panel_logo>
+	</deck_panel>		
+
 	<main x="34" y="185" width="751" height="500" stretch="1">
 		<texture a="100">ui_npcd_pda_dashboard_main</texture>
 	</main>
 
-	<v_main_separator x="130" y="185" width="9" height="500" stretch="1">
+	<v_main_separator x="130" y="0" width="9" height="500" stretch="1">
 		<texture a="100">ui_npcd_pda_dashboard_vseparator</texture>
 	</v_main_separator>
 
-	<sidebar x="150" y="215" width="125" height="440" stretch="1">
+	<sidebar x="150" y="30" width="125" height="440" stretch="1">
 		<texture>ui_npcd_pda_dashboard_vsidescroll</texture>
 	</sidebar>	
 
