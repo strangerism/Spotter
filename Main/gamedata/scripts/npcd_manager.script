@@ -278,7 +278,8 @@ end
 
 local function teardown_npcd_execution()
 	Printer:Debug(LOG.STOP, CAT.EXEC,"teardown_npcd_execution")
-
+	-- fix mcm npcs menu being generated while game is shutting down
+	NPCD_BOOTED = false
 	-- stop current npc Tasks execution
 	for key, value in pairs(Tasks) do
 		RemoveTimeEvent("npcd_manager", key)
