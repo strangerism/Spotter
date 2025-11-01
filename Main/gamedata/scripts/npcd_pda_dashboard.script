@@ -1,13 +1,16 @@
-local string_format = string.format
-function printlog_table(text, node, ...)
-    
-    text = string_format(text, ...)
-    printf("NPCD | %s | \n" .. utils_data.print_table(node, text, true), time_global(), ...)
+local npcdu = npcd_utils
+
+function get_printer()
+	if not Printer then
+		Printer = npcd_logging.get_printer("npcd_pda_dashboard")
+	end 
+	LOG = Printer:GetLogTypes()
+	CAT = Printer:GetLogCategories()
 end
+RegisterScriptCallback("npcd_on_log_update", get_printer)
 
 
 if not mac_mcm then
-    printf("npcd_pda_dashboard: mac_mcm not found, skipping MCM integration")
     local original_set_active_subdialog = pda.set_active_subdialog
     pda.set_active_subdialog = function (section)
         if (section == "eptNPCD") then
@@ -19,7 +22,6 @@ if not mac_mcm then
 end
 
 local xml = CScriptXmlInit()
-xml:ParseFile("npcd_pda_dashboard.xml")
 
 local SINGLETON = nil
 function get_ui()
@@ -27,21 +29,133 @@ function get_ui()
 	return SINGLETON
 end
 
+
+-- APP
+local APP = {
+    NPCS = "npcs",
+    PERKS = "perks",
+    DECK = "deck"
+}
+
+local UI_APP = {}
+UI_APP = {
+    [APP.NPCS] = {
+        active = nil,
+        dialog = nil,
+    },
+    [APP.PERKS] = {
+        active = nil,
+        dialog = nil,
+    },
+    [APP.DECK] = {
+        active = nil,
+        dialog = nil,
+    }
+}
+-- NPCS menu
+local UI_MENU = {}
+UI_MENU["npcs"] = {
+    SQUAD = {},
+    FAVORITES = {},
+    RECRUITABLE = {},
+    ALL = {},
+    DEAD = {},
+}
+
+-- Perks menu
+UI_MENU["perks"] = {
+    DISCOVERED = {},
+    ALL = {},
+    LEARNED = {}
+}
+
+-- Deck menu
+UI_MENU["deck"] = {
+    PERKS = {},
+    FEATS = {},
+    EFFECTS = {}
+}
+
 -- Constructor.
 class "npcd_dashboard_tab" (CUIScriptWnd)
 function npcd_dashboard_tab:__init() super()
+    xml:ParseFile("npcd_pda_dashboard.xml")
 	self:InitControls()
+    self:InitCallbacks()
 end
 
 -- Initialise the interface.
 function npcd_dashboard_tab:InitControls()
+    Printer:Debug(LOG.INFO, CAT.UI, "Initialising NPCD PDA Dashboard UI")
 	self:SetWndRect(Frect():set(0, 0, 1024, 768))
 	
 	-- NPCD window.
 	self.header = xml:InitStatic("header", self)
 	self.main = xml:InitStatic("main", self)
+    self.vsep_main = xml:InitStatic("v_main_separator", self)
     self.sidebar = xml:InitStatic("sidebar", self)
     self.footer = xml:InitStatic("footer", self)
+
+    -- APP
+
+    self.app = {}
+    self.app[APP.NPCS] = {}
+    self.app[APP.NPCS].button = xml:Init3tButton("app:button_npcs", self)
+    self.app[APP.NPCS].button:Enable(true)
+
+    self:Register(self.app[APP.NPCS].button, "app_button_" .. APP.NPCS)
+
+    self.app[APP.PERKS] = {}
+    self.app[APP.PERKS].button = xml:Init3tButton("app:button_perks", self)
+    self.app[APP.PERKS].button:Enable(true)
+
+    self:Register(self.app[APP.PERKS].button, "app_button_" .. APP.PERKS)
+
+    self.app[APP.DECK] = {}
+    self.app[APP.DECK].button = xml:Init3tButton("app:button_deck", self)
+    self.app[APP.DECK].button:Enable(true)
+
+    self:Register(self.app[APP.DECK].button, "app_button_" .. APP.DECK)
+
+end
+
+function npcd_dashboard_tab:InitCallbacks()
+    Printer:Debug(LOG.INFO, CAT.UI, "Initialising NPCD PDA Dashboard UI Callbacks")
+    self:AddCallback("app_button_" .. APP.NPCS, ui_events.BUTTON_CLICKED, self.On_NPCS_Button_Clicked, self)
+    self:AddCallback("app_button_" .. APP.PERKS, ui_events.BUTTON_CLICKED, self.On_Perks_Button_Clicked, self)
+    self:AddCallback("app_button_" .. APP.DECK, ui_events.BUTTON_CLICKED, self.On_Deck_Button_Clicked, self)
+end
+
+function npcd_dashboard_tab:On_NPCS_Button_Clicked()
+    Printer:Debug(LOG.INFO, CAT.UI, "NPCS Button Clicked")
+    self.app[APP.NPCS].button:Enable(false)
+    self.app[APP.PERKS].button:Enable(true)
+    self.app[APP.DECK].button:Enable(true)
+end
+
+function npcd_dashboard_tab:On_Perks_Button_Clicked()
+    Printer:Debug(LOG.INFO, CAT.UI, "PERKS Button Clicked")
+    self.app[APP.NPCS].button:Enable(true)
+    self.app[APP.PERKS].button:Enable(false)
+    self.app[APP.DECK].button:Enable(true)
+end
+
+function npcd_dashboard_tab:On_Deck_Button_Clicked()
+    Printer:Debug(LOG.INFO, CAT.UI, "DECK Button Clicked")
+    self.app[APP.NPCS].button:Enable(true)
+    self.app[APP.PERKS].button:Enable(true)
+    self.app[APP.DECK].button:Enable(false)
+end
+
+function npcd_dashboard_tab:EnableAppButtons(enable)
+    for app_name, app in pairs(self.app) do
+        app.button:Enable(enable)
+    end
+end
+
+function npcd_dashboard_tab:Update()
+    CUIScriptWnd.Update(self)
+    -- Update the dashboard contents here if needed.
 end
 
 function on_key_release(key)

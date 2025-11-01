@@ -34,7 +34,7 @@ function build_perks_icons_registry()
         end
     end
     Printer:Debug(LOG.INFO, CAT.UI, "Built perks icons registry with %d entries", size_table(perks_icons_registry))
-    Printer:DebugTable(LOG.DEBUG, CAT.UI, perks_icons_registry)
+    Printer:DebugTable("icons registry", perks_icons_registry)
 end
 
 if ui_popup_messages then

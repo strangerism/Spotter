@@ -4,12 +4,49 @@
 	<header x="30" y="95" width="764" height="90" stretch="1">
 		<texture>ui_npcd_pda_dashboard_header</texture>
 	</header>
-	
+
+	<app>
+		<button_npcs x="150" y="114" width="100" height="30" stretch="1">
+			<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_npcs</text>
+			<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
+			<text_color>
+				<e r="200" g="200" b="200"/>
+				<t color ="ui_white"/>
+				<e r="200" g="200" b="200"/>
+				<h r="255" g="255" b="255"/>
+			</text_color>
+		</button_npcs>
+		<button_perks x="350" y="114" width="100" height="30" stretch="1">
+			<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_perks</text>
+			<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
+			<text_color>
+				<e r="200" g="200" b="200"/>
+				<t color ="ui_white"/>
+				<e r="200" g="200" b="200"/>
+				<h r="255" g="255" b="255"/>
+			</text_color>
+		</button_perks>	
+		<button_deck x="550" y="114" width="100" height="30" stretch="1">
+			<text align="c" vert_align="c" x="0" y="0" font="letterica16">pda_btn_npcd_app_deck</text>
+			<texture>ui_npcd_pda_dashboard_app_tab_button</texture>
+			<text_color>
+				<e r="200" g="200" b="200"/>
+				<t color ="ui_white"/>
+				<e r="200" g="200" b="200"/>
+				<h r="255" g="255" b="255"/>
+			</text_color>
+		</button_deck>			
+	</app>	
+
 	<main x="30" y="185" width="764" height="500" stretch="1">
 		<texture a="100">ui_npcd_pda_dashboard_main</texture>
 	</main>
 
-	<sidebar x="80" y="185" width="150" height="500" stretch="1">
+	<v_main_separator x="130" y="185" width="9" height="500" stretch="1">
+		<texture a="100">ui_npcd_pda_dashboard_vseparator</texture>
+	</v_main_separator>
+
+	<sidebar x="150" y="215" width="125" height="440" stretch="1">
 		<texture>ui_npcd_pda_dashboard_vsidescroll</texture>
 	</sidebar>	
 

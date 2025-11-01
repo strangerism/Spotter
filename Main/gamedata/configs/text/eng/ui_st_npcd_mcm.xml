@@ -243,4 +243,14 @@
 	<string id="pda_btn_npcd">
 		<text>NPCD</text>
 	</string>	
+	<string id="pda_btn_npcd_app_npcs">
+		<text>Zonebook</text>
+	</string>
+	<string id="pda_btn_npcd_app_perks">
+		<text>Perks Glossary</text>
+	</string>
+	<string id="pda_btn_npcd_app_deck">
+		<text>Active Deck</text>
+	</string>			
+	
 </string_table>
