@@ -132,6 +132,7 @@ function npcd_dashboard_tab:InitAppsBar()
     scanlines.scale = 3
     scanlines.margin_v = 5
     scanlines.intensity = 0.3
+    scanlines.random_accel = true
     npcd_ui_fx.add_fx(scanlines)
     self.apps_bar_scanline = scanlines
 
@@ -147,6 +148,7 @@ function npcd_dashboard_tab:InitAppsBar()
     npcd_ui_fx.add_fx(scanline_flicker)
     npcd_ui_fx.add_fx_to_manager(scanline_flicker.id, self.flickering_manager and self.flickering_manager.id or nil)
     self.apps_bar_scanline_flickering = scanline_flicker
+
 -- FX: Flickering on Apps Bar
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     flickering.dialog = background
@@ -223,6 +225,8 @@ function npcd_dashboard_tab:InitNPCSPanel()
     local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
     scanlines.dialog = scroller_bg
     scanlines.speed = 0.025
+    scanlines.random_accel = true
+    scanlines.accel_length = 10
     scanlines.margin_v = -5
     scanlines.margin_h = 0
     scanlines.orientation = 1

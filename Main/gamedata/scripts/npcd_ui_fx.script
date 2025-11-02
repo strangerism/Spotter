@@ -100,6 +100,8 @@ local FX_CONFIG = {
 		dialog = nil,
 		start = nil,
 		speed = nil,
+		random_accel = false,
+		accel_length = nil,
 		orientation = 1, -- 0 - horizontal, 1 - vertical
 		scale = 1.0,
 		intensity = nil, -- 0 to 1
@@ -111,6 +113,10 @@ local FX_CONFIG = {
 		fx_ui = nil,
 		fx_element = "scanline",
 		init_on_start = false,
+		accel_event = nil,
+		accel_cycle = 0,
+		accel_increment = nil,
+		accel_direction = 1,
 	},
 	[FX.FLICKERING] = {
 		type = FX.FLICKERING,
@@ -173,7 +179,7 @@ function add_fx(fx_config)
 	if fx_config.fx_element and not fx_config.init_on_start then
 		fx_config.fx_ui = xml:InitStatic(fx_config.fx_element, fx_config.dialog)
 	end
-	Printer:DebugTable("Adding FX:", fx_config)
+	Printer:TraceTable("Adding FX:", fx_config)
 end
 
 function remove_fx(fx_id)
@@ -216,7 +222,7 @@ end
 function add_fx_to_manager(fx_id, manager_id)
 	if not FX_JOBS[manager_id] then return end
 	if not FX_JOBS[fx_id] then return end
-	Printer:DebugTable("Adding FX to Manager:", {fx_id = fx_id, manager_id = manager_id})
+	Printer:TraceTable("Adding FX to Manager:", {fx_id = fx_id, manager_id = manager_id})
 	local manager = FX_JOBS[manager_id].config
 	local manager_type = manager.manager_type
 	if not Managed[manager_type] then
@@ -270,11 +276,20 @@ end
 
 -- FX HANDLERS: SCANLINES
 
+local function get_accel_event(accel_length)
+	local chance = math.random(1, 100)
+	if chance > 50 then
+		Printer:Debug(LOG.START, CAT.UI," scanlines acceleration event triggered")
+		return math.random(100 * accel_length, 500 * accel_length)
+	end
+	return nil
+end
+
 function run_scanlines(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	local config = fx_job.config
-	Printer:Debug(LOG.INFO, CAT.UI_ACTION," update scanlines %s", runner_name)
+	Printer:Debug(LOG.INFO, CAT.UI," update scanlines %s", runner_name)
     local GUI = config.fx_ui
 	if not GUI then return false end
 
@@ -291,6 +306,55 @@ function run_scanlines(runner_name)
 		if y < config.starting_y then y = config.ending_y end
 	end
 	GUI:SetWndPos(vector2():set(x, y))
+
+	-- check acceleration event
+	if config.random_accel then
+		config.accel_event = config.accel_event or get_accel_event(accel_length or 1)
+		if config.accel_event then
+			-- initialize acceleration parameters on first run
+			if config.accel_increment == nil then
+				Printer:Debug(LOG.START, CAT.UI," scanlines %s starting acceleration", runner_name)
+				config.accel_max_cycles = config.accel_event
+				config.accel_min_speed = config.speed * 0.1  -- 10x faster at peak
+				config.accel_speed_range = config.speed - config.accel_min_speed
+			end
+			
+			-- update acceleration cycle
+			config.accel_cycle = config.accel_cycle + config.accel_direction
+			
+			-- reached max speed, start slowing down
+			if config.accel_cycle >= config.accel_max_cycles then
+				Printer:Debug(LOG.INFO, CAT.UI," scanlines %s reached max speed, starting slowdown", runner_name)
+				config.accel_direction = -1
+			end
+			
+			-- completed acceleration cycle, reset to normal speed
+			if config.accel_cycle <= 0 and config.accel_direction == -1 then
+				Printer:Debug(LOG.STOP, CAT.UI," scanlines %s resetting to normal speed %s", runner_name , config.speed)
+				-- reset acceleration
+				config.accel_event = nil
+				config.accel_direction = 1
+				config.accel_cycle = 0
+				config.accel_increment = nil
+				config.accel_max_cycles = nil
+				config.accel_min_speed = nil
+				config.accel_speed_range = nil
+				npe_execution.RunnerUpdate(runner_name, {loop_timer = config.speed})
+				return true
+			end
+			
+			-- calculate exponential speed curve
+			local progress = config.accel_cycle / config.accel_max_cycles
+			local exponential_factor = math.pow(progress, 2)  -- quadratic curve for smoother acceleration
+			local new_speed = config.speed - (config.accel_speed_range * exponential_factor)
+			
+			-- ensure minimum speed limit
+			new_speed = math.max(new_speed, config.accel_min_speed)
+			
+			npe_execution.RunnerUpdate(runner_name, {loop_timer = new_speed})
+			Printer:Debug(LOG.INFO, CAT.UI," scanlines %s cycle %s/%s, speed %s", runner_name, config.accel_cycle, config.accel_max_cycles, new_speed)
+		end
+	end	
 	return true
 end
 
@@ -311,7 +375,7 @@ function on_start_scanlines(runner_name)
 	change_ui_alpha(config.fx_ui, (config.intensity and config.intensity * 255) or SCANLINES_ALPHA)
 	config.fx_ui:SetWndPos(vector2():set(config.margin_h, config.starting_y))
     config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - (config.margin_h + config.margin_h / 2), config.fx_ui:GetHeight() * config.scale))
-	Printer:DebugTable("Scanline Config:", config)
+	Printer:TraceTable("Scanline Config:", config)
 	return true
 end
 
@@ -413,7 +477,7 @@ function run_flickering_manager(runner_name)
 	for _, managed_id in pairs(	Managed[FX.FLICKERING]) do
 		local managed_config = FX_JOBS[managed_id]
 		if not managed_config then return false end
-		Printer:DebugTable("Flickering Manager checking managed fx:", managed_config)
+		Printer:TraceTable("Flickering Manager checking managed fx:", managed_config)
 		
 		-- cannot run if scanline loop is active or it has a cooldown
 		if managed_config.cooldown_value == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
