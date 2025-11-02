@@ -164,6 +164,12 @@ function npcd_dashboard_tab:InitAppsBar()
     self:AddCallback("app_button_" .. APP.DECK, ui_events.BUTTON_CLICKED, self.On_Deck_Button_Clicked, self)
 
     npcd_ui_fx.resume_fx(self.apps_bar_scanline.id)
+
+-- FX: Flickering Manager 
+    local manager = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING_MANAGER)
+    npcd_ui_fx.add_fx(manager)
+    self.flickering_manager = manager
+    npcd_ui_fx.resume_fx(self.flickering_manager.id)
 end
 
 function npcd_dashboard_tab:InitHomePanel()
@@ -204,16 +210,11 @@ function npcd_dashboard_tab:InitNPCSPanel()
     flickering.dialog = scroller_bg
     flickering.flickering_duration = time_global() + math.random(10, 50) * 5 -- in ms
     flickering.speed = 0.02
-    flickering.flickering_cooldown = time_global() + math.random(10, 50) * 5
+    flickering.flickering_cooldown = time_global() + math.random(10, 50) * 100 -- in ms
     npcd_ui_fx.add_fx(flickering)
     self.npcs_scroller_flickering = flickering
 
--- FX: Flickering Manager on NPCS scroller
-    local manager = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING_MANAGER)
-    manager.managed_id = self.npcs_scroller_flickering.id
-    npcd_ui_fx.add_fx(manager)
-    self.npcs_scroller_flickering_manager = manager
-    npcd_ui_fx.resume_fx(self.npcs_scroller_flickering_manager.id)
+    npcd_ui_fx.add_fx_to_manager(flickering.id, self.flickering_manager.id)
 
     xml:InitStatic("npcs_panel:npcs_scroller:scroller", scroller)
     xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", scroller)

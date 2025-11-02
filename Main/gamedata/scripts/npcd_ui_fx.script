@@ -124,7 +124,12 @@ local FX_CONFIG = {
 	},
 	[FX.FLICKERING_MANAGER] = {
 		type = FX.FLICKERING_MANAGER,
-		managed_id = nil,
+		manager_type = FX.FLICKERING,
+	},
+}
+
+local Managed = {
+	[FX.FLICKERING] = {
 	},
 }
 
@@ -145,7 +150,6 @@ function get_fx_config(fx_name)
 end
 
 function add_fx(fx_config)
-	Printer:DebugTable("Adding FX:", fx_config)
 	if not fx_config.type then
 		Printer:Debug(LOG.ERROR, CAT.UI_ACTION," FX type not specified!")
 		return
@@ -164,6 +168,7 @@ function add_fx(fx_config)
 	if fx_config.fx_element and not fx_config.init_on_start then
 		fx_config.fx_ui = xml:InitStatic(fx_config.fx_element, fx_config.dialog)
 	end
+	Printer:DebugTable("Adding FX:", fx_config)
 end
 
 function remove_fx(fx_id)
@@ -195,6 +200,34 @@ function update_fx(fx_id, name, value)
 	if not FX_CONTROLS[fx_job.config.type][name] then return end
 
 	fx_job.config[name] = value
+end
+
+function add_fx_to_manager(fx_id, manager_id)
+	if not FX_JOBS[manager_id] then return end
+	if not FX_JOBS[fx_id] then return end
+	Printer:DebugTable("Adding FX to Manager:", {fx_id = fx_id, manager_id = manager_id})
+	local manager = FX_JOBS[manager_id].config
+	local manager_type = manager.manager_type
+	if not Managed[manager_type] then
+		Managed[manager_type] = {}
+	end
+	Managed[manager_type][fx_id] = fx_id
+end
+
+function remove_fx_from_manager(fx_id, manager_id)
+	if not FX_JOBS[manager_id] then return end
+	local manager = FX_JOBS[manager_id].config
+	local manager_type = manager.manager_type
+	if not Managed[manager_type] then return end
+	Managed[manager_type][fx_id] = nil
+end
+
+function purge_fx_manager(manager_id)
+	if not FX_JOBS[manager_id] then return end
+	local manager = FX_JOBS[manager_id].config
+	local manager_type = manager.manager_type
+	if not Managed[manager_type] then return end
+	Managed[manager_type] = {}
 end
 
 -- FX HANDLERS: SCANLINES
@@ -346,21 +379,23 @@ end
 function run_flickering_manager(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
-	local config = fx_job.config
-
-	local managed_config = FX_JOBS[config.managed_id]
-	if not managed_config then return false end
-	
-	-- cannot run if scanline loop is active or it has a cooldown
-	if managed_config.flickering_cooldown == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
-		-- start caller scanlines loop by chance			
-		local flicker_chance = get_flicker_chance()
-		if flicker_chance > 70 then
-			npe_execution.Resume(managed_config.runner_name)
-		end
-	else
-		if time_global() > managed_config.flickering_cooldown then
-			managed_config.flickering_cooldown = 0
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," running flickering manager %s", runner_name)
+	for _, managed_id in pairs(	Managed[FX.FLICKERING]) do
+		local managed_config = FX_JOBS[managed_id]
+		if not managed_config then return false end
+		Printer:DebugTable("Flickering Manager checking managed fx:", managed_config)
+		
+		-- cannot run if scanline loop is active or it has a cooldown
+		if managed_config.flickering_cooldown == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
+			-- start caller scanlines loop by chance			
+			local flicker_chance = get_flicker_chance()
+			if flicker_chance > 70 then
+				npe_execution.Resume(managed_config.runner_name)
+			end
+		else
+			if time_global() > managed_config.flickering_cooldown then
+				managed_config.flickering_cooldown = 0
+			end
 		end
 	end
 end
@@ -370,18 +405,24 @@ function on_stop_flickering_manager(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.dialog then return end
-	npe_execution.Stop(config.managed_id)
+	for _, managed_id in pairs(	Managed[FX.FLICKERING]) do
+		local managed_config = FX_JOBS[managed_id]
+		if not managed_config then return false end
+		-- stop caller flickering loop
+		npe_execution.Stop(managed_config.runner_name)
+	end
 	return true
 end
 
 function on_start_flickering_manager(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
-	local config = fx_job.config
-
-	local managed_config = FX_JOBS[config.managed_id]
-	if not managed_config then return false end
-
-	managed_config.flickering_cooldown = 0
+	Printer:Debug(LOG.START, CAT.UI_ACTION," starting flickering manager %s", runner_name)
+	for _, managed_id in pairs(	Managed[FX.FLICKERING]) do
+		local managed_config = FX_JOBS[managed_id]
+		if not managed_config then return false end
+		-- initialize flickering cooldown
+		managed_config.flickering_cooldown = 0
+	end
 	return true
 end
