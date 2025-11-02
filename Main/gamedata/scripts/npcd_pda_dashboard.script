@@ -94,6 +94,12 @@ function npcd_dashboard_tab:InitControls()
 	self:SetWndRect(Frect():set(0, 0, 1024, 768))
 	
 
+-- FX Managers
+-- FX: Flickering Manager 
+    local manager = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING_MANAGER)
+    npcd_ui_fx.add_fx(manager)
+    self.flickering_manager = manager
+
     -- Apps Bar
     self:InitAppsBar()
     xml:InitStatic("left_side", self)
@@ -109,6 +115,7 @@ function npcd_dashboard_tab:InitControls()
     -- Footer
     self.footer = xml:InitStatic("footer", self)
 
+    npcd_ui_fx.resume_fx(self.flickering_manager.id)
 end
 
 function npcd_dashboard_tab:InitAppsBar()
@@ -123,10 +130,23 @@ function npcd_dashboard_tab:InitAppsBar()
     scanlines.speed = 0.04
     scanlines.orientation = 1
     scanlines.scale = 3
-    scanlines.intensity = 0.4
+    scanlines.margin_v = 5
+    scanlines.intensity = 0.3
     npcd_ui_fx.add_fx(scanlines)
     self.apps_bar_scanline = scanlines
 
+-- FX: FLickering on scanline
+    local scanline_flicker = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
+    local scanline_ui = npcd_ui_fx.get_fx_ui(scanlines.id)
+    scanline_flicker.dialog = scanline_ui
+    scanline_flicker.speed = 0.05
+    scanline_flicker.intensity = 0.3
+    scanline_flicker.max_intensity = 0.6
+    scanline_flicker.random_duration = {"npcd_pda_dashboard", "npcs_scroller_glitch_duration"}
+    scanline_flicker.random_cooldown = {"npcd_pda_dashboard", "npcs_scroller_glitch_cooldown"}
+    npcd_ui_fx.add_fx(scanline_flicker)
+    npcd_ui_fx.add_fx_to_manager(scanline_flicker.id, self.flickering_manager and self.flickering_manager.id or nil)
+    self.apps_bar_scanline_flickering = scanline_flicker
 -- FX: Flickering on Apps Bar
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     flickering.dialog = background
@@ -165,12 +185,6 @@ function npcd_dashboard_tab:InitAppsBar()
     self:AddCallback("app_button_" .. APP.DECK, ui_events.BUTTON_CLICKED, self.On_Deck_Button_Clicked, self)
 
     npcd_ui_fx.resume_fx(self.apps_bar_scanline.id)
-
--- FX: Flickering Manager 
-    local manager = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING_MANAGER)
-    npcd_ui_fx.add_fx(manager)
-    self.flickering_manager = manager
-    npcd_ui_fx.resume_fx(self.flickering_manager.id)
 end
 
 function npcd_dashboard_tab:InitHomePanel()

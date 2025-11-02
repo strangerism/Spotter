@@ -120,7 +120,8 @@ local FX_CONFIG = {
 		flickering_cooldown = nil,
 		random_cooldown = false,
 		cooldown_value = 0,
-		intensity = nil, 
+		intensity = nil,
+		max_intensity = nil,
 		speed = nil,
 		fx_ui = nil,
 		fx_element = nil,
@@ -204,6 +205,12 @@ function update_fx(fx_id, name, value)
 	if not FX_CONTROLS[fx_job.config.type][name] then return end
 
 	fx_job.config[name] = value
+end
+
+function get_fx_ui(fx_id)
+	local fx_job = FX_JOBS[fx_id]
+	if not fx_job then return nil end
+	return fx_job.config.fx_ui
 end
 
 function add_fx_to_manager(fx_id, manager_id)
@@ -342,7 +349,7 @@ function on_start_flickering(runner_name)
 			config.flickering_duration = duration
 		end
 	end
-	change_ui_alpha(config.fx_ui, FLICKERING_ALPHA)
+	change_ui_alpha(config.fx_ui, config.max_intensity and config.max_intensity * 255 or FLICKERING_ALPHA)
 	-- signal successful execution of start functor
 	return true
 end
@@ -355,7 +362,7 @@ function on_stop_flickering(runner_name)
 	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping caller_flickering loop for %s", runner_name)
 
 	-- ending the flickering effect by restoring default alpha and visibility, also setting cooldown for a flickering manager if used
-	change_ui_alpha(config.fx_ui, DEFAULT_ALPHA)
+	change_ui_alpha(config.fx_ui, config.intensity and config.intensity * 255 or DEFAULT_ALPHA)
 	config.fx_ui:Show(true)
 	config.flickering_duration = nil
 
