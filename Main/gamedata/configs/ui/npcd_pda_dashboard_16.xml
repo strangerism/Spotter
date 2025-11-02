@@ -110,7 +110,7 @@
 			<scroller x="10" y="30" width="125" height="380" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_frame</texture>
 			</scroller>	
-			<scroller_bg x="10" y="33" width="125" height="375" stretch="1">
+			<scroller_bg x="15" y="40" width="115" height="360" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_bg</texture>
 			</scroller_bg>				
 			<anchor_bottom x="0" y="380" width="60" height="45" stretch="1">
