@@ -1,0 +1,229 @@
+local npcdu = npcd_utils
+
+function get_printer()
+	if not Printer then
+		Printer = npcd_logging.get_printer("npcd_ui_fx")
+	end 
+	LOG = Printer:GetLogTypes()
+	CAT = Printer:GetLogCategories()
+end
+RegisterScriptCallback("npcd_on_log_update", get_printer)
+
+Runner ={
+    showing = {
+        name = "showing",
+        module = "npe_dialog_codec",
+		group_name = "codec_ui",
+		execution = npe_execution.TYPE.CONDITIONAL,
+		stop_condition = { "npe_dialog_codec", "portrait_showing_completed", "actor" },
+        start_timer = 0.15,
+        loop_timer = 0.0,        
+        functor = { "npe_dialog_codec", "show_portrait", "actor" },
+		start = { "npe_dialog_codec", "on_start_show_portrait", "actor" },
+		stop = { "npe_dialog_codec", "on_stop_show_portrait", "actor" },
+    },	
+    hiding = {
+        name = "hiding",
+        module = "npe_dialog_codec",
+		group_name = "codec_ui",
+		execution = npe_execution.TYPE.CONDITIONAL,
+		stop_condition = { "npe_dialog_codec", "portrait_hiding_completed", "caller" },
+        start_timer = 0.6,
+        loop_timer = 0.0,      
+        functor = { "npe_dialog_codec", "hide_portrait", "caller" },
+		start = { "npe_dialog_codec", "on_start_hide_portrait", "caller" },
+		stop = { "npe_dialog_codec", "on_stop_hide_portrait", "caller" },
+    },		
+    flickering = {
+        name = "flickering",
+        module = "npe_dialog_codec",
+		group_name = "codec_ui",
+		execution = npe_execution.TYPE.CONDITIONAL,
+		stop_condition = { "npe_dialog_codec", "portrait_flickering_duration_ended", "caller" },
+        start_timer = 0.015,
+        loop_timer = 0.015,      
+        functor = { "npe_dialog_codec", "run_portrait_flickering", "caller" },
+		start = { "npe_dialog_codec", "on_start_portrait_flickering", "caller" },
+		stop = { "npe_dialog_codec", "on_stop_portrait_flickering", "caller" },
+    },
+    flickering_manager = {
+        name = "flickering_manager",
+		module = "npe_dialog_codec",
+		group_name = "codec_ui",
+		execution = npe_execution.TYPE.INFINITE,
+        start_timer = 1,
+        loop_timer = 1,      
+        functor = { "npe_dialog_codec", "run_portraits_flickering_manager" },
+		start = { "npe_dialog_codec", "on_start_portraits_flickering_manager" },
+		stop = { "npe_dialog_codec", "on_stop_portraits_flickering_manager" },
+    },
+	wide_scanlines = {
+		name = "wide_scanlines",
+		module = "npe_dialog_codec",
+		group_name = "codec_ui",
+		execution = npe_execution.TYPE.INFINITE,
+		start_timer = 0.5,
+		loop_timer = 0.04,
+		functor = { "npe_dialog_codec", "run_portrait_wide_scanlines" },
+		start = { "npe_dialog_codec", "on_start_portrait_wide_scanlines" },
+	},
+	scanlines = {
+		name = "scanlines",
+		module = "npcd_ui_fx",
+		group_name = "npcd_ui_fx",
+		execution = npe_execution.TYPE.INFINITE,
+		start_timer = 0.1,
+		loop_timer = 0.04,
+		functor = { "npcd_ui_fx", "scanlines" },
+		start = { "npcd_ui_fx", "on_start_scanlines" },
+	},
+}
+
+FX = {
+	SHOWING = "showing",
+	HIDING = "hiding",
+	FLICKERING = "flickering",
+	FLICKERING_MANAGER = "flickering_manager",
+	WIDE_SCANLINES = "wide_scanlines",
+	SCANLINES = "scanlines",
+}
+
+local FX_CONFIG = {
+	[FX.SHOWING] = {
+	},
+	[FX.HIDING] = {
+	},
+	[FX.FLICKERING] = {
+	},
+	[FX.FLICKERING_MANAGER] = {
+	},
+	[FX.WIDE_SCANLINES] = {
+	},
+	[FX.SCANLINES] = {
+		type = FX.SCANLINES,
+		scanline = nil,
+		dialog = nil,
+		start = 0.0,
+		speed = 1.0,
+		orientation = 1, -- 0 - horizontal, 1 - vertical
+		argb = {150, 255, 255, 255},
+		margin_v = 0,
+		margin_h = 0,
+		direction = 1, -- 1 - in, -1 - out
+		start_x = nil,
+		start_y = nil,
+		fx_ui = nil,
+		fx_element = "scanline",
+		init_on_start = false,
+	},
+}
+
+local FX_CONTROLS = {
+	[FX.SCANLINES] = {
+		direction = true
+	}
+}
+
+local FX_JOBS = {
+}
+
+local xml = CScriptXmlInit()
+xml:ParseFile("ui_npcd_fx.xml")
+
+function get_fx_config(fx_name)
+	return npcdu.copy(FX_CONFIG[fx_name])
+end
+
+function add_fx(fx_config)
+	Printer:DebugTable("Adding FX:", fx_config)
+	local fx_id = fx_config.type .. "_" .. tostring(math.random(10000, 99999))
+	local new_runner = npcdu.copy(Runner[fx_config.type])
+	new_runner.name = fx_id
+	new_runner.start_timer = fx_config.start or new_runner.start_timer
+	new_runner.loop_timer = fx_config.speed or new_runner.loop_timer
+	FX_JOBS[fx_id] = {
+		runner_name = fx_id,
+		config = fx_config,
+	}
+	npe_execution.Add(new_runner)
+	fx_config.id = fx_id
+	if not fx_config.init_on_start then
+		fx_config.fx_ui = xml:InitStatic(fx_config.fx_element, fx_config.dialog)
+	end
+end
+
+function remove_fx(fx_id)
+	local fx_job = FX_JOBS[fx_id]
+	if fx_job then
+		npe_execution.Remove(fx_job.runner_name)
+		FX_JOBS[fx_id] = nil
+	end
+end
+
+function stop_fx(fx_id)
+	local fx_job = FX_JOBS[fx_id]
+	if fx_job then
+		npe_execution.Stop(fx_job.runner_name)
+		FX_JOBS[fx_id] = nil
+	end
+end
+
+function resume_fx(fx_id)
+	local fx_job = FX_JOBS[fx_id]
+	if fx_job then
+		npe_execution.Resume(fx_job.runner_name)
+	end
+end
+
+function update_fx(fx_id, name, value)
+	local fx_job = FX_JOBS[fx_id]
+	if not fx_job then return end
+	if not FX_CONTROLS[fx_job.config.type][name] then return end
+
+	fx_job.config[name] = value
+end
+
+-- FX HANDLERS: SCANLINES
+
+function scanlines(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	Printer:Debug(LOG.INFO, CAT.UI," update scanlines %s", runner_name)
+    local GUI = config.fx_ui
+	if not GUI then return false end
+
+	local y = GUI:GetWndPos().y
+	local x = GUI:GetWndPos().x
+	-- update scanlines
+	if orientation == 0 then
+		x = x + config.direction
+		if x > config.ending_x then x = config.starting_x end
+		if x < config.starting_x then x = config.ending_x end
+	else 
+		y = y + config.direction
+		if y > config.ending_y then y = config.starting_y end
+		if y < config.starting_y then y = config.ending_y end
+	end
+	GUI:SetWndPos(vector2():set(x, y))
+	return true
+end
+
+function on_start_scanlines(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.dialog then return end
+	Printer:Debug(LOG.INFO, CAT.UI," on_start_scanlines %s", runner_name)
+
+	config.starting_y = config.margin_v
+	config.ending_y = config.dialog:GetHeight() - config.margin_v
+
+	if config.init_on_start then
+		config.fx_ui = xml:InitStatic(config.fx_element, config.dialog)
+	end
+	-- config.scanline:SetColor(GetARGB(config.argb[1], config.argb[2], config.argb[3], config.argb[4]))
+    config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - config.margin_h, config.fx_ui:GetHeight()))
+	Printer:DebugTable("Scanline Config:", config)
+	return true
+end

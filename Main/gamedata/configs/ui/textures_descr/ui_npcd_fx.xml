@@ -1,0 +1,7 @@
+<w>	
+    <file name ="ui\npcd\ui_fx">
+		<texture id = "ui_npcd_codec_750" x="0" y="0" width="750" height="422" />
+		<texture id = "ui_npcd_codec_750_scanline" x="530" y="192" width="136" height="1" />
+		<texture id = "ui_npcd_codec_750_band" x="268" y="60" width="1" height="12" />
+	</file>  
+</w>    

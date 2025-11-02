@@ -21,100 +21,6 @@ if not mac_mcm then
     end
 end
 
--- NPE Runners for animations
-
-Runner ={
-    npc_portrait_showing = {
-        name = "npc_portrait_showing",
-        module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.CONDITIONAL,
-		stop_condition = { "npe_dialog_codec", "portrait_showing_completed", "actor" },
-        start_timer = 0.15,
-        loop_timer = 0.0,        
-        functor = { "npe_dialog_codec", "show_portrait", "actor" },
-		start = { "npe_dialog_codec", "on_start_show_portrait", "actor" },
-		stop = { "npe_dialog_codec", "on_stop_show_portrait", "actor" },
-    },	
-    npc_portrait_hiding = {
-        name = "npc_portrait_hiding",
-        module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.CONDITIONAL,
-		stop_condition = { "npe_dialog_codec", "portrait_hiding_completed", "caller" },
-        start_timer = 0.6,
-        loop_timer = 0.0,      
-        functor = { "npe_dialog_codec", "hide_portrait", "caller" },
-		start = { "npe_dialog_codec", "on_start_hide_portrait", "caller" },
-		stop = { "npe_dialog_codec", "on_stop_hide_portrait", "caller" },
-    },		
-    npc_portrait_flickering = {
-        name = "npc_portrait_flickering",
-        module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.CONDITIONAL,
-		stop_condition = { "npe_dialog_codec", "portrait_flickering_duration_ended", "caller" },
-        start_timer = 0.015,
-        loop_timer = 0.015,      
-        functor = { "npe_dialog_codec", "run_portrait_flickering", "caller" },
-		start = { "npe_dialog_codec", "on_start_portrait_flickering", "caller" },
-		stop = { "npe_dialog_codec", "on_stop_portrait_flickering", "caller" },
-    },
-    portraits_flickering_manager = {
-        name = "portraits_flickering_manager",
-		module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.INFINITE,
-        start_timer = 1,
-        loop_timer = 1,      
-        functor = { "npe_dialog_codec", "run_portraits_flickering_manager" },
-		start = { "npe_dialog_codec", "on_start_portraits_flickering_manager" },
-		stop = { "npe_dialog_codec", "on_stop_portraits_flickering_manager" },
-    },
-	npc_portrait_scanlines = {
-		name = "npc_portrait_scanlines",
-		module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.INFINITE,
-		start_timer = 0.5,
-		loop_timer = 0.015,
-		functor = { "npe_dialog_codec", "run_portrait_scanlines" },
-		start = { "npe_dialog_codec", "on_start_portrait_scanlines" },
-	},
-	npc_portrait_wide_scanlines = {
-		name = "npc_portrait_wide_scanlines",
-		module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.INFINITE,
-		start_timer = 0.5,
-		loop_timer = 0.04,
-		functor = { "npe_dialog_codec", "run_portrait_wide_scanlines" },
-		start = { "npe_dialog_codec", "on_start_portrait_wide_scanlines" },
-	},
-	npcs_scroller_scanlines = {
-		name = "npcs_scroller_scanlines",
-		module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.INFINITE,
-		start_timer = 0.5,
-		loop_timer = 0.015,
-		functor = { "npe_dialog_codec", "run_portrait_scanlines" },
-		start = { "npe_dialog_codec", "on_start_portrait_scanlines" },
-	},
-	npc_appbar_scanlines = {
-		name = "npc_appbar_scanlines",
-		module = "npcd_pda_dashboard",
-		group_name = "npcd_pda_dashboard_ui",
-		execution = npe_execution.TYPE.INFINITE,
-		start_timer = 0.1,
-		loop_timer = 0.04,
-		functor = { "npcd_pda_dashboard", "npc_appbar_scanlines" },
-		start = { "npcd_pda_dashboard", "on_start_npc_appbar_scanlines" },
-	},         
-}
-
-
-
 
 local xml = CScriptXmlInit()
 
@@ -122,34 +28,6 @@ local SINGLETON = nil
 function get_ui()
 	SINGLETON = SINGLETON or npcd_dashboard_tab()
 	return SINGLETON
-end
-
--- Animations: NPC Appbar Scanlines
-
-local starting_y
-local ending_y
-local direction = 1
-function npc_appbar_scanlines()
-	Printer:Debug(LOG.INFO, CAT.UI," npc_appbar_scanlines")
-    local GUI = npcd_pda_dashboard.get_ui()
-	if not GUI then return false end
-	-- update scanlines
-	local x = GUI.apps_bar_scanline:GetWndPos().x
-	local y = GUI.apps_bar_scanline:GetWndPos().y
-	y = y + direction
-	if y > ending_y then y = starting_y end
-    if y < starting_y then y = ending_y end
-	GUI.apps_bar_scanline:SetWndPos(vector2():set(x, y))
-end
-
-function on_start_npc_appbar_scanlines()
-	Printer:Debug(LOG.INFO, CAT.UI," on_start_npc_appbar_scanlines")
-    local GUI = npcd_pda_dashboard.get_ui()
-	if not GUI then return end
-	starting_y = 20
-	ending_y = GUI.apps_bar:GetHeight() - 20
-    GUI.apps_bar_scanline:SetWndSize(vector2():set(GUI.apps_bar:GetWidth() - 30, GUI.apps_bar_scanline:GetHeight()))
-	return true
 end
 
 -- APP
@@ -237,8 +115,18 @@ function npcd_dashboard_tab:InitAppsBar()
 
     self.apps_bar = xml:InitStatic("apps_bar", self)
     xml:InitStatic("apps_bar:background", self.apps_bar)
-    self.apps_bar_scanline = xml:InitStatic("apps_bar:scanline", self.apps_bar)
-    
+
+    -- FX: Scanlines on Apps Bar
+    local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
+    scanlines.dialog = self.apps_bar
+    scanlines.start =  0
+    scanlines.speed = 0.04
+    scanlines.margin_v = 20
+    scanlines.margin_h = 30
+    scanlines.orientation = 1
+    npcd_ui_fx.add_fx(scanlines)
+    self.apps_bar_scanline = scanlines
+
     self.app = {}
     self.app[APP.NPCS] = {}
     self.app[APP.NPCS].tab = xml:InitStatic("apps_bar:npcs", self.apps_bar)
@@ -269,8 +157,7 @@ function npcd_dashboard_tab:InitAppsBar()
     self:AddCallback("app_button_" .. APP.PERKS, ui_events.BUTTON_CLICKED, self.On_Perks_Button_Clicked, self)
     self:AddCallback("app_button_" .. APP.DECK, ui_events.BUTTON_CLICKED, self.On_Deck_Button_Clicked, self)
 
-    npe_execution.Add(Runner.npc_appbar_scanlines)
-    npe_execution.Resume(Runner.npc_appbar_scanlines.name)
+    npcd_ui_fx.resume_fx(self.apps_bar_scanline.id)
 end
 
 function npcd_dashboard_tab:InitHomePanel()
@@ -327,7 +214,7 @@ function npcd_dashboard_tab:ActivateAppPanel(app_name)
     UI_APP[app_name].active = true
     self.app_panel = UI_APP[app_name].dialog
     self.app_panel:Show(true)
-    direction = direction * -1
+    self.apps_bar_scanline.direction = self.apps_bar_scanline.direction * -1
 end
 
 function npcd_dashboard_tab:On_NPCS_Button_Clicked()
