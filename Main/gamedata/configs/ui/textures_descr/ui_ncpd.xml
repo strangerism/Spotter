@@ -30,11 +30,11 @@
 		<texture id="ui_npcd_pda_dashboard_panel_bg" x="182" y="79" width="580" height="300" />
 		<texture id="ui_npcd_pda_dashboard_panel_left_shoulder" x="173" y="79" width="9" height="300" />
 		<texture id="ui_npcd_pda_dashboard_panel_right_shoulder" x="762" y="79" width="9" height="300" />
-		<texture id="ui_npcd_pda_dashboard_vseparator" x="772" y="82" width="9" height="300" />
+		<texture id="ui_npcd_pda_dashboard_vseparator" x="772" y="82" width="13" height="304" />
 		<texture id="ui_npcd_pda_dashboard_vseparator_dark_1" x="153" y="71" width="9" height="326" />
 		<texture id="ui_npcd_pda_dashboard_vseparator_dark_2" x="1" y="71" width="9" height="326" />
-		<texture id="ui_npcd_pda_dashboard_vsidescroll_frame" x="0" y="71" width="161" height="326" />
-		<texture id="ui_npcd_pda_dashboard_vsidescroll_bg" x="782" y="82" width="144" height="308" />
+		<texture id="ui_npcd_pda_dashboard_vsidescroll_frame" x="0" y="71" width="171" height="336" />
+		<texture id="ui_npcd_pda_dashboard_vsidescroll_bg" x="790" y="82" width="144" height="308" />
 		<texture id="ui_npcd_pda_dashboard_vsidescroll_dirt" x="301" y="442" width="144" height="308" />
 		<texture id="ui_npcd_pda_dashboard_app_tab_l" x="8" y="9" width="70" height="43" />
 		<texture id="ui_npcd_pda_dashboard_app_tab_button_d" x="776" y="486" width="110" height="43" />

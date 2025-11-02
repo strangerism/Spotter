@@ -208,7 +208,7 @@ function npcd_dashboard_tab:InitNPCSPanel()
     scanlines.dialog = scroller_bg
     scanlines.speed = 0.025
     scanlines.margin_v = -5
-    scanlines.margin_h = 10
+    scanlines.margin_h = 0
     scanlines.orientation = 1
     npcd_ui_fx.add_fx(scanlines)
     self.npcs_scroller_scanline = scanlines
