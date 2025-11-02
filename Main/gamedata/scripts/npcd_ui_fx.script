@@ -102,7 +102,7 @@ local FX_CONFIG = {
 		speed = nil,
 		orientation = 1, -- 0 - horizontal, 1 - vertical
 		scale = 1.0,
-		argb = {150, 255, 255, 255},
+		intensity = nil, -- 0 to 1
 		margin_v = 0,
 		margin_h = 0,
 		direction = 1, -- 1 - in, -1 - out
@@ -120,7 +120,7 @@ local FX_CONFIG = {
 		flickering_cooldown = nil,
 		random_cooldown = false,
 		cooldown_value = 0,
-		intensity = nil,
+		intensity = nil, 
 		speed = nil,
 		fx_ui = nil,
 		fx_element = nil,
@@ -234,6 +234,33 @@ function purge_fx_manager(manager_id)
 	Managed[manager_type] = {}
 end
 
+-- FX HANDLERS UTILITIES
+
+local DEFAULT_ALPHA = 220
+local FLICKERING_ALPHA = 180
+local SCANLINES_ALPHA = 100
+local clr_cache = {}
+
+local function change_alpha(clr, a)
+    if not (clr and a ) then return end
+
+    if not clr_cache[clr .. "_" .. a] then
+        b = bit.band(clr, 255)
+        g = bit.band(bit.rshift(clr, 8), 255)
+        r = bit.band(bit.rshift(clr, 16), 255)
+        clr_cache[clr .. "_" .. a] = GetARGB(a, r, g, b)
+    end
+
+    return clr_cache[clr .. "_" .. a]
+end
+
+function change_ui_alpha(ui_element, a)
+	if not ui_element then return end
+	local clr = ui_element:GetTextureColor()
+	change_alpha(clr, a)
+	ui_element:SetTextureColor(clr_cache[clr .. "_" .. a])
+end
+
 -- FX HANDLERS: SCANLINES
 
 function run_scanlines(runner_name)
@@ -273,7 +300,8 @@ function on_start_scanlines(runner_name)
 	if config.init_on_start then
 		config.fx_ui = xml:InitStatic(config.fx_element, config.dialog)
 	end
-	-- config.scanline:SetColor(GetARGB(config.argb[1], config.argb[2], config.argb[3], config.argb[4]))
+
+	change_ui_alpha(config.fx_ui, (config.intensity and config.intensity * 255) or SCANLINES_ALPHA)
 	config.fx_ui:SetWndPos(vector2():set(config.margin_h, config.starting_y))
     config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - (config.margin_h + config.margin_h / 2), config.fx_ui:GetHeight() * config.scale))
 	Printer:DebugTable("Scanline Config:", config)
@@ -281,29 +309,6 @@ function on_start_scanlines(runner_name)
 end
 
 -- FX HANDLERS: FLICKERING
-local DEFAULT_ALPHA = 220
-local FLICKERING_ALPHA = 180
-local clr_cache = {}
-
-local function change_alpha(clr, a)
-    if not (clr and a ) then return end
-
-    if not clr_cache[clr .. "_" .. a] then
-        b = bit.band(clr, 255)
-        g = bit.band(bit.rshift(clr, 8), 255)
-        r = bit.band(bit.rshift(clr, 16), 255)
-        clr_cache[clr .. "_" .. a] = GetARGB(a, r, g, b)
-    end
-
-    return clr_cache[clr .. "_" .. a]
-end
-
-function change_ui_alpha(ui_element, a)
-	if not ui_element then return end
-	local clr = ui_element:GetTextureColor()
-	change_alpha(clr, a)
-	ui_element:SetTextureColor(clr_cache[clr .. "_" .. a])
-end
 
 function run_flickering(runner_name)
 	local fx_job = FX_JOBS[runner_name]
