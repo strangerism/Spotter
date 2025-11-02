@@ -117,7 +117,7 @@ function npcd_dashboard_tab:InitAppsBar()
     local background = xml:InitStatic("apps_bar:background", self.apps_bar)
     xml:InitStatic("apps_bar:frame", self.apps_bar)
     
-    -- FX: Scanlines on Apps Bar
+-- FX: Scanlines on Apps Bar
     local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
     scanlines.dialog = background
     scanlines.speed = 0.04
@@ -125,10 +125,9 @@ function npcd_dashboard_tab:InitAppsBar()
     npcd_ui_fx.add_fx(scanlines)
     self.apps_bar_scanline = scanlines
 
-    -- FX: Flickering on Apps Bar
+-- FX: Flickering on Apps Bar
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     flickering.dialog = background
-    flickering.flickering_duration = time_global() + math.random(10, 50) * 5 -- in ms
     flickering.speed = 0.02
     npcd_ui_fx.add_fx(flickering)
     self.apps_bar_flickering = flickering
@@ -181,6 +180,14 @@ function npcd_dashboard_tab:InitHomePanel()
     UI_APP[APP.HOME].dialog:Show(false)
 end
 
+function npcs_scroller_glitch_duration()
+    return time_global() + math.random(10, 50) * 5
+end
+
+function npcs_scroller_glitch_cooldown()
+    return time_global() + math.random(10, 50) * 100
+end
+
 function npcd_dashboard_tab:InitNPCSPanel()
     -- NPCS Panel
     UI_APP[APP.NPCS].active = false
@@ -208,9 +215,9 @@ function npcd_dashboard_tab:InitNPCSPanel()
 -- FX: Flickering on NPCS scroller
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     flickering.dialog = scroller_bg
-    flickering.flickering_duration = time_global() + math.random(10, 50) * 5 -- in ms
+    flickering.random_duration = {"npcd_pda_dashboard", "npcs_scroller_glitch_duration"}
     flickering.speed = 0.02
-    flickering.flickering_cooldown = time_global() + math.random(10, 50) * 100 -- in ms
+    flickering.random_cooldown = {"npcd_pda_dashboard", "npcs_scroller_glitch_cooldown"}
     npcd_ui_fx.add_fx(flickering)
     self.npcs_scroller_flickering = flickering
 

@@ -115,7 +115,10 @@ local FX_CONFIG = {
 		type = FX.FLICKERING,
 		dialog = nil,
 		flickering_duration = nil,
-		flickering_cooldown = 0,
+		random_duration = false,
+		flickering_cooldown = nil,
+		random_cooldown = false,
+		cooldown_value = 0,
 		intensity = nil,
 		speed = nil,
 		fx_ui = nil,
@@ -326,6 +329,13 @@ function on_start_flickering(runner_name)
 	-- starting the flickering effect by setting duration and new alpha
 	-- duration can be preset in config or calculated here
 	config.flickering_duration = config.flickering_duration or (time_global() + math.random(10, 50) * 5)
+	if config.random_duration then
+		-- execute custom random duration functor
+		local duration = execute_func(unpack(config.random_duration))
+		if duration and type(duration) == "number" then
+			config.flickering_duration = duration
+		end
+	end
 	change_ui_alpha(config.fx_ui, FLICKERING_ALPHA)
 	-- signal successful execution of start functor
 	return true
@@ -344,7 +354,14 @@ function on_stop_flickering(runner_name)
 	config.flickering_duration = nil
 
 	-- used when flickering is managed by a flickering manager
-	config.flickering_cooldown = time_global() + math.random(1, 10) * 500
+	config.cooldown_value = config.flickering_cooldown or (time_global() + math.random(10, 50) * 100)
+	if config.random_cooldown then
+		-- execute custom random cooldown functor
+		local cooldown = execute_func(unpack(config.random_cooldown))
+		if cooldown and type(cooldown) == "number" then
+			config.cooldown_value = time_global() + cooldown
+		end
+	end
 	-- signal successful execution of stop functor
 	return true
 end
@@ -386,15 +403,15 @@ function run_flickering_manager(runner_name)
 		Printer:DebugTable("Flickering Manager checking managed fx:", managed_config)
 		
 		-- cannot run if scanline loop is active or it has a cooldown
-		if managed_config.flickering_cooldown == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
+		if managed_config.cooldown_value == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
 			-- start caller scanlines loop by chance			
 			local flicker_chance = get_flicker_chance()
 			if flicker_chance > 70 then
 				npe_execution.Resume(managed_config.runner_name)
 			end
 		else
-			if time_global() > managed_config.flickering_cooldown then
-				managed_config.flickering_cooldown = 0
+			if time_global() > managed_config.cooldown_value then
+				managed_config.cooldown_value = 0
 			end
 		end
 	end
@@ -422,7 +439,7 @@ function on_start_flickering_manager(runner_name)
 		local managed_config = FX_JOBS[managed_id]
 		if not managed_config then return false end
 		-- initialize flickering cooldown
-		managed_config.flickering_cooldown = 0
+		managed_config.cooldown_value = 0
 	end
 	return true
 end
