@@ -188,20 +188,35 @@ function npcd_dashboard_tab:InitNPCSPanel()
 
     local scroller = xml:InitStatic("npcs_panel:npcs_scroller", UI_APP[APP.NPCS].dialog)
     xml:InitStatic("npcs_panel:npcs_scroller:anchor_top", scroller)
-    xml:InitStatic("npcs_panel:npcs_scroller:scroller", scroller)
-    xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", scroller)
+    local scroller_bg = xml:InitStatic("npcs_panel:npcs_scroller:scroller_bg", scroller)
 
-    -- FX: Scanlines on NPCS Panel
+-- FX: Scanlines on NPCS scroller
     local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
-    scanlines.dialog = scroller
-    scanlines.start =  0
+    scanlines.dialog = scroller_bg
     scanlines.speed = 0.025
-    scanlines.margin_v = 45
-    scanlines.margin_h = 17
+    scanlines.margin_h = 10
     scanlines.orientation = 1
     npcd_ui_fx.add_fx(scanlines)
     self.npcs_scroller_scanline = scanlines
 
+-- FX: Flickering on NPCS scroller
+    local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
+    flickering.dialog = scroller_bg
+    flickering.flickering_duration = time_global() + math.random(10, 50) * 5 -- in ms
+    flickering.speed = 0.02
+    flickering.flickering_cooldown = time_global() + math.random(10, 50) * 5
+    npcd_ui_fx.add_fx(flickering)
+    self.npcs_scroller_flickering = flickering
+
+-- FX: Flickering Manager on NPCS scroller
+    local manager = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING_MANAGER)
+    manager.managed_id = self.npcs_scroller_flickering.id
+    npcd_ui_fx.add_fx(manager)
+    self.npcs_scroller_flickering_manager = manager
+    npcd_ui_fx.resume_fx(self.npcs_scroller_flickering_manager.id)
+
+    xml:InitStatic("npcs_panel:npcs_scroller:scroller", scroller)
+    xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", scroller)
     UI_APP[APP.NPCS].dialog:Show(false)
 end
 

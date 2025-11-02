@@ -34,17 +34,6 @@ Runner ={
 		start = { "npe_dialog_codec", "on_start_hide_portrait", "caller" },
 		stop = { "npe_dialog_codec", "on_stop_hide_portrait", "caller" },
     },		
-    flickering_manager = {
-        name = "flickering_manager",
-		module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.INFINITE,
-        start_timer = 1,
-        loop_timer = 1,      
-        functor = { "npe_dialog_codec", "run_portraits_flickering_manager" },
-		start = { "npe_dialog_codec", "on_start_portraits_flickering_manager" },
-		stop = { "npe_dialog_codec", "on_stop_portraits_flickering_manager" },
-    },
 	wide_scanlines = {
 		name = "wide_scanlines",
 		module = "npe_dialog_codec",
@@ -77,6 +66,17 @@ Runner ={
 		start = { "npcd_ui_fx", "on_start_flickering" },
 		stop = { "npcd_ui_fx", "on_stop_flickering" },
     },
+    flickering_manager = {
+        name = "flickering_manager",
+		module = "npcd_ui_fx",
+		group_name = "npcd_ui_fx",
+		execution = npe_execution.TYPE.INFINITE,
+        start_timer = 1,
+        loop_timer = 1,
+        functor = { "npcd_ui_fx", "run_flickering_manager" },
+		start = { "npcd_ui_fx", "on_start_flickering_manager" },
+		stop = { "npcd_ui_fx", "on_stop_flickering_manager" },
+    },
 }
 
 FX = {
@@ -92,8 +92,6 @@ local FX_CONFIG = {
 	[FX.SHOWING] = {
 	},
 	[FX.HIDING] = {
-	},
-	[FX.FLICKERING_MANAGER] = {
 	},
 	[FX.WIDE_SCANLINES] = {
 	},
@@ -124,6 +122,10 @@ local FX_CONFIG = {
 		fx_element = nil,
 		init_on_start = false,
 	},
+	[FX.FLICKERING_MANAGER] = {
+		type = FX.FLICKERING_MANAGER,
+		managed_id = nil,
+	},
 }
 
 local FX_CONTROLS = {
@@ -144,7 +146,7 @@ end
 
 function add_fx(fx_config)
 	Printer:DebugTable("Adding FX:", fx_config)
-	if not fx_config.type or not fx_config.dialog then
+	if not fx_config.type then
 		Printer:Debug(LOG.ERROR, CAT.UI_ACTION," FX type not specified!")
 		return
 	end
@@ -236,7 +238,7 @@ function on_start_scanlines(runner_name)
 	end
 	-- config.scanline:SetColor(GetARGB(config.argb[1], config.argb[2], config.argb[3], config.argb[4]))
 	config.fx_ui:SetWndPos(vector2():set(config.margin_h, config.starting_y))
-    config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - config.margin_h, config.fx_ui:GetHeight()))
+    config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - (config.margin_h + config.margin_h / 2), config.fx_ui:GetHeight()))
 	Printer:DebugTable("Scanline Config:", config)
 	return true
 end
@@ -325,4 +327,61 @@ function flickering_duration_ended(runner_name)
 	else
 		return false
 	end
+end
+
+-- FX HANDLERS: FLICKERING MANAGER
+
+local current_level = 6
+
+local function get_flicker_chance()
+	local chance = math.random(1, 100)
+	if current_level < 7 then
+		chance = chance + (7 - current_level) * 10
+	elseif current_level == 9 then
+		chance = chance - 50
+	end
+	return chance
+end
+
+function run_flickering_manager(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+
+	local managed_config = FX_JOBS[config.managed_id]
+	if not managed_config then return false end
+	
+	-- cannot run if scanline loop is active or it has a cooldown
+	if managed_config.flickering_cooldown == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
+		-- start caller scanlines loop by chance			
+		local flicker_chance = get_flicker_chance()
+		if flicker_chance > 70 then
+			npe_execution.Resume(managed_config.runner_name)
+		end
+	else
+		if time_global() > managed_config.flickering_cooldown then
+			managed_config.flickering_cooldown = 0
+		end
+	end
+end
+
+function on_stop_flickering_manager(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.dialog then return end
+	npe_execution.Stop(config.managed_id)
+	return true
+end
+
+function on_start_flickering_manager(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+
+	local managed_config = FX_JOBS[config.managed_id]
+	if not managed_config then return false end
+
+	managed_config.flickering_cooldown = 0
+	return true
 end
