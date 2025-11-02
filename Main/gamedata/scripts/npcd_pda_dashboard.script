@@ -122,6 +122,7 @@ function npcd_dashboard_tab:InitAppsBar()
     scanlines.dialog = background
     scanlines.speed = 0.04
     scanlines.orientation = 1
+    scanlines.scale = 3
     npcd_ui_fx.add_fx(scanlines)
     self.apps_bar_scanline = scanlines
 

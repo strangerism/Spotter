@@ -51,7 +51,7 @@ Runner ={
 		execution = npe_execution.TYPE.INFINITE,
 		start_timer = 0.1,
 		loop_timer = 0.04,
-		functor = { "npcd_ui_fx", "scanlines" },
+		functor = { "npcd_ui_fx", "run_scanlines" },
 		start = { "npcd_ui_fx", "on_start_scanlines" },
 	},
     flickering = {
@@ -101,6 +101,7 @@ local FX_CONFIG = {
 		start = nil,
 		speed = nil,
 		orientation = 1, -- 0 - horizontal, 1 - vertical
+		scale = 1.0,
 		argb = {150, 255, 255, 255},
 		margin_v = 0,
 		margin_h = 0,
@@ -235,7 +236,7 @@ end
 
 -- FX HANDLERS: SCANLINES
 
-function scanlines(runner_name)
+function run_scanlines(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	local config = fx_job.config
@@ -274,7 +275,7 @@ function on_start_scanlines(runner_name)
 	end
 	-- config.scanline:SetColor(GetARGB(config.argb[1], config.argb[2], config.argb[3], config.argb[4]))
 	config.fx_ui:SetWndPos(vector2():set(config.margin_h, config.starting_y))
-    config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - (config.margin_h + config.margin_h / 2), config.fx_ui:GetHeight()))
+    config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - (config.margin_h + config.margin_h / 2), config.fx_ui:GetHeight() * config.scale))
 	Printer:DebugTable("Scanline Config:", config)
 	return true
 end
