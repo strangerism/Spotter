@@ -223,6 +223,7 @@ function on_start_scanlines(runner_name)
 		config.fx_ui = xml:InitStatic(config.fx_element, config.dialog)
 	end
 	-- config.scanline:SetColor(GetARGB(config.argb[1], config.argb[2], config.argb[3], config.argb[4]))
+	config.fx_ui:SetWndPos(vector2():set(config.margin_h, config.starting_y))
     config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - config.margin_h, config.fx_ui:GetHeight()))
 	Printer:DebugTable("Scanline Config:", config)
 	return true

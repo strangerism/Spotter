@@ -185,6 +185,17 @@ function npcd_dashboard_tab:InitNPCSPanel()
     xml:InitStatic("npcs_panel:npcs_scroller:scroller", scroller)
     xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", scroller)
 
+    -- FX: Scanlines on NPCS Panel
+    local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
+    scanlines.dialog = scroller
+    scanlines.start =  0
+    scanlines.speed = 0.025
+    scanlines.margin_v = 45
+    scanlines.margin_h = 17
+    scanlines.orientation = 1
+    npcd_ui_fx.add_fx(scanlines)
+    self.npcs_scroller_scanline = scanlines
+
     UI_APP[APP.NPCS].dialog:Show(false)
 end
 
@@ -215,6 +226,9 @@ function npcd_dashboard_tab:ActivateAppPanel(app_name)
     self.app_panel = UI_APP[app_name].dialog
     self.app_panel:Show(true)
     self.apps_bar_scanline.direction = self.apps_bar_scanline.direction * -1
+
+    -- stopping all panel fx on app change
+    -- npcd_ui_fx.stop_fx(self.npcs_scroller_scanline.id)
 end
 
 function npcd_dashboard_tab:On_NPCS_Button_Clicked()
@@ -223,6 +237,7 @@ function npcd_dashboard_tab:On_NPCS_Button_Clicked()
     self.app[APP.PERKS].button:Enable(true)
     self.app[APP.DECK].button:Enable(true)
     self:ActivateAppPanel(APP.NPCS)
+    npcd_ui_fx.resume_fx(self.npcs_scroller_scanline.id)
 end
 
 function npcd_dashboard_tab:On_Perks_Button_Clicked()
