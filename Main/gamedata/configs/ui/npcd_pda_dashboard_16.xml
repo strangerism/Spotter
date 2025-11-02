@@ -103,7 +103,7 @@
 		<panel_logo x="420" y="150" width="200" height="200" stretch="1">
 			<texture a="30">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
 		</panel_logo>
-		<npcs_scroller x="140" y="25" width="125" height="440" stretch="1">
+		<npcs_scroller x="139" y="25" width="125" height="440" stretch="1">
 			<anchor_top x="0" y="15" width="60" height="45" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_top</texture>
 			</anchor_top>			
@@ -112,7 +112,10 @@
 			</scroller>	
 			<scroller_bg x="15" y="40" width="115" height="360" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_bg</texture>
-			</scroller_bg>				
+			</scroller_bg>		
+			<scroller_dirt x="15" y="40" width="115" height="360" stretch="1">
+				<texture>ui_npcd_pda_dashboard_vsidescroll_dirt</texture>
+			</scroller_dirt>					
 			<anchor_bottom x="0" y="380" width="60" height="45" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_bottom</texture>
 			</anchor_bottom>						

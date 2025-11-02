@@ -223,7 +223,7 @@ function npcd_dashboard_tab:InitNPCSPanel()
     self.npcs_scroller_flickering = flickering
 
     npcd_ui_fx.add_fx_to_manager(flickering.id, self.flickering_manager.id)
-
+    xml:InitStatic("npcs_panel:npcs_scroller:scroller_dirt", scroller)
     xml:InitStatic("npcs_panel:npcs_scroller:scroller", scroller)
     xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", scroller)
     UI_APP[APP.NPCS].dialog:Show(false)
