@@ -127,6 +127,13 @@ function npcd_dashboard_tab:InitAppsBar()
     npcd_ui_fx.add_fx(scanlines)
     self.apps_bar_scanline = scanlines
 
+    -- FX: Flickering on Apps Bar
+    local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
+    flickering.dialog = self.apps_bar
+    flickering.flickering_duration = time_global() + math.random(10, 50) * 5 -- in ms
+    npcd_ui_fx.add_fx(flickering)
+    self.apps_bar_flickering = flickering
+
     self.app = {}
     self.app[APP.NPCS] = {}
     self.app[APP.NPCS].tab = xml:InitStatic("apps_bar:npcs", self.apps_bar)
@@ -227,6 +234,7 @@ function npcd_dashboard_tab:ActivateAppPanel(app_name)
     self.app_panel:Show(true)
     self.apps_bar_scanline.direction = self.apps_bar_scanline.direction * -1
 
+    npcd_ui_fx.resume_fx(self.apps_bar_flickering.id)
     -- stopping all panel fx on app change
     -- npcd_ui_fx.stop_fx(self.npcs_scroller_scanline.id)
 end

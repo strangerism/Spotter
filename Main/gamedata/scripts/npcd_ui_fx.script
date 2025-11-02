@@ -34,18 +34,6 @@ Runner ={
 		start = { "npe_dialog_codec", "on_start_hide_portrait", "caller" },
 		stop = { "npe_dialog_codec", "on_stop_hide_portrait", "caller" },
     },		
-    flickering = {
-        name = "flickering",
-        module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.CONDITIONAL,
-		stop_condition = { "npe_dialog_codec", "portrait_flickering_duration_ended", "caller" },
-        start_timer = 0.015,
-        loop_timer = 0.015,      
-        functor = { "npe_dialog_codec", "run_portrait_flickering", "caller" },
-		start = { "npe_dialog_codec", "on_start_portrait_flickering", "caller" },
-		stop = { "npe_dialog_codec", "on_stop_portrait_flickering", "caller" },
-    },
     flickering_manager = {
         name = "flickering_manager",
 		module = "npe_dialog_codec",
@@ -77,15 +65,27 @@ Runner ={
 		functor = { "npcd_ui_fx", "scanlines" },
 		start = { "npcd_ui_fx", "on_start_scanlines" },
 	},
+    flickering = {
+        name = "flickering",
+        module = "npcd_ui_fx",
+		group_name = "npcd_ui_fx",
+		execution = npe_execution.TYPE.CONDITIONAL,
+		stop_condition = { "npcd_ui_fx", "flickering_duration_ended" },
+        start_timer = 0.015,
+        loop_timer = 0.015,
+        functor = { "npcd_ui_fx", "run_flickering" },
+		start = { "npcd_ui_fx", "on_start_flickering" },
+		stop = { "npcd_ui_fx", "on_stop_flickering" },
+    },
 }
 
 FX = {
 	SHOWING = "showing",
 	HIDING = "hiding",
-	FLICKERING = "flickering",
 	FLICKERING_MANAGER = "flickering_manager",
 	WIDE_SCANLINES = "wide_scanlines",
 	SCANLINES = "scanlines",
+	FLICKERING = "flickering",
 }
 
 local FX_CONFIG = {
@@ -93,15 +93,12 @@ local FX_CONFIG = {
 	},
 	[FX.HIDING] = {
 	},
-	[FX.FLICKERING] = {
-	},
 	[FX.FLICKERING_MANAGER] = {
 	},
 	[FX.WIDE_SCANLINES] = {
 	},
 	[FX.SCANLINES] = {
 		type = FX.SCANLINES,
-		scanline = nil,
 		dialog = nil,
 		start = 0.0,
 		speed = 1.0,
@@ -114,6 +111,15 @@ local FX_CONFIG = {
 		start_y = nil,
 		fx_ui = nil,
 		fx_element = "scanline",
+		init_on_start = false,
+	},
+	[FX.FLICKERING] = {
+		type = FX.FLICKERING,
+		dialog = nil,
+		flickering_duration = nil,
+		flickering_cooldown = 0,
+		fx_ui = nil,
+		fx_element = nil,
 		init_on_start = false,
 	},
 }
@@ -136,6 +142,10 @@ end
 
 function add_fx(fx_config)
 	Printer:DebugTable("Adding FX:", fx_config)
+	if not fx_config.type or not fx_config.dialog then
+		Printer:Debug(LOG.ERROR, CAT.UI_ACTION," FX type not specified!")
+		return
+	end
 	local fx_id = fx_config.type .. "_" .. tostring(math.random(10000, 99999))
 	local new_runner = npcdu.copy(Runner[fx_config.type])
 	new_runner.name = fx_id
@@ -147,7 +157,7 @@ function add_fx(fx_config)
 	}
 	npe_execution.Add(new_runner)
 	fx_config.id = fx_id
-	if not fx_config.init_on_start then
+	if fx_config.fx_element and not fx_config.init_on_start then
 		fx_config.fx_ui = xml:InitStatic(fx_config.fx_element, fx_config.dialog)
 	end
 end
@@ -189,7 +199,7 @@ function scanlines(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	local config = fx_job.config
-	Printer:Debug(LOG.INFO, CAT.UI," update scanlines %s", runner_name)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," update scanlines %s", runner_name)
     local GUI = config.fx_ui
 	if not GUI then return false end
 
@@ -214,7 +224,7 @@ function on_start_scanlines(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.dialog then return end
-	Printer:Debug(LOG.INFO, CAT.UI," on_start_scanlines %s", runner_name)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," on_start_scanlines %s", runner_name)
 
 	config.starting_y = config.margin_v
 	config.ending_y = config.dialog:GetHeight() - config.margin_v
@@ -227,4 +237,90 @@ function on_start_scanlines(runner_name)
     config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - config.margin_h, config.fx_ui:GetHeight()))
 	Printer:DebugTable("Scanline Config:", config)
 	return true
+end
+
+-- FX HANDLERS: FLICKERING
+local DEFAULT_ALPHA = 220
+local FLICKERING_ALPHA = 180
+local clr_cache = {}
+
+local function change_alpha(clr, a)
+    if not (clr and a ) then return end
+
+    if not clr_cache[clr .. "_" .. a] then
+        b = bit.band(clr, 255)
+        g = bit.band(bit.rshift(clr, 8), 255)
+        r = bit.band(bit.rshift(clr, 16), 255)
+        clr_cache[clr .. "_" .. a] = GetARGB(a, r, g, b)
+    end
+
+    return clr_cache[clr .. "_" .. a]
+end
+
+function change_ui_alpha(ui_element, a)
+	if not ui_element then return end
+	local clr = ui_element:GetTextureColor()
+	change_alpha(clr, a)
+	ui_element:SetTextureColor(clr_cache[clr .. "_" .. a])
+end
+
+function run_flickering(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," running caller_flickering loop for %s", runner_name)
+	-- flickering effect is done alternating alpha value of the ui element and switching its visibility
+	if config.fx_ui:IsShown() then
+		config.fx_ui:Show(false)
+	else
+		config.fx_ui:Show(true)
+	end
+end
+
+function on_start_flickering(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.dialog then return end
+	Printer:Debug(LOG.START, CAT.UI_ACTION," starting caller_flickering loop for %s", runner_name)
+
+	-- the fx element is the original dialog manipulation
+	config.fx_ui = config.dialog
+	-- starting the flickering effect by setting duration and new alpha
+	-- duration can be preset in config or calculated here
+	config.flickering_duration = config.flickering_duration or (time_global() + math.random(10, 50) * 5)
+	change_ui_alpha(config.fx_ui, FLICKERING_ALPHA)
+	-- signal successful execution of start functor
+	return true
+end
+
+function on_stop_flickering(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.fx_ui then return end
+	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping caller_flickering loop for %s", runner_name)
+
+	-- ending the flickering effect by restoring default alpha and visibility, also setting cooldown for a flickering manager if used
+	change_ui_alpha(config.fx_ui, DEFAULT_ALPHA)
+	config.fx_ui:Show(true)
+	config.flickering_duration = nil
+
+	-- used when flickering is managed by a flickering manager
+	config.flickering_cooldown = time_global() + math.random(1, 10) * 500
+	-- signal successful execution of stop functor
+	return true
+end
+
+function flickering_duration_ended(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+
+	-- called by the npe execution to check if the flickering duration has ended
+	if time_global() > config.flickering_duration then
+		return true
+	else
+		return false
+	end
 end
