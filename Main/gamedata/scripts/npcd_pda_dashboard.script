@@ -114,23 +114,22 @@ end
 function npcd_dashboard_tab:InitAppsBar()
 
     self.apps_bar = xml:InitStatic("apps_bar", self)
-    xml:InitStatic("apps_bar:background", self.apps_bar)
-
+    local background = xml:InitStatic("apps_bar:background", self.apps_bar)
+    xml:InitStatic("apps_bar:frame", self.apps_bar)
+    
     -- FX: Scanlines on Apps Bar
     local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
-    scanlines.dialog = self.apps_bar
-    scanlines.start =  0
+    scanlines.dialog = background
     scanlines.speed = 0.04
-    scanlines.margin_v = 20
-    scanlines.margin_h = 30
     scanlines.orientation = 1
     npcd_ui_fx.add_fx(scanlines)
     self.apps_bar_scanline = scanlines
 
     -- FX: Flickering on Apps Bar
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
-    flickering.dialog = self.apps_bar
+    flickering.dialog = background
     flickering.flickering_duration = time_global() + math.random(10, 50) * 5 -- in ms
+    flickering.speed = 0.02
     npcd_ui_fx.add_fx(flickering)
     self.apps_bar_flickering = flickering
 

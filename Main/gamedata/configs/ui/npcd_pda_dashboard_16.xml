@@ -1,14 +1,14 @@
 <w>
 	<main_wnd x="0" y="0" width="1024" height="768"/>
 		
-	<apps_bar x="34" y="95" width="751" height="90" stretch="1">
-		<background x="0" y="0" width="751" height="90" stretch="1">
-			<texture>ui_npcd_pda_dashboard_header</texture>
+	<apps_bar x="36" y="95" width="751" height="95" stretch="1">
+		<frame x="0" y="0" width="751" height="95" stretch="1">
+			<texture>ui_npcd_pda_dashboard_header_frame</texture>
+		</frame>	
+		<background x="0" y="0" width="751" height="95" stretch="1">
+			<texture>ui_npcd_pda_dashboard_header_bg</texture>
 		</background>	
-        <scanline x="15" y="5" width="751" height="1" stretch="1">
-            <texture a="100">ui_npe_mgs2_codec_750_scanline</texture>
-        </scanline> 		
-		<npcs x="55" y="19" width="240" height="30">
+		<npcs x="55" y="15" width="240" height="30">
 			<tab_left x="0" y="0" width="70" height="30" stretch="1">
 				<texture>ui_npcd_pda_dashboard_app_tab_l</texture>
 			</tab_left>
@@ -26,7 +26,7 @@
 				<texture>ui_npcd_pda_dashboard_app_tab_r</texture>
 			</tab_right>			
 		</npcs>
-		<perks x="265" y="19" width="240" height="30">
+		<perks x="265" y="15" width="240" height="30">
 			<tab_left x="0" y="0" width="70" height="30" stretch="1">
 				<texture>ui_npcd_pda_dashboard_app_tab_l</texture>
 			</tab_left>
@@ -44,7 +44,7 @@
 				<texture>ui_npcd_pda_dashboard_app_tab_r</texture>
 			</tab_right>			
 		</perks>
-		<deck x="475" y="19" width="240" height="30">
+		<deck x="475" y="15" width="240" height="30">
 			<tab_left x="0" y="0" width="70" height="30" stretch="1">
 				<texture>ui_npcd_pda_dashboard_app_tab_l</texture>
 			</tab_left>
