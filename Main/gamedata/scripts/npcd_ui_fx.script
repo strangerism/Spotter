@@ -67,6 +67,18 @@ Runner ={
 		start = { "npcd_ui_fx", "on_start_show" },
 		stop = { "npcd_ui_fx", "on_stop_show" },
     },
+	translate = {
+		name = "translate",
+		module = "npcd_ui_fx",
+		group_name = "npcd_ui_fx",
+		execution = npe_execution.TYPE.CONDITIONAL,
+		stop_condition = { "npcd_ui_fx", "translate_completed"},
+		start_timer = 0.1,
+		loop_timer = 0.00,
+		functor = { "npcd_ui_fx", "run_translate" },
+		start = { "npcd_ui_fx", "on_start_translate" },
+		stop = { "npcd_ui_fx", "on_stop_translate" },
+	},
 }
 
 FX = {
@@ -75,6 +87,7 @@ FX = {
 	FLICKERING_MANAGER = "flickering_manager",
 	SCANLINES = "scanlines",
 	FLICKERING = "flickering",
+	TRANSLATE = "translate",
 }
 
 local FX_CONFIG = {
@@ -129,11 +142,20 @@ local FX_CONFIG = {
 		type = FX.SHOWING,
 		dialog = nil,
 		start = nil,
-		speed = nil,		
+		speed = nil,
 		cursor = 0,
 		y = 0,
 		height = 0,
-	},	
+	},
+	[FX.TRANSLATE] = { -- translate the dialog from its initial position along the specified orientation and direction
+		type = FX.TRANSLATE,
+		dialog = nil,
+		start = nil,
+		speed = nil,
+		orientation = 0, -- 0 - x axis, 1 - y axis
+		direction = 1, -- 1 - forward, -1 - backward
+		length = nil, -- how many pixels is translated
+	},
 }
 
 local Managed = {
@@ -494,7 +516,7 @@ function run_flickering_manager(runner_name)
 		if managed_config.force then
 			-- forced flickering start
 			npe_execution.Resume(managed_config.runner_name)
-			Printer:Debug(LOG.START, CAT.UI," forced start of caller flickering loop for %s", managed_config.runner_name)
+			Printer:Debug(LOG.START, CAT.UI_ACTION," forced start of caller flickering loop for %s", managed_config.runner_name)
 		elseif managed_config.cooldown_value == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
 			-- start caller scanlines loop by chance			
 			local flicker_chance = get_flicker_chance()
@@ -573,7 +595,7 @@ function on_start_show(runner_name)
 end
 
 function on_stop_show(runner_name)
-	Printer:Debug(LOG.STOP, CAT.UI," stopping show_portrait %s", runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping show_portrait %s", runner_name)
 end
 
 function showing_completed(runner_name)
@@ -586,4 +608,72 @@ function showing_completed(runner_name)
 	else
 		return false
 	end
+end
+
+-- FX: TRANSLATE
+
+function translate_completed(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.fx_ui then return end
+	if config.orientation == 0 then
+		if (config.direction == 1 and config.fx_ui:GetWndPos().x >= config.end_x) or
+		   (config.direction == -1 and config.fx_ui:GetWndPos().x <= config.end_x) then
+			return true
+		end
+	else
+		if (config.direction == 1 and config.fx_ui:GetWndPos().y >= config.end_y) or
+		   (config.direction == -1 and config.fx_ui:GetWndPos().y <= config.end_y) then
+			return true
+		end
+	end
+	return false
+end
+
+function run_translate(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.fx_ui then return end
+	config.fx_ui:Show(false)
+	Printer:Debug(LOG.INFO, CAT.UI," updating translate dialog %s", runner_name)
+	-- update translation
+	local x, y = config.fx_ui:GetWndPos().x, config.fx_ui:GetWndPos().y
+	if config.orientation == 0 then
+		config.cursor = config.cursor + 1 * config.direction
+		Printer:Debug(LOG.INFO, CAT.UI," cursor x:%s", config.cursor)
+		x = config.cursor
+	else
+		config.cursor = config.cursor + 1 * config.direction
+		y = config.cursor
+	end
+	config.fx_ui:SetWndPos(vector2():set(x, y))
+	config.fx_ui:Show(true)
+	Printer:Debug(LOG.INFO, CAT.UI," translating dialog %s to x:%s y:%s length:%s", runner_name, x, y, config.length)
+end
+
+function on_start_translate(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.dialog then return end
+	config.fx_ui = config.dialog
+	Printer:Debug(LOG.START, CAT.UI," starting translate_dialog %s", runner_name)
+
+	if config.orientation == 0 then
+		config.start_x = config.fx_ui:GetWndPos().x
+		config.end_x = config.start_x + (config.direction * config.length)
+		Printer:Debug(LOG.INFO, CAT.UI," translate_dialog %s from x:%s to x:%s", runner_name, config.start_x, config.end_x)
+		config.cursor = config.start_x
+	else
+		config.start_y = config.fx_ui:GetWndPos().y
+		config.end_y = config.start_y + (config.direction * config.length)
+		config.cursor = config.start_y
+	end
+	return true
+end
+
+function on_stop_translate(runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI," stopping translate_dialog %s", runner_name)
 end

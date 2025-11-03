@@ -39,28 +39,6 @@ local APP = {
     DECK = "deck"
 }
 
-local STRING_PREFIX = "pda_btn_npcd_"
-
-local UI_APP = {}
-UI_APP = {
-    [APP.HOME] = {
-        active = nil,
-        dialog = nil,
-    },
-    [APP.NPCS] = {
-        active = nil,
-        dialog = nil,
-    },
-    [APP.PERKS] = {
-        active = nil,
-        dialog = nil,
-    },
-    [APP.DECK] = {
-        active = nil,
-        dialog = nil,
-    },
-}
-
 local MENU = {
         SQUAD = "squad",
         FAVORITES = "favorites",
@@ -73,6 +51,34 @@ local MENU = {
         FEATS = "feats",
         EFFECTS = "effects",
 }
+
+local STRING_PREFIX = "pda_btn_npcd_"
+
+local UI_APP = {}
+UI_APP = {
+    [APP.HOME] = {
+        active = nil,
+        dialog = nil,
+        default_menu = nil,
+    },
+    [APP.NPCS] = {
+        active = nil,
+        dialog = nil,
+        default_menu = MENU.SQUAD,
+    },
+    [APP.PERKS] = {
+        active = nil,
+        dialog = nil,
+        default_menu = MENU.DISCOVERED,
+    },
+    [APP.DECK] = {
+        active = nil,
+        dialog = nil,
+        default_menu = MENU.PERKS,
+    },
+}
+
+
 
 local APP_MENU = {
     [APP.NPCS] = {
@@ -94,7 +100,7 @@ local APP_MENU = {
 }
 
 -- NPCS menu
-local UI_MENU = {}
+UI_MENU = {}
 -- UI_MENU[APP.NPCS] = {
 --     [MENU.NPCS.SQUAD] = {},
 --     [MENU.NPCS.FAVORITES] = {},
@@ -363,7 +369,7 @@ end
 
 function npcd_dashboard_tab:On_Menu_Button_Clicked(app, menu)
     Printer:Debug(LOG.INFO, CAT.UI, "Menu Button Clicked - App: " .. app .. " Menu: " .. menu)
-    -- Handle menu button click logic here.
+    self:ActivateAppMenu(app, menu)
 end
 
 function npcd_dashboard_tab:InitPerksPanel()
@@ -387,17 +393,27 @@ function npcd_dashboard_tab:InitDeckPanel()
 end
 
 function npcd_dashboard_tab:ActivateAppPanel(app_name)
+    -- disable current active dialog
     if self.app_panel then
         self.app_panel:Show(false)
     end
+
     self:DeactivateOtherPanels(app_name)
+
+    -- activate new dialog and children
     UI_APP[app_name].active = true
     self.app_panel = UI_APP[app_name].dialog
-    self.app_panel:Show(true)
-    self.apps_bar_scanline.direction = self.apps_bar_scanline.direction * -1
+    if app_name ~= APP.HOME then
+        self:ActivateAppMenu(app_name, UI_APP[app_name].default_menu or APP_MENU[app_name][1])
+    end
+    -- show new active dialog
+    if self.app_panel then
+        self.app_panel:Show(true)
+    end
 
+    -- update fx
+    self.apps_bar_scanline.direction = self.apps_bar_scanline.direction * -1
     npcd_ui_fx.resume_fx(self.apps_bar_flickering.id)
-    -- stopping all panel fx on app change
 end
 
 function npcd_dashboard_tab:DeactivateOtherPanels(app_name)
@@ -408,6 +424,64 @@ function npcd_dashboard_tab:DeactivateOtherPanels(app_name)
                 npcd_ui_fx.stop_fx(self.npcs_scroller_scanline.id)
                 npcd_ui_fx.stop_fx(self.npcs_scroller_flickering.id)
             end
+        end
+    end
+end
+
+function enable_active_menu_button(app_name, menu_name, enable)
+    Printer:Debug(LOG.INFO, CAT.UI, "Setting Active Menu Button Enable State - App: " .. app_name .. " Menu: " .. menu_name .. " Enable: " .. tostring(enable))
+    UI_MENU[app_name][menu_name].button:Enable(enable)
+end
+
+function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
+    Printer:Debug(LOG.INFO, CAT.UI, "Activating App Menu - App: " .. app_name .. " Menu: " .. menu_name)
+    -- disable current active menu panel
+    if self.app_menu_panel then
+        self.app_menu_panel:Show(false)
+    end
+
+    self:DeactivateOtherMenus(app_name, menu_name)
+
+    -- activate new menu panel and children
+    self.app_menu_panel = UI_MENU[app_name][menu_name].dialog
+    Printer:Debug(LOG.INFO, CAT.UI, "Activated Menu - App: " .. app_name .. " Menu: " .. menu_name)
+    -- show new active menu panel
+    if self.app_menu_panel then
+        self.app_menu_panel:Show(true)
+    end
+
+    -- update fx
+    if not UI_MENU[app_name][menu_name].active then
+        local activated_translate_fx = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.TRANSLATE)
+        activated_translate_fx.dialog = UI_MENU[app_name][menu_name].button
+        activated_translate_fx.orientation = 0
+        activated_translate_fx.direction = 1
+        activated_translate_fx.length = 5
+        activated_translate_fx.stop = {"npcd_pda_dashboard", "enable_active_menu_button", app_name, menu_name, false}
+        npcd_ui_fx.add_fx(activated_translate_fx)
+        npcd_ui_fx.resume_fx(activated_translate_fx.id)
+    end
+    UI_MENU[app_name][menu_name].active = true
+end
+
+function npcd_dashboard_tab:DeactivateOtherMenus(app_name, menu_name)
+    local menus = APP_MENU[app_name] or {}
+    for _, name in pairs(menus) do
+        if name ~= menu_name then
+            if UI_MENU[app_name][name].active then
+                -- translate current active [app][menu] button back to original position
+                local deactivated_translate_fx = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.TRANSLATE)
+                deactivated_translate_fx.dialog = UI_MENU[app_name][name].button
+                deactivated_translate_fx.orientation = 0
+                deactivated_translate_fx.direction = -1
+                deactivated_translate_fx.length = 5
+                deactivated_translate_fx.stop = {"npcd_pda_dashboard", "enable_active_menu_button", app_name, name, true}
+                npcd_ui_fx.add_fx(deactivated_translate_fx)
+                npcd_ui_fx.resume_fx(deactivated_translate_fx.id)
+            end
+            UI_MENU[app_name][name].active = false
+            UI_MENU[app_name][name].button:Enable(true)
+            Printer:Debug(LOG.INFO, CAT.UI, "Deactivated Menu - App: " .. app_name .. " Menu: " .. name)
         end
     end
 end
