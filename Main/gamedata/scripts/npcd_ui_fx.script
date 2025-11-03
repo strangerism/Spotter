@@ -119,6 +119,7 @@ local FX_CONFIG = {
 		fx_ui = nil,
 		fx_element = nil,
 		init_on_start = false,
+		force = nil, -- if managed, commands the manager to start flickering immediately (one-shot) value is duration in ms
 	},
 	[FX.FLICKERING_MANAGER] = {
 		type = FX.FLICKERING_MANAGER,
@@ -166,6 +167,7 @@ function add_fx(fx_config)
 	new_runner.name = fx_id
 	new_runner.start_timer = fx_config.start or new_runner.start_timer
 	new_runner.loop_timer = fx_config.speed or new_runner.loop_timer
+	new_runner.stop = fx_config.stop or new_runner.stop
 	FX_JOBS[fx_id] = {
 		runner_name = fx_id,
 		config = fx_config,
@@ -190,8 +192,9 @@ function stop_fx(fx_id)
 	local fx_job = FX_JOBS[fx_id]
 	if fx_job then
 		npe_execution.Stop(fx_job.runner_name)
-		if fx_job.config.fx_ui then
+		if fx_job.config.fx_ui and fx_job.config.type ~= FX.SHOWING then
 			fx_job.config.fx_ui:Show(false)
+			fx_job.config.fx_ui = nil
 		end
 	end
 end
@@ -369,7 +372,7 @@ function on_start_scanlines(runner_name)
 	config.starting_y = config.margin_v
 	config.ending_y = config.dialog:GetHeight() - config.margin_v
 
-	if config.init_on_start then
+	if not config.fx_ui or config.init_on_start then
 		config.fx_ui = xml:InitStatic(config.fx_element, config.dialog)
 	end
 
@@ -414,7 +417,14 @@ function on_start_flickering(runner_name)
 			config.flickering_duration = duration
 		end
 	end
-	change_ui_alpha(config.fx_ui, config.max_intensity and config.max_intensity * 255 or FLICKERING_ALPHA)
+	local intensity = config.intensity and config.intensity * 255 or DEFAULT_ALPHA
+	if config.force then
+		-- forced flickering duration
+		config.flickering_duration = time_global() + config.force
+		config.force = nil
+		intensity = 255
+	end
+	change_ui_alpha(config.fx_ui, intensity)
 	-- signal successful execution of start functor
 	return true
 end
@@ -481,7 +491,11 @@ function run_flickering_manager(runner_name)
 		Printer:TraceTable("Flickering Manager checking managed fx:", managed_config)
 		
 		-- cannot run if scanline loop is active or it has a cooldown
-		if managed_config.cooldown_value == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
+		if managed_config.force then
+			-- forced flickering start
+			npe_execution.Resume(managed_config.runner_name)
+			Printer:Debug(LOG.START, CAT.UI," forced start of caller flickering loop for %s", managed_config.runner_name)
+		elseif managed_config.cooldown_value == 0 and not npe_execution.IsRunnerRunning(managed_config.runner_name) then
 			-- start caller scanlines loop by chance			
 			local flicker_chance = get_flicker_chance()
 			if flicker_chance > 70 then
@@ -528,14 +542,13 @@ function run_show(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	local config = fx_job.config
-	if not config.dialog then return end
-	local GUI = config.dialog
+	if not config.fx_ui then return end
 
 	config.cursor = config.cursor + 6
 	local new_y = config.y - config.cursor
 	local new_height = config.cursor * 2
-	GUI:SetWndPos(vector2():set(GUI:GetWndPos().x, new_y))
-	GUI:SetWndSize(vector2():set(GUI:GetWidth(), new_height))
+	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, new_y))
+	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), new_height))
 	Printer:Debug(LOG.INFO, CAT.UI_ACTION," showing portrait %s at y:%s height:%s", runner_name, new_y, new_height)
 end
 
@@ -544,33 +557,31 @@ function on_start_show(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.dialog then return end
-	local GUI = config.dialog
+	config.fx_ui = config.dialog
 	Printer:Debug(LOG.START, CAT.UI_ACTION," starting show_portrait")
 
 	config.cursor = 0
 	-- save original height
-	config.height = GUI:GetHeight()
-	-- set GUI y postion to middle
-	config.y = GUI:GetWndPos().y + GUI:GetHeight() / 2
-	GUI:SetWndPos(vector2():set(GUI:GetWndPos().x, config.y))
+	config.height = config.fx_ui:GetHeight()
+	-- set y postion to middle
+	config.y = config.fx_ui:GetWndPos().y + config.fx_ui:GetHeight() / 2
+	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.y))
 	-- initial height 0
-	GUI:SetWndSize(vector2():set(GUI:GetWidth(), 0))
-	GUI:Show(true)
+	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), 0))
+	config.fx_ui:Show(true)
 	return true
 end
 
 function on_stop_show(runner_name)
-	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping show_portrait %s", runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI," stopping show_portrait %s", runner_name)
 end
 
 function showing_completed(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	local config = fx_job.config
-	if not config.dialog then return end
-	local GUI = config.dialog
-
-	if GUI:GetHeight() >= config.height then
+	if not config.fx_ui then return end
+	if config.fx_ui:GetHeight() >= config.height then
 		return true
 	else
 		return false

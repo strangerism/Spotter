@@ -206,6 +206,17 @@ function npcs_scroller_glitch_cooldown()
     return time_global() + math.random(10, 50) * 100
 end
 
+function npcs_scroller_bg_showing_fx_stop()
+    Printer:Debug(LOG.INFO, CAT.UI, "NPCS Scroller BG Showing FX Stopped")
+    local ui = get_ui()
+    if ui then
+        Printer:Debug(LOG.START, CAT.UI, "Forcing NPCS Scroller Flickering FX to start")
+        npcd_ui_fx.resume_fx(ui.npcs_scroller_flickering.id)
+        ui.npcs_scroller_flickering.force = 500 -- 0.5 seconds
+        npcd_ui_fx.resume_fx(ui.npcs_scroller_scanline.id)
+    end
+end
+
 function npcd_dashboard_tab:InitNPCSPanel()
     -- NPCS Panel
     UI_APP[APP.NPCS].active = false
@@ -229,9 +240,10 @@ function npcd_dashboard_tab:InitNPCSPanel()
     local npcs_scroller_bg_showing_fx = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
     npcs_scroller_bg_showing_fx.speed = 0.005
     npcs_scroller_bg_showing_fx.dialog = self.scroller_bg
+    npcs_scroller_bg_showing_fx.stop = {"npcd_pda_dashboard", "npcs_scroller_bg_showing_fx_stop"}
     npcd_ui_fx.add_fx(npcs_scroller_bg_showing_fx)
     self.npcs_scroller_bg_showing_fx = npcs_scroller_bg_showing_fx
-    
+
 -- FX: Scanlines on NPCS scroller
     local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
     scanlines.dialog = self.scroller_bg
@@ -301,7 +313,6 @@ function npcd_dashboard_tab:DeactivateOtherPanels(app_name)
         if name ~= app_name then
             UI_APP[name].active = false
             if name == APP.NPCS then
-                -- self.scroller_bg:Show(false)
                 npcd_ui_fx.stop_fx(self.npcs_scroller_scanline.id)
                 npcd_ui_fx.stop_fx(self.npcs_scroller_flickering.id)
             end
@@ -317,9 +328,9 @@ function npcd_dashboard_tab:On_NPCS_Button_Clicked()
     self.scroller_bg:Show(false)
     self:ActivateAppPanel(APP.NPCS)
 
-    npcd_ui_fx.resume_fx(self.npcs_scroller_scanline.id)
+
     npcd_ui_fx.resume_fx(self.npcs_scroller_bg_showing_fx.id)
-    npcd_ui_fx.resume_fx(self.npcs_scroller_flickering.id)
+    
 end
 
 function npcd_dashboard_tab:On_Perks_Button_Clicked()
