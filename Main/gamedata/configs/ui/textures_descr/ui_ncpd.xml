@@ -50,7 +50,7 @@
 		<texture id="ui_npcd_pda_panel_menu_button_d" x="126" y="28" width="947" height="196" />
 		<texture id="ui_npcd_pda_panel_menu_button_e" x="126" y="455" width="947" height="196" />
 		<texture id="ui_npcd_pda_panel_menu_button_h" x="126" y="241" width="947" height="196" />
-		<texture id="ui_npcd_pda_panel_menu_button_t" x="126" y="28" width="947" height="196" />
+		<texture id="ui_npcd_pda_panel_menu_button_t" x="126" y="241" width="947" height="196" />
 		<texture id="ui_npcd_pda_panel_menu_button_bg" x="22" y="674" width="769" height="196" />
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">
