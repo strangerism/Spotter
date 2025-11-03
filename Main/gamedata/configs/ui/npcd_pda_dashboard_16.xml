@@ -107,7 +107,7 @@
 				<texture a="30">ui_npcd_pda_panel_menu_button_bg</texture>
 			</button_bg>			
 		</menu_bar>
-		<v_main_separator x="130" y="0" width="9" height="500" stretch="1">
+		<v_main_separator x="140" y="0" width="9" height="500" stretch="1">
 			<texture>ui_npcd_pda_dashboard_vseparator</texture>
 		</v_main_separator>		
 		<panel_bg x="0" y="0" width="733" height="500" stretch="1">
@@ -116,7 +116,7 @@
 		<panel_logo x="420" y="150" width="200" height="200" stretch="1">
 			<texture a="30">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
 		</panel_logo>
-		<npcs_scroller x="139" y="25" width="125" height="440" stretch="1">
+		<npcs_scroller x="149" y="25" width="125" height="440" stretch="1">
 			<anchor_top x="0" y="15" width="60" height="45" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_top</texture>
 			</anchor_top>			
@@ -151,7 +151,7 @@
 				<texture a="30">ui_npcd_pda_panel_menu_button_bg</texture>
 			</button_bg>			
 		</menu_bar>
-		<v_main_separator x="130" y="0" width="9" height="500" stretch="1">
+		<v_main_separator x="140" y="0" width="9" height="500" stretch="1">
 			<texture>ui_npcd_pda_dashboard_vseparator</texture>
 		</v_main_separator>		
 		<panel_bg x="0" y="0" width="733" height="500" stretch="1">
@@ -160,7 +160,7 @@
 		<panel_logo x="420" y="150" width="200" height="200" stretch="1">
 			<texture a="30">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
 		</panel_logo>
-		<npcs_scroller x="139" y="25" width="125" height="440" stretch="1">
+		<npcs_scroller x="149" y="25" width="125" height="440" stretch="1">
 			<anchor_top x="0" y="15" width="60" height="45" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_top</texture>
 			</anchor_top>			
@@ -192,7 +192,7 @@
 				</text_color>
 			</button>			
 		</menu_bar>	
-		<v_main_separator x="130" y="0" width="9" height="500" stretch="1">
+		<v_main_separator x="140" y="0" width="9" height="500" stretch="1">
 			<texture>ui_npcd_pda_dashboard_vseparator</texture>
 		</v_main_separator>			
 		<panel_bg x="0" y="0" width="733" height="500" stretch="1">

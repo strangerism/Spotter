@@ -491,7 +491,7 @@ end
 
 -- FX HANDLERS: FLICKERING MANAGER
 
-local current_level = 6
+local current_level = 7
 
 local function get_flicker_chance()
 	local chance = math.random(1, 100)

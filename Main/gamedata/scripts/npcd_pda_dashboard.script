@@ -456,7 +456,7 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
         activated_translate_fx.dialog = UI_MENU[app_name][menu_name].button
         activated_translate_fx.orientation = 0
         activated_translate_fx.direction = 1
-        activated_translate_fx.length = 5
+        activated_translate_fx.length = 10
         activated_translate_fx.stop = {"npcd_pda_dashboard", "enable_active_menu_button", app_name, menu_name, false}
         npcd_ui_fx.add_fx(activated_translate_fx)
         npcd_ui_fx.resume_fx(activated_translate_fx.id)
@@ -474,7 +474,7 @@ function npcd_dashboard_tab:DeactivateOtherMenus(app_name, menu_name)
                 deactivated_translate_fx.dialog = UI_MENU[app_name][name].button
                 deactivated_translate_fx.orientation = 0
                 deactivated_translate_fx.direction = -1
-                deactivated_translate_fx.length = 5
+                deactivated_translate_fx.length = 10
                 deactivated_translate_fx.stop = {"npcd_pda_dashboard", "enable_active_menu_button", app_name, name, true}
                 npcd_ui_fx.add_fx(deactivated_translate_fx)
                 npcd_ui_fx.resume_fx(deactivated_translate_fx.id)
