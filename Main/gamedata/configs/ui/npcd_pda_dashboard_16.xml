@@ -92,8 +92,8 @@
 	</home_panel>	
 
 	<npcs_panel x="43" y="185" width="733" height="500" stretch="1">
-		<menu_bar x="0" y="0" width="130" height="500" stretch="1">
-			<button x="10" y="50" width="120" height="40" stretch="1">
+		<menu_bar x="0" y="0" width="120" height="500" stretch="1">
+			<button x="-7" y="50" width="120" height="40" stretch="1">
 				<text align="c" vert_align="c" x="-10" y="7" font="letterica16">pda_btn_npcd_app_npcs</text>
 				<texture>ui_npcd_pda_panel_menu_button</texture>
 				<text_color>
@@ -107,7 +107,7 @@
 				<texture a="30">ui_npcd_pda_panel_menu_button_bg</texture>
 			</button_bg>			
 		</menu_bar>
-		<v_main_separator x="140" y="0" width="9" height="500" stretch="1">
+		<v_main_separator x="124" y="0" width="9" height="500" stretch="1">
 			<texture>ui_npcd_pda_dashboard_vseparator</texture>
 		</v_main_separator>		
 		<panel_bg x="0" y="0" width="733" height="500" stretch="1">
@@ -116,7 +116,7 @@
 		<panel_logo x="420" y="150" width="200" height="200" stretch="1">
 			<texture a="30">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
 		</panel_logo>
-		<npcs_scroller x="149" y="25" width="125" height="440" stretch="1">
+		<npcs_scroller x="133" y="25" width="125" height="440" stretch="1">
 			<anchor_top x="0" y="15" width="60" height="45" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_top</texture>
 			</anchor_top>			
@@ -136,8 +136,8 @@
 	</npcs_panel>
 
 	<perks_panel x="43" y="185" width="733" height="500" stretch="1">
-		<menu_bar x="0" y="0" width="130" height="500" stretch="1">
-			<button x="10" y="0" width="120" height="40" stretch="1">
+		<menu_bar x="0" y="0" width="120" height="500" stretch="1">
+			<button x="-7" y="0" width="120" height="40" stretch="1">
 				<text align="c" vert_align="c" x="-10" y="7" font="letterica16">pda_btn_npcd_app_npcs</text>
 				<texture>ui_npcd_pda_panel_menu_button</texture>
 				<text_color>
@@ -151,7 +151,7 @@
 				<texture a="30">ui_npcd_pda_panel_menu_button_bg</texture>
 			</button_bg>			
 		</menu_bar>
-		<v_main_separator x="140" y="0" width="9" height="500" stretch="1">
+		<v_main_separator x="124" y="0" width="9" height="500" stretch="1">
 			<texture>ui_npcd_pda_dashboard_vseparator</texture>
 		</v_main_separator>		
 		<panel_bg x="0" y="0" width="733" height="500" stretch="1">
@@ -160,7 +160,7 @@
 		<panel_logo x="420" y="150" width="200" height="200" stretch="1">
 			<texture a="30">ui_npcd_pda_dashboard_npcd_logo_1_bw</texture>
 		</panel_logo>
-		<npcs_scroller x="149" y="25" width="125" height="440" stretch="1">
+		<npcs_scroller x="133" y="25" width="125" height="440" stretch="1">
 			<anchor_top x="0" y="15" width="60" height="45" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_top</texture>
 			</anchor_top>			
@@ -180,8 +180,8 @@
 	</perks_panel>	
 
 	<deck_panel x="43" y="185" width="733" height="500" stretch="1">
-		<menu_bar x="0" y="0" width="130" height="500" stretch="1">
-			<button x="10" y="0" width="120" height="40" stretch="1">
+		<menu_bar x="0" y="0" width="120" height="500" stretch="1">
+			<button x="-7" y="0" width="120" height="40" stretch="1">
 				<text align="c" vert_align="c" x="-10" y="7" font="letterica16">pda_btn_npcd_app_npcs</text>
 				<texture>ui_npcd_pda_panel_menu_button</texture>
 				<text_color>
@@ -192,7 +192,7 @@
 				</text_color>
 			</button>			
 		</menu_bar>	
-		<v_main_separator x="140" y="0" width="9" height="500" stretch="1">
+		<v_main_separator x="124" y="0" width="9" height="500" stretch="1">
 			<texture>ui_npcd_pda_dashboard_vseparator</texture>
 		</v_main_separator>			
 		<panel_bg x="0" y="0" width="733" height="500" stretch="1">

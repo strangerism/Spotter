@@ -144,7 +144,7 @@ function npcd_dashboard_tab:InitControls()
 
     -- Apps Bar
     self:InitAppsBar()
-    xml:InitStatic("left_side", self)
+    self.left_shoulder = xml:InitStatic("left_side", self)
 
     -- App Panel
     self:InitHomePanel()
@@ -431,6 +431,13 @@ end
 function enable_active_menu_button(app_name, menu_name, enable)
     Printer:Debug(LOG.INFO, CAT.UI, "Setting Active Menu Button Enable State - App: " .. app_name .. " Menu: " .. menu_name .. " Enable: " .. tostring(enable))
     UI_MENU[app_name][menu_name].button:Enable(enable)
+
+    -- redraw left shoulder to fix button overlap issue
+    local GUI = npcd_pda_dashboard.get_ui()
+    if GUI then
+        Printer:Debug(LOG.INFO, CAT.UI, "Redrawing Left Shoulder to fix button overlap issue")
+        GUI.left_shoulder = xml:InitStatic("left_side", GUI)
+    end
 end
 
 function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)

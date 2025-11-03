@@ -47,10 +47,10 @@
 		<texture id="ui_npcd_pda_dashboard_vsidescroll_bottom" x="178" y="552" width="113" height="94" />
 	</file>
 	<file name="ui\npcd\ui_pda_panel">
-		<texture id="ui_npcd_pda_panel_menu_button_d" x="22" y="27" width="769" height="196" />
-		<texture id="ui_npcd_pda_panel_menu_button_e" x="22" y="454" width="769" height="196" />
-		<texture id="ui_npcd_pda_panel_menu_button_h" x="22" y="240" width="769" height="196" />
-		<texture id="ui_npcd_pda_panel_menu_button_t" x="22" y="27" width="769" height="196" />
+		<texture id="ui_npcd_pda_panel_menu_button_d" x="126" y="28" width="947" height="196" />
+		<texture id="ui_npcd_pda_panel_menu_button_e" x="126" y="455" width="947" height="196" />
+		<texture id="ui_npcd_pda_panel_menu_button_h" x="126" y="241" width="947" height="196" />
+		<texture id="ui_npcd_pda_panel_menu_button_t" x="126" y="28" width="947" height="196" />
 		<texture id="ui_npcd_pda_panel_menu_button_bg" x="22" y="674" width="769" height="196" />
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">
