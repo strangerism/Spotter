@@ -244,13 +244,42 @@
 		<text>NPCD</text>
 	</string>	
 	<string id="pda_btn_npcd_app_npcs">
-		<text>Zonebook</text>
+		<text>Profiles</text>
 	</string>
 	<string id="pda_btn_npcd_app_perks">
-		<text>Perks Glossary</text>
+		<text>Perks</text>
 	</string>
 	<string id="pda_btn_npcd_app_deck">
-		<text>Active Deck</text>
+		<text>Deck</text>
 	</string>			
-	
+	<string id="pda_btn_npcd_menu_squad">
+		<text>Squad</text>
+	</string>
+	<string id="pda_btn_npcd_menu_favorites">
+		<text>Favorites</text>
+	</string>
+	<string id="pda_btn_npcd_menu_recruitable">
+		<text>Recruitable</text>
+	</string>	
+	<string id="pda_btn_npcd_menu_all">
+		<text>All</text>
+	</string>
+	<string id="pda_btn_npcd_menu_dead">
+		<text>Dead</text>
+	</string>
+	<string id="pda_btn_npcd_menu_discovered">
+		<text>Discovered</text>
+	</string>
+	<string id="pda_btn_npcd_menu_learned">
+		<text>Learned</text>
+	</string>	
+	<string id="pda_btn_npcd_menu_perks">
+		<text>Perks</text>
+	</string>
+	<string id="pda_btn_npcd_menu_feats">
+		<text>Feats</text>
+	</string>
+	<string id="pda_btn_npcd_menu_effects">
+		<text>Effects</text>
+	</string>					
 </string_table>

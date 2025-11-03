@@ -1,4 +1,5 @@
 local npcdu = npcd_utils
+local gc = game.translate_string
 
 function get_printer()
 	if not Printer then
@@ -38,6 +39,8 @@ local APP = {
     DECK = "deck"
 }
 
+local STRING_PREFIX = "pda_btn_npcd_"
+
 local UI_APP = {}
 UI_APP = {
     [APP.HOME] = {
@@ -57,29 +60,62 @@ UI_APP = {
         dialog = nil,
     },
 }
+
+local MENU = {
+        SQUAD = "squad",
+        FAVORITES = "favorites",
+        RECRUITABLE = "recruitable",
+        ALL = "all",
+        DEAD = "dead",
+        DISCOVERED = "discovered",
+        LEARNED = "learned",
+        PERKS = "perks",
+        FEATS = "feats",
+        EFFECTS = "effects",
+}
+
+local APP_MENU = {
+    [APP.NPCS] = {
+        MENU.SQUAD,
+        MENU.FAVORITES,
+        MENU.RECRUITABLE,
+        MENU.ALL,
+        MENU.DEAD,
+    },
+    [APP.PERKS] = {
+        MENU.DISCOVERED,
+        MENU.LEARNED,
+    },
+    [APP.DECK] = {
+        MENU.PERKS,
+        MENU.FEATS,
+        MENU.EFFECTS,
+    },
+}
+
 -- NPCS menu
 local UI_MENU = {}
-UI_MENU["npcs"] = {
-    SQUAD = {},
-    FAVORITES = {},
-    RECRUITABLE = {},
-    ALL = {},
-    DEAD = {},
-}
+-- UI_MENU[APP.NPCS] = {
+--     [MENU.NPCS.SQUAD] = {},
+--     [MENU.NPCS.FAVORITES] = {},
+--     [MENU.NPCS.RECRUITABLE] = {},
+--     [MENU.NPCS.ALL] = {},
+--     [MENU.NPCS.DEAD] = {},
+-- }
 
--- Perks menu
-UI_MENU["perks"] = {
-    DISCOVERED = {},
-    ALL = {},
-    LEARNED = {}
-}
+-- -- Perks menu
+-- UI_MENU[APP.PERKS] = {
+--     [MENU.PERKS.DISCOVERED] = {},
+--     [MENU.PERKS.ALL] = {},
+--     [MENU.PERKS.LEARNED] = {}
+-- }
 
--- Deck menu
-UI_MENU["deck"] = {
-    PERKS = {},
-    FEATS = {},
-    EFFECTS = {}
-}
+-- -- Deck menu
+-- UI_MENU[APP.DECK] = {
+--     [MENU.DECK.PERKS] = {},
+--     [MENU.DECK.FEATS] = {},
+--     [MENU.DECK.EFFECTS] = {}
+-- }
 
 -- Constructor.
 class "npcd_dashboard_tab" (CUIScriptWnd)
@@ -109,6 +145,7 @@ function npcd_dashboard_tab:InitControls()
     self:InitNPCSPanel()
     self:InitPerksPanel()
     self:InitDeckPanel()
+    self:InitAppsMenu()
     self:ActivateAppPanel(APP.HOME)
 
     xml:InitStatic("right_side", self)
@@ -222,8 +259,9 @@ function npcd_dashboard_tab:InitNPCSPanel()
     UI_APP[APP.NPCS].active = false
     UI_APP[APP.NPCS].dialog = xml:InitStatic("npcs_panel", self)
 
+    
     local menu_bar = xml:InitStatic("npcs_panel:menu_bar", UI_APP[APP.NPCS].dialog)
-
+    
     local panel_bg = xml:InitStatic("npcs_panel:panel_bg", UI_APP[APP.NPCS].dialog)
     xml:InitStatic("npcs_panel:v_main_separator", panel_bg)
     xml:InitStatic("npcs_panel:panel_logo", panel_bg)
@@ -273,7 +311,59 @@ function npcd_dashboard_tab:InitNPCSPanel()
     local scroller_frame = xml:InitStatic("npcs_panel:npcs_scroller:scroller_frame", npcs_scroller)
 
     xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", npcs_scroller)
+
+    --------------------------------
+    --- NPCS Menu bar
+    --------------------------------
+
     UI_APP[APP.NPCS].dialog:Show(false)
+end
+
+function npcd_dashboard_tab:InitAppsMenu()
+    Printer:DebugTable("APP", APP)
+    Printer:DebugTable("MENU", MENU)
+    for _, app in pairs(APP) do
+        -- e.g. UI_MENU["npcs"] = {}        
+        UI_MENU[app] = {}
+        local button_spacing = 10
+        local menus = APP_MENU[app] or {}
+        local menu_count = #menus
+        
+        if menu_count > 0 then
+            -- Create all buttons first to get their heights
+            local buttons = {}
+            for i, menu in ipairs(menus) do
+                UI_MENU[app][menu] = {}
+                UI_MENU[app][menu].button = xml:Init3tButton(app .. "_panel:menu_bar:button", UI_APP[app].dialog)
+                UI_MENU[app][menu].button:TextControl():SetText(gc(STRING_PREFIX .. "menu_".. menu))
+                self:Register(UI_MENU[app][menu].button, app .. "_menu_button_" .. menu)
+                self:AddCallback(app .. "_menu_button_" .. menu, ui_events.BUTTON_CLICKED, function ()
+                    self:On_Menu_Button_Clicked(app, menu)
+                end, self)
+                table.insert(buttons, {menu = menu, button = UI_MENU[app][menu].button})
+            end
+            
+            -- Calculate vertical centering for menu buttons
+            -- Use the panel dialog height as reference for centering
+            local panel_height = UI_APP[app].dialog:GetHeight()
+            local middle = panel_height / 2
+            local first_button_height = buttons[1].button:GetHeight()
+            local total_height = (menu_count * first_button_height) + ((menu_count - 1) * button_spacing)
+            local start_y = middle - (total_height / 2)
+            
+            -- Position buttons vertically centered with proper spacing
+            for i, button_data in ipairs(buttons) do
+                local button_height = button_data.button:GetHeight()
+                local y_pos = start_y + ((i - 1) * (button_height + button_spacing))
+                button_data.button:SetWndPos(vector2():set(button_data.button:GetWndPos().x, y_pos))
+            end
+        end
+    end
+end
+
+function npcd_dashboard_tab:On_Menu_Button_Clicked(app, menu)
+    Printer:Debug(LOG.INFO, CAT.UI, "Menu Button Clicked - App: " .. app .. " Menu: " .. menu)
+    -- Handle menu button click logic here.
 end
 
 function npcd_dashboard_tab:InitPerksPanel()
@@ -281,6 +371,7 @@ function npcd_dashboard_tab:InitPerksPanel()
     UI_APP[APP.PERKS].active = false
     UI_APP[APP.PERKS].dialog = xml:InitStatic("perks_panel", self)
     local panel_bg = xml:InitStatic("perks_panel:panel_bg", UI_APP[APP.PERKS].dialog)
+    xml:InitStatic("npcs_panel:v_main_separator", panel_bg)
     xml:InitStatic("perks_panel:panel_logo", panel_bg)
     UI_APP[APP.PERKS].dialog:Show(false)
 end
@@ -290,6 +381,7 @@ function npcd_dashboard_tab:InitDeckPanel()
     UI_APP[APP.DECK].active = false
     UI_APP[APP.DECK].dialog = xml:InitStatic("deck_panel", self)
     local panel_bg = xml:InitStatic("deck_panel:panel_bg", UI_APP[APP.DECK].dialog)
+    xml:InitStatic("npcs_panel:v_main_separator", panel_bg)
     xml:InitStatic("deck_panel:panel_logo", panel_bg)
     UI_APP[APP.DECK].dialog:Show(false)
 end
@@ -326,9 +418,8 @@ function npcd_dashboard_tab:On_NPCS_Button_Clicked()
     self.app[APP.PERKS].button:Enable(true)
     self.app[APP.DECK].button:Enable(true)
     self.scroller_bg:Show(false)
+
     self:ActivateAppPanel(APP.NPCS)
-
-
     npcd_ui_fx.resume_fx(self.npcs_scroller_bg_showing_fx.id)
     
 end
