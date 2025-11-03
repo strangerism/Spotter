@@ -9,19 +9,7 @@ function get_printer()
 end
 RegisterScriptCallback("npcd_on_log_update", get_printer)
 
-Runner ={
-    showing = {
-        name = "showing",
-        module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.CONDITIONAL,
-		stop_condition = { "npe_dialog_codec", "portrait_showing_completed", "actor" },
-        start_timer = 0.15,
-        loop_timer = 0.0,        
-        functor = { "npe_dialog_codec", "show_portrait", "actor" },
-		start = { "npe_dialog_codec", "on_start_show_portrait", "actor" },
-		stop = { "npe_dialog_codec", "on_stop_show_portrait", "actor" },
-    },	
+Runner ={	
     hiding = {
         name = "hiding",
         module = "npe_dialog_codec",
@@ -33,17 +21,7 @@ Runner ={
         functor = { "npe_dialog_codec", "hide_portrait", "caller" },
 		start = { "npe_dialog_codec", "on_start_hide_portrait", "caller" },
 		stop = { "npe_dialog_codec", "on_stop_hide_portrait", "caller" },
-    },		
-	wide_scanlines = {
-		name = "wide_scanlines",
-		module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.INFINITE,
-		start_timer = 0.5,
-		loop_timer = 0.04,
-		functor = { "npe_dialog_codec", "run_portrait_wide_scanlines" },
-		start = { "npe_dialog_codec", "on_start_portrait_wide_scanlines" },
-	},
+    },
 	scanlines = {
 		name = "scanlines",
 		module = "npcd_ui_fx",
@@ -77,13 +55,24 @@ Runner ={
 		start = { "npcd_ui_fx", "on_start_flickering_manager" },
 		stop = { "npcd_ui_fx", "on_stop_flickering_manager" },
     },
+    showing = {
+        name = "showing",
+        module = "npcd_ui_fx",
+		group_name = "npcd_ui_fx",
+		execution = npe_execution.TYPE.CONDITIONAL,
+		stop_condition = { "npcd_ui_fx", "showing_completed"},
+        start_timer = 0.15,
+        loop_timer = 0.0,
+        functor = { "npcd_ui_fx", "run_show" },
+		start = { "npcd_ui_fx", "on_start_show" },
+		stop = { "npcd_ui_fx", "on_stop_show" },
+    },
 }
 
 FX = {
 	SHOWING = "showing",
 	HIDING = "hiding",
 	FLICKERING_MANAGER = "flickering_manager",
-	WIDE_SCANLINES = "wide_scanlines",
 	SCANLINES = "scanlines",
 	FLICKERING = "flickering",
 }
@@ -92,8 +81,6 @@ local FX_CONFIG = {
 	[FX.SHOWING] = {
 	},
 	[FX.HIDING] = {
-	},
-	[FX.WIDE_SCANLINES] = {
 	},
 	[FX.SCANLINES] = {
 		type = FX.SCANLINES,
@@ -137,6 +124,15 @@ local FX_CONFIG = {
 		type = FX.FLICKERING_MANAGER,
 		manager_type = FX.FLICKERING,
 	},
+	[FX.SHOWING] = {
+		type = FX.SHOWING,
+		dialog = nil,
+		start = nil,
+		speed = nil,		
+		cursor = 0,
+		y = 0,
+		height = 0,
+	},	
 }
 
 local Managed = {
@@ -194,7 +190,9 @@ function stop_fx(fx_id)
 	local fx_job = FX_JOBS[fx_id]
 	if fx_job then
 		npe_execution.Stop(fx_job.runner_name)
-		FX_JOBS[fx_id] = nil
+		if fx_job.config.fx_ui then
+			fx_job.config.fx_ui:Show(false)
+		end
 	end
 end
 
@@ -202,6 +200,9 @@ function resume_fx(fx_id)
 	local fx_job = FX_JOBS[fx_id]
 	if fx_job then
 		npe_execution.Resume(fx_job.runner_name)
+		if fx_job.config.fx_ui then
+			fx_job.config.fx_ui:Show(true)
+		end		
 	end
 end
 
@@ -279,7 +280,7 @@ end
 local function get_accel_event(accel_length)
 	local chance = math.random(1, 100)
 	if chance > 50 then
-		Printer:Debug(LOG.START, CAT.UI," scanlines acceleration event triggered")
+		Printer:Debug(LOG.START, CAT.UI_ACTION," scanlines acceleration event triggered")
 		return math.random(100 * accel_length, 500 * accel_length)
 	end
 	return nil
@@ -289,7 +290,7 @@ function run_scanlines(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	local config = fx_job.config
-	Printer:Debug(LOG.INFO, CAT.UI," update scanlines %s", runner_name)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," update scanlines %s", runner_name)
     local GUI = config.fx_ui
 	if not GUI then return false end
 
@@ -313,7 +314,7 @@ function run_scanlines(runner_name)
 		if config.accel_event then
 			-- initialize acceleration parameters on first run
 			if config.accel_increment == nil then
-				Printer:Debug(LOG.START, CAT.UI," scanlines %s starting acceleration", runner_name)
+				Printer:Debug(LOG.START, CAT.UI_ACTION," scanlines %s starting acceleration", runner_name)
 				config.accel_max_cycles = config.accel_event
 				config.accel_min_speed = config.speed * 0.1  -- 10x faster at peak
 				config.accel_speed_range = config.speed - config.accel_min_speed
@@ -324,13 +325,13 @@ function run_scanlines(runner_name)
 			
 			-- reached max speed, start slowing down
 			if config.accel_cycle >= config.accel_max_cycles then
-				Printer:Debug(LOG.INFO, CAT.UI," scanlines %s reached max speed, starting slowdown", runner_name)
+				Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s reached max speed, starting slowdown", runner_name)
 				config.accel_direction = -1
 			end
 			
 			-- completed acceleration cycle, reset to normal speed
 			if config.accel_cycle <= 0 and config.accel_direction == -1 then
-				Printer:Debug(LOG.STOP, CAT.UI," scanlines %s resetting to normal speed %s", runner_name , config.speed)
+				Printer:Debug(LOG.STOP, CAT.UI_ACTION," scanlines %s resetting to normal speed %s", runner_name , config.speed)
 				-- reset acceleration
 				config.accel_event = nil
 				config.accel_direction = 1
@@ -352,7 +353,7 @@ function run_scanlines(runner_name)
 			new_speed = math.max(new_speed, config.accel_min_speed)
 			
 			npe_execution.RunnerUpdate(runner_name, {loop_timer = new_speed})
-			Printer:Debug(LOG.INFO, CAT.UI," scanlines %s cycle %s/%s, speed %s", runner_name, config.accel_cycle, config.accel_max_cycles, new_speed)
+			Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s cycle %s/%s, speed %s", runner_name, config.accel_cycle, config.accel_max_cycles, new_speed)
 		end
 	end	
 	return true
@@ -519,4 +520,59 @@ function on_start_flickering_manager(runner_name)
 		managed_config.cooldown_value = 0
 	end
 	return true
+end
+
+-- FX: SHOWING
+
+function run_show(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.dialog then return end
+	local GUI = config.dialog
+
+	config.cursor = config.cursor + 6
+	local new_y = config.y - config.cursor
+	local new_height = config.cursor * 2
+	GUI:SetWndPos(vector2():set(GUI:GetWndPos().x, new_y))
+	GUI:SetWndSize(vector2():set(GUI:GetWidth(), new_height))
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," showing portrait %s at y:%s height:%s", runner_name, new_y, new_height)
+end
+
+function on_start_show(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.dialog then return end
+	local GUI = config.dialog
+	Printer:Debug(LOG.START, CAT.UI_ACTION," starting show_portrait")
+
+	config.cursor = 0
+	-- save original height
+	config.height = GUI:GetHeight()
+	-- set GUI y postion to middle
+	config.y = GUI:GetWndPos().y + GUI:GetHeight() / 2
+	GUI:SetWndPos(vector2():set(GUI:GetWndPos().x, config.y))
+	-- initial height 0
+	GUI:SetWndSize(vector2():set(GUI:GetWidth(), 0))
+	GUI:Show(true)
+	return true
+end
+
+function on_stop_show(runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping show_portrait %s", runner_name)
+end
+
+function showing_completed(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.dialog then return end
+	local GUI = config.dialog
+
+	if GUI:GetHeight() >= config.height then
+		return true
+	else
+		return false
+	end
 end

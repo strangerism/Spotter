@@ -217,13 +217,24 @@ function npcd_dashboard_tab:InitNPCSPanel()
     xml:InitStatic("npcs_panel:v_main_separator", panel_bg)
     xml:InitStatic("npcs_panel:panel_logo", panel_bg)
 
-    local scroller = xml:InitStatic("npcs_panel:npcs_scroller", UI_APP[APP.NPCS].dialog)
-    xml:InitStatic("npcs_panel:npcs_scroller:anchor_top", scroller)
-    local scroller_bg = xml:InitStatic("npcs_panel:npcs_scroller:scroller_bg", scroller)
+    local npcs_scroller = xml:InitStatic("npcs_panel:npcs_scroller", UI_APP[APP.NPCS].dialog)
+    xml:InitStatic("npcs_panel:npcs_scroller:anchor_top", npcs_scroller)
 
+    --------------------------------
+    -- NPCS Scroller Background
+    --------------------------------
+    self.scroller_bg = xml:InitStatic("npcs_panel:npcs_scroller:scroller_bg", npcs_scroller)
+    self.scroller_bg:Show(false)
+-- FX: Showing on NPCS scroller background    
+    local npcs_scroller_bg_showing_fx = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
+    npcs_scroller_bg_showing_fx.speed = 0.005
+    npcs_scroller_bg_showing_fx.dialog = self.scroller_bg
+    npcd_ui_fx.add_fx(npcs_scroller_bg_showing_fx)
+    self.npcs_scroller_bg_showing_fx = npcs_scroller_bg_showing_fx
+    
 -- FX: Scanlines on NPCS scroller
     local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
-    scanlines.dialog = scroller_bg
+    scanlines.dialog = self.scroller_bg
     scanlines.speed = 0.025
     scanlines.random_accel = true
     scanlines.accel_length = 10
@@ -235,17 +246,21 @@ function npcd_dashboard_tab:InitNPCSPanel()
 
 -- FX: Flickering on NPCS scroller
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
-    flickering.dialog = scroller_bg
+    flickering.dialog = self.scroller_bg
     flickering.random_duration = {"npcd_pda_dashboard", "npcs_scroller_glitch_duration"}
-    flickering.speed = 0.02
     flickering.random_cooldown = {"npcd_pda_dashboard", "npcs_scroller_glitch_cooldown"}
     npcd_ui_fx.add_fx(flickering)
     self.npcs_scroller_flickering = flickering
-
     npcd_ui_fx.add_fx_to_manager(flickering.id, self.flickering_manager.id)
-    xml:InitStatic("npcs_panel:npcs_scroller:scroller_dirt", scroller)
-    xml:InitStatic("npcs_panel:npcs_scroller:scroller", scroller)
-    xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", scroller)
+
+    --------------------------------
+    --- NPCS Scroller Elements
+    --------------------------------
+    self.scroller_dirt = xml:InitStatic("npcs_panel:npcs_scroller:scroller_dirt", npcs_scroller)
+
+    local scroller_frame = xml:InitStatic("npcs_panel:npcs_scroller:scroller_frame", npcs_scroller)
+
+    xml:InitStatic("npcs_panel:npcs_scroller:anchor_bottom", npcs_scroller)
     UI_APP[APP.NPCS].dialog:Show(false)
 end
 
@@ -271,7 +286,7 @@ function npcd_dashboard_tab:ActivateAppPanel(app_name)
     if self.app_panel then
         self.app_panel:Show(false)
     end
-
+    self:DeactivateOtherPanels(app_name)
     UI_APP[app_name].active = true
     self.app_panel = UI_APP[app_name].dialog
     self.app_panel:Show(true)
@@ -279,7 +294,19 @@ function npcd_dashboard_tab:ActivateAppPanel(app_name)
 
     npcd_ui_fx.resume_fx(self.apps_bar_flickering.id)
     -- stopping all panel fx on app change
-    -- npcd_ui_fx.stop_fx(self.npcs_scroller_scanline.id)
+end
+
+function npcd_dashboard_tab:DeactivateOtherPanels(app_name)
+    for _, name in pairs(APP) do
+        if name ~= app_name then
+            UI_APP[name].active = false
+            if name == APP.NPCS then
+                -- self.scroller_bg:Show(false)
+                npcd_ui_fx.stop_fx(self.npcs_scroller_scanline.id)
+                npcd_ui_fx.stop_fx(self.npcs_scroller_flickering.id)
+            end
+        end
+    end
 end
 
 function npcd_dashboard_tab:On_NPCS_Button_Clicked()
@@ -287,8 +314,12 @@ function npcd_dashboard_tab:On_NPCS_Button_Clicked()
     self.app[APP.NPCS].button:Enable(false)
     self.app[APP.PERKS].button:Enable(true)
     self.app[APP.DECK].button:Enable(true)
+    self.scroller_bg:Show(false)
     self:ActivateAppPanel(APP.NPCS)
+
     npcd_ui_fx.resume_fx(self.npcs_scroller_scanline.id)
+    npcd_ui_fx.resume_fx(self.npcs_scroller_bg_showing_fx.id)
+    npcd_ui_fx.resume_fx(self.npcs_scroller_flickering.id)
 end
 
 function npcd_dashboard_tab:On_Perks_Button_Clicked()

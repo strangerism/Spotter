@@ -107,9 +107,9 @@
 			<anchor_top x="0" y="15" width="60" height="45" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_top</texture>
 			</anchor_top>			
-			<scroller x="10" y="30" width="125" height="380" stretch="1">
+			<scroller_frame x="10" y="30" width="125" height="380" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_frame</texture>
-			</scroller>	
+			</scroller_frame>	
 			<scroller_bg x="15" y="40" width="115" height="360" stretch="1">
 				<texture>ui_npcd_pda_dashboard_vsidescroll_bg</texture>
 			</scroller_bg>		
