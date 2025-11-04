@@ -287,29 +287,33 @@ end
 
 function npcd_dashboard_tab:InitItemScroller()
 
-    local scroller = xml:InitStatic("scroller", self)
-    self.item_scroller = scroller
+    self.menu_scroller = {}
+    self.menu_scroller.ui = {}
+    self.menu_scroller.fx = {}
+    --------------------------------
+    local scroller_dialog = xml:InitStatic("scroller", self)
+    self.menu_scroller.ui.dialog = scroller_dialog
 
-    xml:InitStatic("scroller:anchor_top", scroller)
+    xml:InitStatic("scroller:anchor_top", scroller_dialog)
 
     --------------------------------
     -- Scroller Background
     --------------------------------
-    self.scroller_bg = xml:InitStatic("scroller:scroller_bg", scroller)
-    self.scroller_bg:Show(true)
-    self.scroller_glass = xml:InitStatic("scroller:scroller_glass", scroller)
-    self.scroller_glass:Show(false)
--- FX: Showing on scroller background    
-    local npcs_scroller_glass_showing_fx = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
-    npcs_scroller_glass_showing_fx.speed = 0.005
-    npcs_scroller_glass_showing_fx.dialog = self.scroller_glass
-    npcs_scroller_glass_showing_fx.stop = {"npcd_pda_dashboard", "npcs_scroller_glass_showing_fx_stop"}
-    npcd_ui_fx.add_fx(npcs_scroller_glass_showing_fx)
-    self.npcs_scroller_glass_showing_fx = npcs_scroller_glass_showing_fx
+    self.menu_scroller.ui.bg = xml:InitStatic("scroller:scroller_bg", scroller_dialog)
+    self.menu_scroller.ui.bg:Show(true)
+    self.menu_scroller.ui.glass = xml:InitStatic("scroller:scroller_glass", scroller_dialog)
+    self.menu_scroller.ui.glass:Show(false)
+-- FX: Showing on scroller background
+    local glass_showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
+    glass_showing.dialog = self.menu_scroller.ui.glass
+    glass_showing.speed = 0.005
+    glass_showing.stop = {"npcd_pda_dashboard", "npcs_scroller_glass_showing_fx_stop"}
+    npcd_ui_fx.add_fx(glass_showing)
+    self.menu_scroller.fx.glass_showing = glass_showing
 
 -- FX: Scanlines on scroller
     local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
-    scanlines.dialog = self.scroller_glass
+    scanlines.dialog = self.menu_scroller.ui.glass
     scanlines.speed = 0.025
     scanlines.random_accel = true
     scanlines.accel_length = 5
@@ -317,11 +321,11 @@ function npcd_dashboard_tab:InitItemScroller()
     scanlines.margin_h = 0
     scanlines.orientation = 1
     npcd_ui_fx.add_fx(scanlines)
-    self.npcs_scroller_scanline = scanlines
+    self.menu_scroller.fx.scanline = scanlines
 
 -- FX: Wide Scanlines on scroller
     local wide_scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
-    wide_scanlines.dialog = self.scroller_glass
+    wide_scanlines.dialog = self.menu_scroller.ui.glass
     wide_scanlines.speed = 0.04
     wide_scanlines.random_accel = false
     wide_scanlines.margin_v = -5
@@ -330,10 +334,10 @@ function npcd_dashboard_tab:InitItemScroller()
     wide_scanlines.scale = 5
     wide_scanlines.intensity = 0.05
     npcd_ui_fx.add_fx(wide_scanlines)
-    self.npcs_scroller_wide_scanline = wide_scanlines
+    self.menu_scroller.fx.wide_scanline = wide_scanlines
 
     local wide_scanlines_2 = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
-    wide_scanlines_2.dialog = self.scroller_glass
+    wide_scanlines_2.dialog = self.menu_scroller.ui.glass
     wide_scanlines_2.speed = 0.04
     wide_scanlines_2.random_accel = false
     wide_scanlines_2.margin_v = -5
@@ -343,77 +347,70 @@ function npcd_dashboard_tab:InitItemScroller()
     wide_scanlines_2.scale = 5
     wide_scanlines_2.intensity = 0.05
     npcd_ui_fx.add_fx(wide_scanlines_2)
-    self.npcs_scroller_wide_scanline_2 = wide_scanlines_2
+    self.menu_scroller.fx.wide_scanline_2 = wide_scanlines_2
 
 -- FX: Flickering on scroller
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
-    flickering.dialog = self.scroller_glass
+    flickering.dialog = self.menu_scroller.ui.glass
     flickering.random_duration = {"npcd_pda_dashboard", "npcs_scroller_glitch_duration"}
     flickering.random_cooldown = {"npcd_pda_dashboard", "npcs_scroller_glitch_cooldown"}
     npcd_ui_fx.add_fx(flickering)
-    self.npcs_scroller_flickering = flickering
+    self.menu_scroller.fx.flickering = flickering
     npcd_ui_fx.add_fx_to_manager(flickering.id, self.flickering_manager.id)
 
     --------------------------------
     --- NPCS Scroller Elements
     --------------------------------
-    self.scroller_dirt = xml:InitStatic("scroller:scroller_dirt", scroller)
+    self.menu_scroller.ui.dirt = xml:InitStatic("scroller:scroller_dirt", scroller_dialog)
 
-    local scroller_frame = xml:InitStatic("scroller:scroller_frame", scroller)
+    self.menu_scroller.ui.frame = xml:InitStatic("scroller:scroller_frame", scroller_dialog)
 
-    xml:InitStatic("scroller:anchor_bottom", scroller)
-    self.item_scroller:Show(false)
-
-    return scroller
-end
-
-function npcd_dashboard_tab:ClearItemScroller()
-    return self.item_scroller
+    xml:InitStatic("scroller:anchor_bottom", scroller_dialog)
+    self.menu_scroller.ui.dialog:Show(false)
 end
 
 function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
     Printer:Debug(LOG.INFO, CAT.UI, "Updating Item Scroller - App: " .. app_name .. " Menu: " .. menu_name)
-    self.item_scroller:Show(false)
+    self.menu_scroller.ui.dialog:Show(false)
     self:ResetItemScroller()
-    self.item_scroller_items = {}
-    -- self.item_scroller_items = xml:InitScrollView("scroller:scroll", self.scroller_bg)
-    self.scroll = xml:InitScrollView("scroller:scroll", self.scroller_bg)
+    self.menu_scroller.items = {}
+
+    self.menu_scroller.scroll = xml:InitScrollView("scroller:scroll", self.menu_scroller.ui.bg)
     local index = 0
     for _, npc in ipairs(ITEMS[app_name][menu_name]) do
         local item = {}
         item.button = xml:Init3tButton("scroller:item_button", nil)
         index = index + 1
-        -- item.button:SetWndPos(vector2():set(item.button:GetWndPos().x, item.button:GetWndPos().y + (index * item.button:GetHeight())))
-        table.insert(self.item_scroller_items, item)
-        self.scroll:AddWindow(item.button, true)
+        table.insert(self.menu_scroller.items, item)
+        self.menu_scroller.scroll:AddWindow(item.button, true)
         item.button:TextControl():SetText(index .. ". " .. npc.name)
         Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Item Added - Item: " .. npc.name)
         npc.idx = index
         self:Register(item.button, "item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. npc.id)
         self:AddCallback("item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. npc.id, ui_events.BUTTON_CLICKED, function ()
             Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Button Clicked - Item[%s]: " .. npc.name, npc.idx)
-            if self.scroller_selected_item then
-                self.scroller_selected_item:Enable(true)
+            if self.menu_scroller.selected then
+                self.menu_scroller.selected:Enable(true)
             end
             -- local index = self.scroll:GetCurrentScrollPos()
             Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Current Scroll Pos: " .. tostring(npc.idx))
-            self.scroller_selected_item = self.item_scroller_items[npc.idx].button
-            if self.scroller_selected_item then
-                self.scroller_selected_item:Enable(false)
+            self.menu_scroller.selected = self.menu_scroller.items[npc.idx].button
+            if self.menu_scroller.selected then
+                self.menu_scroller.selected:Enable(false)
             end
         end, self)
     end
-    Printer:DebugTable("Item Scroller Items", self.item_scroller_items)
-    self.item_scroller:SetWndPos(vector2():set(self.item_scroller:GetWndPos().x, self.item_scroller:GetWndPos().y))
-    self.item_scroller:Show(true)
+    -- Printer:DebugTable("Item Scroller Items", self.menu_scroller.items)
+    -- self.menu_scroller.scroll:SetWndPos(vector2():set(self.menu_scroller.scroll:GetWndPos().x, self.menu_scroller.scroll:GetWndPos().y))
+    self.menu_scroller.ui.dialog:Show(true)
 end
 
 function npcd_dashboard_tab:ResetItemScroller()
     Printer:Debug(LOG.INFO, CAT.UI, "Resetting Item Scroller")
-    if self.scroll then
-        self.scroll:Clear()
+    if self.menu_scroller.scroll then
+        self.menu_scroller.scroll:Clear()
     end
-    for _, item in ipairs(self.item_scroller_items or {}) do
+    for _, item in ipairs(self.menu_scroller.items or {}) do
         if item and item.button then
             Printer:Debug(LOG.INFO, CAT.UI, "Removing Item Scroller Item")
             item.button:Show(false)
@@ -435,12 +432,12 @@ function npcs_scroller_glass_showing_fx_stop()
     local ui = get_ui()
     if ui then
         Printer:Debug(LOG.START, CAT.UI, "Forcing NPCS Scroller Flickering FX to start")
-        npcd_ui_fx.resume_fx(ui.npcs_scroller_flickering.id)
-        ui.npcs_scroller_flickering.force = 500 -- 0.5 seconds
-        npcd_ui_fx.resume_fx(ui.npcs_scroller_scanline.id)
-        npcd_ui_fx.resume_fx(ui.npcs_scroller_wide_scanline.id)
-        npcd_ui_fx.resume_fx(ui.npcs_scroller_wide_scanline_2.id)
-        ui.scroller_bg:Show(true)
+        npcd_ui_fx.resume_fx(ui.menu_scroller.fx.flickering.id)
+        ui.menu_scroller.fx.flickering.force = 500 -- 0.5 seconds
+        npcd_ui_fx.resume_fx(ui.menu_scroller.fx.scanline.id)
+        npcd_ui_fx.resume_fx(ui.menu_scroller.fx.wide_scanline.id)
+        npcd_ui_fx.resume_fx(ui.menu_scroller.fx.wide_scanline_2.id)
+        ui.menu_scroller.ui.bg:Show(true)
     end
 end
 
@@ -593,10 +590,10 @@ function npcd_dashboard_tab:DeactivateOtherPanels(app_name)
         if name ~= app_name then
             UI_APP[name].active = false
             if name == APP.NPCS or name == APP.PERKS then
-                npcd_ui_fx.stop_fx(self.npcs_scroller_scanline.id)
-                npcd_ui_fx.stop_fx(self.npcs_scroller_wide_scanline.id)
-                npcd_ui_fx.stop_fx(self.npcs_scroller_wide_scanline_2.id)
-                npcd_ui_fx.stop_fx(self.npcs_scroller_flickering.id)
+                npcd_ui_fx.stop_fx(self.menu_scroller.fx.scanline.id)
+                npcd_ui_fx.stop_fx(self.menu_scroller.fx.wide_scanline.id)
+                npcd_ui_fx.stop_fx(self.menu_scroller.fx.wide_scanline_2.id)
+                npcd_ui_fx.stop_fx(self.menu_scroller.fx.flickering.id)
             end
         end
     end
@@ -678,38 +675,47 @@ end
 
 function npcd_dashboard_tab:On_NPCS_Button_Clicked()
     Printer:Debug(LOG.INFO, CAT.UI, "NPCS Button Clicked")
+
     self.app[APP.NPCS].button:Enable(false)
     self.app[APP.PERKS].button:Enable(true)
     self.app[APP.DECK].button:Enable(true)
-    self.scroller_bg:Show(false)
-    self.scroller_glass:Show(false)
-    -- self:ResetItemScroller()
-    self.item_scroller:Show(true)
+
+    self.menu_scroller.ui.bg:Show(false)
+    self.menu_scroller.ui.glass:Show(false)
+    self.menu_scroller.ui.dialog:Show(true)
+
     self:ActivateAppPanel(APP.NPCS)
-    npcd_ui_fx.resume_fx(self.npcs_scroller_glass_showing_fx.id)
+
+    npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
 end
 
 function npcd_dashboard_tab:On_Perks_Button_Clicked()
     Printer:Debug(LOG.INFO, CAT.UI, "PERKS Button Clicked")
+
     self.app[APP.NPCS].button:Enable(true)
     self.app[APP.PERKS].button:Enable(false)
     self.app[APP.DECK].button:Enable(true)
-    self.scroller_bg:Show(false)
-    self.scroller_glass:Show(false)
-    -- self:ResetItemScroller()
-    self.item_scroller:Show(true)
+
+    self.menu_scroller.ui.bg:Show(false)
+    self.menu_scroller.ui.glass:Show(false)
+    self.menu_scroller.ui.dialog:Show(true)
+
     self:ActivateAppPanel(APP.PERKS)
-    npcd_ui_fx.resume_fx(self.npcs_scroller_glass_showing_fx.id)
+
+    npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
 end
 
 function npcd_dashboard_tab:On_Deck_Button_Clicked()
     Printer:Debug(LOG.INFO, CAT.UI, "DECK Button Clicked")
+
     self.app[APP.NPCS].button:Enable(true)
     self.app[APP.PERKS].button:Enable(true)
     self.app[APP.DECK].button:Enable(false)
-    self.scroller_bg:Show(false)
-    self.scroller_glass:Show(false)
-    self.item_scroller:Show(false)
+
+    self.menu_scroller.ui.bg:Show(false)
+    self.menu_scroller.ui.glass:Show(false)
+    self.menu_scroller.ui.dialog:Show(false)
+
     self:ActivateAppPanel(APP.DECK)
 end
 
