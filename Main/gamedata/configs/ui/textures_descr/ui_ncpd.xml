@@ -34,7 +34,8 @@
 		<texture id="ui_npcd_pda_dashboard_vseparator_dark_1" x="153" y="71" width="9" height="326" />
 		<texture id="ui_npcd_pda_dashboard_vseparator_dark_2" x="1" y="71" width="9" height="326" />
 		<texture id="ui_npcd_pda_dashboard_vsidescroll_frame" x="0" y="71" width="171" height="336" />
-		<texture id="ui_npcd_pda_dashboard_vsidescroll_bg" x="790" y="82" width="144" height="308" />
+		<texture id="ui_npcd_pda_dashboard_vsidescroll_bg" x="450" y="442" width="144" height="308" />
+		<texture id="ui_npcd_pda_dashboard_vsidescroll_glass" x="790" y="82" width="144" height="308" />
 		<texture id="ui_npcd_pda_dashboard_vsidescroll_dirt" x="301" y="442" width="144" height="308" />
 		<texture id="ui_npcd_pda_dashboard_app_tab_l" x="8" y="9" width="70" height="43" />
 		<texture id="ui_npcd_pda_dashboard_app_tab_button_d" x="776" y="486" width="110" height="43" />
@@ -52,6 +53,36 @@
 		<texture id="ui_npcd_pda_panel_menu_button_h" x="126" y="241" width="947" height="196" />
 		<texture id="ui_npcd_pda_panel_menu_button_t" x="126" y="241" width="947" height="196" />
 		<texture id="ui_npcd_pda_panel_menu_button_bg" x="22" y="674" width="769" height="196" />
+
+		<texture id="ui_npcd_pda_scroller_item_art_button_d" x="22" y="674" width="769" height="196" />
+		<texture id="ui_npcd_pda_scroller_item_art_button_e" x="22" y="674" width="769" height="196" />
+		<texture id="ui_npcd_pda_scroller_item_art_button_h" x="22" y="674" width="769" height="196" />
+		<texture id="ui_npcd_pda_scroller_item_art_button_t" x="22" y="674" width="769" height="196" />
+
+		<texture id="ui_npcd_pda_scroller_item_green_button_d" x="1135" y="94" width="248" height="42" />
+		<texture id="ui_npcd_pda_scroller_item_green_button_e" x="1135" y="94" width="248" height="42" />
+		<texture id="ui_npcd_pda_scroller_item_green_button_h" x="1135" y="94" width="248" height="42" />
+		<texture id="ui_npcd_pda_scroller_item_green_button_t" x="1135" y="94" width="248" height="42" />
+
+		<texture id="ui_npcd_pda_scroller_item_dark_button_d" x="1135" y="148" width="248" height="42" />
+		<texture id="ui_npcd_pda_scroller_item_dark_button_e" x="1135" y="148" width="248" height="42" />
+		<texture id="ui_npcd_pda_scroller_item_dark_button_h" x="1135" y="148" width="248" height="42" />
+		<texture id="ui_npcd_pda_scroller_item_dark_button_t" x="1135" y="148" width="248" height="42" />	
+
+		<texture id="ui_npcd_pda_scroller_item_highlight_green_button_d" x="1135" y="203" width="85" height="85" />
+		<texture id="ui_npcd_pda_scroller_item_highlight_green_button_e" x="1390" y="203" width="85" height="85" />
+		<texture id="ui_npcd_pda_scroller_item_highlight_green_button_h" x="1220" y="203" width="85" height="85" />
+		<texture id="ui_npcd_pda_scroller_item_highlight_green_button_t" x="1220" y="203" width="85" height="85" />
+
+		<texture id="ui_npcd_pda_scroller_item_highlight_yellow_button_d" x="1135" y="302" width="85" height="85" />
+		<texture id="ui_npcd_pda_scroller_item_highlight_yellow_button_e" x="1390" y="302" width="85" height="85" />
+		<texture id="ui_npcd_pda_scroller_item_highlight_yellow_button_h" x="1220" y="302" width="85" height="85" />
+		<texture id="ui_npcd_pda_scroller_item_highlight_yellow_button_t" x="1220" y="302" width="85" height="85" />	
+
+		<texture id="ui_npcd_pda_scroller_item_darkfill_button_d" x="1220" y="203" width="85" height="85" />
+		<texture id="ui_npcd_pda_scroller_item_darkfill_button_e" x="1135" y="399" width="337" height="48" />
+		<texture id="ui_npcd_pda_scroller_item_darkfill_button_h" x="1135" y="455" width="337" height="48" />
+		<texture id="ui_npcd_pda_scroller_item_darkfill_button_t" x="1135" y="455" width="337" height="48" />								
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">
 		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />

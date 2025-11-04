@@ -232,6 +232,15 @@ function resume_fx(fx_id)
 	end
 end
 
+function reset_fx(fx_id)
+	local fx_job = FX_JOBS[fx_id]
+	if fx_job then
+		npe_execution.Remove(fx_job.runner_name)
+		npe_execution.Add(fx_job.config)
+		resume_fx(fx_id)
+	end
+end
+
 function update_fx(fx_id, name, value)
 	local fx_job = FX_JOBS[fx_id]
 	if not fx_job then return end
@@ -278,7 +287,7 @@ end
 
 local DEFAULT_ALPHA = 220
 local FLICKERING_ALPHA = 180
-local SCANLINES_ALPHA = 100
+SCANLINES_ALPHA = 100
 local clr_cache = {}
 
 local function change_alpha(clr, a)
@@ -307,7 +316,7 @@ local function get_accel_event(accel_length)
 	local chance = math.random(1, 100)
 	if chance > 50 then
 		local event = math.random(100 * accel_length, 500 * accel_length)
-		Printer:Debug(LOG.START, CAT.UI," scanlines acceleration event triggered %s", event)
+		Printer:Debug(LOG.START, CAT.UI_ACTION," scanlines acceleration event triggered %s", event)
 		return event
 	end
 	return nil
@@ -349,10 +358,10 @@ function run_scanlines(runner_name)
 			end
 
 			if config.accel_direction > 0 	  and config.accel_cycle > (config.accel_event - math.ceil(config.accel_event/(config.accel_increment + config.accel_direction))) and config.accel_increment < 5 then
-				Printer:Debug(LOG.INFO, CAT.UI," scanlines %s increasing acceleration to %s", runner_name, config.accel_increment + 1)
+				Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s increasing acceleration to %s", runner_name, config.accel_increment + 1)
 				config.accel_increment = config.accel_increment + 1
 			elseif config.accel_direction < 0 and config.accel_cycle < (config.accel_event - math.ceil(config.accel_event/(config.accel_increment + config.accel_direction))) and config.accel_increment > 1 then
-				Printer:Debug(LOG.INFO, CAT.UI," scanlines %s decreasing acceleration to %s", runner_name, config.accel_increment - 1)
+				Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s decreasing acceleration to %s", runner_name, config.accel_increment - 1)
 				config.accel_increment = config.accel_increment - 1
 			end
 
@@ -361,13 +370,13 @@ function run_scanlines(runner_name)
 			
 			-- reached max speed, start slowing down
 			if config.accel_cycle >= config.accel_max_cycles then
-				Printer:Debug(LOG.INFO, CAT.UI," scanlines %s reached max speed, starting slowdown", runner_name)
+				Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s reached max speed, starting slowdown", runner_name)
 				config.accel_direction = -1
 			end
 			
 			-- completed acceleration cycle, reset to normal speed
 			if config.accel_cycle <= 0 and config.accel_direction == -1 then
-				Printer:Debug(LOG.STOP, CAT.UI," scanlines %s resetting to normal speed %s", runner_name , config.speed)
+				Printer:Debug(LOG.STOP, CAT.UI_ACTION," scanlines %s resetting to normal speed %s", runner_name , config.speed)
 				-- reset acceleration
 				config.accel_event = nil
 				config.accel_direction = 1
@@ -389,7 +398,7 @@ function run_scanlines(runner_name)
 			new_speed = math.max(new_speed, config.accel_min_speed)
 			
 			npe_execution.RunnerUpdate(runner_name, {loop_timer = new_speed})
-			Printer:Debug(LOG.INFO, CAT.UI," scanlines %s cycle %s/%s, speed %s", runner_name, config.accel_cycle, config.accel_max_cycles, new_speed)
+			Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s cycle %s/%s, speed %s", runner_name, config.accel_cycle, config.accel_max_cycles, new_speed)
 		end
 	end	
 	return true
@@ -400,7 +409,7 @@ function on_start_scanlines(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.dialog then return end
-	Printer:Debug(LOG.INFO, CAT.UI," on_start_scanlines %s", runner_name)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," on_start_scanlines %s", runner_name)
 
 	config.starting_y = config.margin_v + (config.dialog:GetHeight() * config.offset)
 	config.ending_y = config.dialog:GetHeight() - config.margin_v
