@@ -110,6 +110,7 @@ local FX_CONFIG = {
 		direction = 1, -- 1 - in, -1 - out
 		start_x = nil,
 		start_y = nil,
+		offset = 0,
 		fx_ui = nil,
 		fx_element = "scanline",
 		init_on_start = false,
@@ -401,7 +402,7 @@ function on_start_scanlines(runner_name)
 	if not config.dialog then return end
 	Printer:Debug(LOG.INFO, CAT.UI," on_start_scanlines %s", runner_name)
 
-	config.starting_y = config.margin_v
+	config.starting_y = config.margin_v + (config.dialog:GetHeight() * config.offset)
 	config.ending_y = config.dialog:GetHeight() - config.margin_v
 
 	if not config.fx_ui or config.init_on_start then
