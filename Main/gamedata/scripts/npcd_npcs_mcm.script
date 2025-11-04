@@ -1,11 +1,11 @@
 local npcdu = npcd_utils
 MENU_TYPE = {
-    ALL = "all",
-    RANKED = "ranked",
     SQUAD = "squad",
-    RECRUITABLE = "recruitable",
-    DEAD = "dead",
     FAVORITE = "favorite",
+    RECRUITABLE = "recruitable",
+    ALL = "all",
+    DEAD = "dead",
+    DISCOVERED = "discovered",
 }
 -- off when not in development
 NPCS_DEBUG = true
@@ -16,7 +16,7 @@ local function is_not_friend(npc_id)
     return not (npcd_relations.is_actor_not_enemy(db.actor, npc))
 end
 
-local function get_npc(npc_id, menu_type)
+function get_npc(npc_id, menu_type)
     -- printf("-[NPCD][MCM] get_npc %s menu_type %s", npc_id, menu_type)
     local npc_deck = npcd.get_npc(npc_id)
     if not npc_deck or not npc_deck.has_profile then return nil end
@@ -37,6 +37,9 @@ local function get_npc(npc_id, menu_type)
     if menu_type == MENU_TYPE.RECRUITABLE then
         return npc_deck.Info.can_recruit and npc_deck or nil
     end
+    if menu_type == MENU_TYPE.DISCOVERED then
+        return npc_deck.show_profile and npc_deck or nil
+    end    
 end
 
 local function unfavorite(npc_id, path, self)

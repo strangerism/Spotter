@@ -250,6 +250,7 @@ function npcd_dashboard_tab:InitAppsBar()
     xml:InitStatic("apps_bar:npcs:tab_left", self.app[APP.NPCS].tab)
     self.app[APP.NPCS].button = xml:Init3tButton("apps_bar:npcs:button", self.app[APP.NPCS].tab)
     self.app[APP.NPCS].button:Enable(true)
+    self.app[APP.NPCS].button:TextControl():SetFont(GetFontSmall())
     xml:InitStatic("apps_bar:npcs:tab_right", self.app[APP.NPCS].tab)
     self:Register(self.app[APP.NPCS].button, "app_button_" .. APP.NPCS)
 
@@ -258,6 +259,7 @@ function npcd_dashboard_tab:InitAppsBar()
     xml:InitStatic("apps_bar:perks:tab_left", self.app[APP.PERKS].tab)
     self.app[APP.PERKS].button = xml:Init3tButton("apps_bar:perks:button", self.app[APP.PERKS].tab)
     self.app[APP.PERKS].button:Enable(true)
+    self.app[APP.PERKS].button:TextControl():SetFont(GetFontSmall())
     xml:InitStatic("apps_bar:perks:tab_right", self.app[APP.PERKS].tab)
     self:Register(self.app[APP.PERKS].button, "app_button_" .. APP.PERKS)
 
@@ -266,6 +268,7 @@ function npcd_dashboard_tab:InitAppsBar()
     xml:InitStatic("apps_bar:deck:tab_left", self.app[APP.DECK].tab)
     self.app[APP.DECK].button = xml:Init3tButton("apps_bar:deck:button", self.app[APP.DECK].tab)
     self.app[APP.DECK].button:Enable(true)
+    self.app[APP.DECK].button:TextControl():SetFont(GetFontSmall())
     xml:InitStatic("apps_bar:deck:tab_right", self.app[APP.DECK].tab)
     self:Register(self.app[APP.DECK].button, "app_button_" .. APP.DECK)
 
@@ -278,7 +281,7 @@ function npcd_dashboard_tab:InitAppsBar()
 end
 
 function npcd_dashboard_tab:UpdateAppsBar()
-    self.apps_bar:SetWndPos(vector2():set(self.apps_bar:GetWndPos().x, self.apps_bar:GetWndPos().y))
+    -- self.apps_bar:SetWndPos(vector2():set(self.apps_bar:GetWndPos().x, self.apps_bar:GetWndPos().y))
 end
 
 --------------------------------
@@ -376,20 +379,23 @@ function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
     self.menu_scroller.items = {}
 
     self.menu_scroller.scroll = xml:InitScrollView("scroller:scroll", self.menu_scroller.ui.bg)
+    local menu_item = get_menu_items(menu_name)
     local index = 0
-    for _, npc in ipairs(ITEMS[app_name][menu_name]) do
+    for _, npc in ipairs(menu_item or {}) do
         local item = {}
         item.button = xml:Init3tButton("scroller:item_button", nil)
         index = index + 1
         table.insert(self.menu_scroller.items, item)
         self.menu_scroller.scroll:AddWindow(item.button, true)
         item.button:TextControl():SetText(index .. ". " .. npc.name)
+        item.button:TextControl():SetFont(GetFontSmall())
         Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Item Added - Item: " .. npc.name)
         npc.idx = index
         self:Register(item.button, "item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. npc.id)
         self:AddCallback("item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. npc.id, ui_events.BUTTON_CLICKED, function ()
             Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Button Clicked - Item[%s]: " .. npc.name, npc.idx)
             if self.menu_scroller.selected then
+                self.menu_scroller.selected:TextControl():SetFont(GetFontSmall())
                 self.menu_scroller.selected:Enable(true)
             end
             -- local index = self.scroll:GetCurrentScrollPos()
@@ -397,11 +403,10 @@ function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
             self.menu_scroller.selected = self.menu_scroller.items[npc.idx].button
             if self.menu_scroller.selected then
                 self.menu_scroller.selected:Enable(false)
+                self.menu_scroller.selected:TextControl():SetFont(GetFontMedium())
             end
         end, self)
     end
-    -- Printer:DebugTable("Item Scroller Items", self.menu_scroller.items)
-    -- self.menu_scroller.scroll:SetWndPos(vector2():set(self.menu_scroller.scroll:GetWndPos().x, self.menu_scroller.scroll:GetWndPos().y))
     self.menu_scroller.ui.dialog:Show(true)
 end
 
@@ -631,7 +636,10 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
         npcd_ui_fx.resume_fx(activated_translate_fx.id)
     end
     UI_MENU[app_name][menu_name].active = true
-    self:UpdateItemScroller(app_name, menu_name)
+    if app_name == APP.NPCS or app_name == APP.PERKS then
+        self:UpdateItemScroller(app_name, menu_name)
+        -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
+    end
 end
 
 function npcd_dashboard_tab:DeactivateOtherMenus(app_name, menu_name)
@@ -717,6 +725,8 @@ function npcd_dashboard_tab:On_Deck_Button_Clicked()
     self.menu_scroller.ui.dialog:Show(false)
 
     self:ActivateAppPanel(APP.DECK)
+
+    -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
 end
 
 function npcd_dashboard_tab:EnableAppButtons(enable)
@@ -730,6 +740,28 @@ end
 function npcd_dashboard_tab:Update()
     CUIScriptWnd.Update(self)
     -- Update the dashboard contents here if needed.
+end
+
+function get_menu_items(menu_name)
+    
+    local table_items = {}
+
+    local npcs_id_list = npcd.get_npcs_id_list()
+
+    for i = 1, #npcs_id_list do
+        local npc_deck = npcd_npcs_mcm.get_npc(npcs_id_list[i], menu_name)
+        if npc_deck then
+            Printer:Debug(LOG.INFO, CAT.UI, "Menu Item NPC Deck Found: " .. npc_deck.id)
+            Printer:DebugTable("NPC Deck", npc_deck)
+            local npc_data = npcd.get_npc_data(npc_deck.id)
+            if npc_data then
+                Printer:Debug(LOG.INFO, CAT.UI, "Menu Item NPC Data Found: " .. npc_data.id)
+                Printer:DebugTable("NPC Data", npc_data)
+                table.insert(table_items, { id = npc_data.id, name = npc_data.name })
+            end
+        end
+    end
+    return table_items
 end
 
 function on_key_release(key)
