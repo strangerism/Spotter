@@ -305,8 +305,9 @@ end
 local function get_accel_event(accel_length)
 	local chance = math.random(1, 100)
 	if chance > 50 then
-		Printer:Debug(LOG.START, CAT.UI_ACTION," scanlines acceleration event triggered")
-		return math.random(100 * accel_length, 500 * accel_length)
+		local event = math.random(100 * accel_length, 500 * accel_length)
+		Printer:Debug(LOG.START, CAT.UI," scanlines acceleration event triggered %s", event)
+		return event
 	end
 	return nil
 end
@@ -323,11 +324,11 @@ function run_scanlines(runner_name)
 	local x = GUI:GetWndPos().x
 	-- update scanlines
 	if orientation == 0 then
-		x = x + config.direction
+		x = x + config.direction * (config.accel_increment or 1)
 		if x > config.ending_x then x = config.starting_x end
 		if x < config.starting_x then x = config.ending_x end
 	else 
-		y = y + config.direction
+		y = y + config.direction * (config.accel_increment or 1)
 		if y > config.ending_y then y = config.starting_y end
 		if y < config.starting_y then y = config.ending_y end
 	end
@@ -335,7 +336,7 @@ function run_scanlines(runner_name)
 
 	-- check acceleration event
 	if config.random_accel then
-		config.accel_event = config.accel_event or get_accel_event(accel_length or 1)
+		config.accel_event = config.accel_event or get_accel_event(config.accel_length or 1)
 		if config.accel_event then
 			-- initialize acceleration parameters on first run
 			if config.accel_increment == nil then
@@ -343,20 +344,29 @@ function run_scanlines(runner_name)
 				config.accel_max_cycles = config.accel_event
 				config.accel_min_speed = config.speed * 0.1  -- 10x faster at peak
 				config.accel_speed_range = config.speed - config.accel_min_speed
+				config.accel_increment = 1
 			end
-			
+
+			if config.accel_direction > 0 	  and config.accel_cycle > (config.accel_event - math.ceil(config.accel_event/(config.accel_increment + config.accel_direction))) and config.accel_increment < 5 then
+				Printer:Debug(LOG.INFO, CAT.UI," scanlines %s increasing acceleration to %s", runner_name, config.accel_increment + 1)
+				config.accel_increment = config.accel_increment + 1
+			elseif config.accel_direction < 0 and config.accel_cycle < (config.accel_event - math.ceil(config.accel_event/(config.accel_increment + config.accel_direction))) and config.accel_increment > 1 then
+				Printer:Debug(LOG.INFO, CAT.UI," scanlines %s decreasing acceleration to %s", runner_name, config.accel_increment - 1)
+				config.accel_increment = config.accel_increment - 1
+			end
+
 			-- update acceleration cycle
-			config.accel_cycle = config.accel_cycle + config.accel_direction
+			config.accel_cycle = config.accel_cycle + config.accel_direction -- * (config.accel_increment or 1)
 			
 			-- reached max speed, start slowing down
 			if config.accel_cycle >= config.accel_max_cycles then
-				Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s reached max speed, starting slowdown", runner_name)
+				Printer:Debug(LOG.INFO, CAT.UI," scanlines %s reached max speed, starting slowdown", runner_name)
 				config.accel_direction = -1
 			end
 			
 			-- completed acceleration cycle, reset to normal speed
 			if config.accel_cycle <= 0 and config.accel_direction == -1 then
-				Printer:Debug(LOG.STOP, CAT.UI_ACTION," scanlines %s resetting to normal speed %s", runner_name , config.speed)
+				Printer:Debug(LOG.STOP, CAT.UI," scanlines %s resetting to normal speed %s", runner_name , config.speed)
 				-- reset acceleration
 				config.accel_event = nil
 				config.accel_direction = 1
@@ -378,7 +388,7 @@ function run_scanlines(runner_name)
 			new_speed = math.max(new_speed, config.accel_min_speed)
 			
 			npe_execution.RunnerUpdate(runner_name, {loop_timer = new_speed})
-			Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s cycle %s/%s, speed %s", runner_name, config.accel_cycle, config.accel_max_cycles, new_speed)
+			Printer:Debug(LOG.INFO, CAT.UI," scanlines %s cycle %s/%s, speed %s", runner_name, config.accel_cycle, config.accel_max_cycles, new_speed)
 		end
 	end	
 	return true
@@ -389,7 +399,7 @@ function on_start_scanlines(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.dialog then return end
-	Printer:Debug(LOG.INFO, CAT.UI_ACTION," on_start_scanlines %s", runner_name)
+	Printer:Debug(LOG.INFO, CAT.UI," on_start_scanlines %s", runner_name)
 
 	config.starting_y = config.margin_v
 	config.ending_y = config.dialog:GetHeight() - config.margin_v
@@ -637,12 +647,12 @@ function run_translate(runner_name)
 	local config = fx_job.config
 	if not config.fx_ui then return end
 	config.fx_ui:Show(false)
-	Printer:Debug(LOG.INFO, CAT.UI," updating translate dialog %s", runner_name)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," updating translate dialog %s", runner_name)
 	-- update translation
 	local x, y = config.fx_ui:GetWndPos().x, config.fx_ui:GetWndPos().y
 	if config.orientation == 0 then
 		config.cursor = config.cursor + 1 * config.direction
-		Printer:Debug(LOG.INFO, CAT.UI," cursor x:%s", config.cursor)
+		Printer:Debug(LOG.INFO, CAT.UI_ACTION," cursor x:%s", config.cursor)
 		x = config.cursor
 	else
 		config.cursor = config.cursor + 1 * config.direction
@@ -650,7 +660,7 @@ function run_translate(runner_name)
 	end
 	config.fx_ui:SetWndPos(vector2():set(x, y))
 	config.fx_ui:Show(true)
-	Printer:Debug(LOG.INFO, CAT.UI," translating dialog %s to x:%s y:%s length:%s", runner_name, x, y, config.length)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," translating dialog %s to x:%s y:%s length:%s", runner_name, x, y, config.length)
 end
 
 function on_start_translate(runner_name)
@@ -659,12 +669,12 @@ function on_start_translate(runner_name)
 	local config = fx_job.config
 	if not config.dialog then return end
 	config.fx_ui = config.dialog
-	Printer:Debug(LOG.START, CAT.UI," starting translate_dialog %s", runner_name)
+	Printer:Debug(LOG.START, CAT.UI_ACTION," starting translate_dialog %s", runner_name)
 
 	if config.orientation == 0 then
 		config.start_x = config.fx_ui:GetWndPos().x
 		config.end_x = config.start_x + (config.direction * config.length)
-		Printer:Debug(LOG.INFO, CAT.UI," translate_dialog %s from x:%s to x:%s", runner_name, config.start_x, config.end_x)
+		Printer:Debug(LOG.INFO, CAT.UI_ACTION," translate_dialog %s from x:%s to x:%s", runner_name, config.start_x, config.end_x)
 		config.cursor = config.start_x
 	else
 		config.start_y = config.fx_ui:GetWndPos().y
@@ -675,5 +685,5 @@ function on_start_translate(runner_name)
 end
 
 function on_stop_translate(runner_name)
-	Printer:Debug(LOG.STOP, CAT.UI," stopping translate_dialog %s", runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping translate_dialog %s", runner_name)
 end
