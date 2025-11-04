@@ -379,28 +379,28 @@ function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
     self.menu_scroller.items = {}
 
     self.menu_scroller.scroll = xml:InitScrollView("scroller:scroll", self.menu_scroller.ui.bg)
-    local menu_item = get_menu_items(menu_name)
+    local menu_items = get_menu_items(app_name, menu_name)
     local index = 0
-    for _, npc in ipairs(menu_item or {}) do
+    for _, menu_item in ipairs(menu_items or {}) do
         local item = {}
         item.button = xml:Init3tButton("scroller:item_button", nil)
         index = index + 1
         table.insert(self.menu_scroller.items, item)
         self.menu_scroller.scroll:AddWindow(item.button, true)
-        item.button:TextControl():SetText(index .. ". " .. npc.name)
+        item.button:TextControl():SetText(index .. ". " .. gc(menu_item.name) or menu_item.name)
         item.button:TextControl():SetFont(GetFontSmall())
-        Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Item Added - Item: " .. npc.name)
-        npc.idx = index
-        self:Register(item.button, "item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. npc.id)
-        self:AddCallback("item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. npc.id, ui_events.BUTTON_CLICKED, function ()
-            Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Button Clicked - Item[%s]: " .. npc.name, npc.idx)
+        Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Item Added - Item: " .. gc(menu_item.name) or menu_item.name)
+        menu_item.idx = index
+        self:Register(item.button, "item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. menu_item.id)
+        self:AddCallback("item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. menu_item.id, ui_events.BUTTON_CLICKED, function ()
+            Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Button Clicked - Item[%s]: " .. menu_item.name, menu_item.idx)
             if self.menu_scroller.selected then
                 self.menu_scroller.selected:TextControl():SetFont(GetFontSmall())
                 self.menu_scroller.selected:Enable(true)
             end
             -- local index = self.scroll:GetCurrentScrollPos()
-            Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Current Scroll Pos: " .. tostring(npc.idx))
-            self.menu_scroller.selected = self.menu_scroller.items[npc.idx].button
+            Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Current Scroll Pos: " .. tostring(menu_item.idx))
+            self.menu_scroller.selected = self.menu_scroller.items[menu_item.idx].button
             if self.menu_scroller.selected then
                 self.menu_scroller.selected:Enable(false)
                 self.menu_scroller.selected:TextControl():SetFont(GetFontMedium())
@@ -742,25 +742,35 @@ function npcd_dashboard_tab:Update()
     -- Update the dashboard contents here if needed.
 end
 
-function get_menu_items(menu_name)
+function get_menu_items(app_name, menu_name)
     
     local table_items = {}
 
-    local npcs_id_list = npcd.get_npcs_id_list()
+    if app_name == APP.NPCS then
 
-    for i = 1, #npcs_id_list do
-        local npc_deck = npcd_npcs_mcm.get_npc(npcs_id_list[i], menu_name)
-        if npc_deck then
-            Printer:Debug(LOG.INFO, CAT.UI, "Menu Item NPC Deck Found: " .. npc_deck.id)
-            Printer:DebugTable("NPC Deck", npc_deck)
-            local npc_data = npcd.get_npc_data(npc_deck.id)
-            if npc_data then
-                Printer:Debug(LOG.INFO, CAT.UI, "Menu Item NPC Data Found: " .. npc_data.id)
-                Printer:DebugTable("NPC Data", npc_data)
-                table.insert(table_items, { id = npc_data.id, name = npc_data.name })
+        local npcs_id_list = npcd.get_npcs_id_list()
+
+        for i = 1, #npcs_id_list do
+            local npc_deck = npcd_npcs_mcm.get_npc(npcs_id_list[i], menu_name)
+            if npc_deck then
+                Printer:Debug(LOG.INFO, CAT.UI, "Menu Item NPC Deck Found: " .. npc_deck.id)
+                Printer:DebugTable("NPC Deck", npc_deck)
+                local npc_data = npcd.get_npc_data(npc_deck.id)
+                if npc_data then
+                    Printer:Debug(LOG.INFO, CAT.UI, "Menu Item NPC Data Found: " .. npc_data.id)
+                    Printer:DebugTable("NPC Data", npc_data)
+                    table.insert(table_items, { id = npc_data.id, name = npc_data.name })
+                end
             end
         end
     end
+
+    if app_name == APP.PERKS then
+        for perk_id, perk in pairs(npcd.get_perks() or {}) do
+            table.insert(table_items, { id = perk.id, name = perk.name })
+        end
+    end
+
     return table_items
 end
 
