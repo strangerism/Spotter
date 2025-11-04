@@ -176,6 +176,7 @@ function npcd_dashboard_tab:InitAppsBar()
     scanlines.margin_v = 5
     scanlines.intensity = 0.3
     scanlines.random_accel = true
+    scanlines.accel_length = 5
     npcd_ui_fx.add_fx(scanlines)
     self.apps_bar_scanline = scanlines
 
@@ -257,6 +258,8 @@ function npcs_scroller_bg_showing_fx_stop()
         npcd_ui_fx.resume_fx(ui.npcs_scroller_flickering.id)
         ui.npcs_scroller_flickering.force = 500 -- 0.5 seconds
         npcd_ui_fx.resume_fx(ui.npcs_scroller_scanline.id)
+        npcd_ui_fx.resume_fx(ui.npcs_scroller_wide_scanline.id)
+        npcd_ui_fx.resume_fx(ui.npcs_scroller_wide_scanline_2.id)
     end
 end
 
@@ -293,12 +296,38 @@ function npcd_dashboard_tab:InitNPCSPanel()
     scanlines.dialog = self.scroller_bg
     scanlines.speed = 0.025
     scanlines.random_accel = true
-    scanlines.accel_length = 10
+    scanlines.accel_length = 5
     scanlines.margin_v = -5
     scanlines.margin_h = 0
     scanlines.orientation = 1
     npcd_ui_fx.add_fx(scanlines)
     self.npcs_scroller_scanline = scanlines
+
+-- FX: Wide Scanlines on NPCS scroller
+    local wide_scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
+    wide_scanlines.dialog = self.scroller_bg
+    wide_scanlines.speed = 0.04
+    wide_scanlines.random_accel = false
+    wide_scanlines.margin_v = -5
+    wide_scanlines.margin_h = 0
+    wide_scanlines.orientation = 1
+    wide_scanlines.scale = 5
+    wide_scanlines.intensity = 0.05
+    npcd_ui_fx.add_fx(wide_scanlines)
+    self.npcs_scroller_wide_scanline = wide_scanlines
+
+    local wide_scanlines_2 = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
+    wide_scanlines_2.dialog = self.scroller_bg
+    wide_scanlines_2.speed = 0.04
+    wide_scanlines_2.random_accel = false
+    wide_scanlines_2.margin_v = -5
+    wide_scanlines_2.margin_h = 0
+    wide_scanlines_2.offset = 0.5
+    wide_scanlines_2.orientation = 1
+    wide_scanlines_2.scale = 5
+    wide_scanlines_2.intensity = 0.05
+    npcd_ui_fx.add_fx(wide_scanlines_2)
+    self.npcs_scroller_wide_scanline_2 = wide_scanlines_2
 
 -- FX: Flickering on NPCS scroller
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
@@ -422,6 +451,8 @@ function npcd_dashboard_tab:DeactivateOtherPanels(app_name)
             UI_APP[name].active = false
             if name == APP.NPCS then
                 npcd_ui_fx.stop_fx(self.npcs_scroller_scanline.id)
+                npcd_ui_fx.stop_fx(self.npcs_scroller_wide_scanline.id)
+                npcd_ui_fx.stop_fx(self.npcs_scroller_wide_scanline_2.id)
                 npcd_ui_fx.stop_fx(self.npcs_scroller_flickering.id)
             end
         end
