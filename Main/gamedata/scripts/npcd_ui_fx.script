@@ -232,6 +232,16 @@ function resume_fx(fx_id)
 	end
 end
 
+function show_fx(fx_id, show)
+	local fx_job = FX_JOBS[fx_id]
+	if fx_job then
+		-- npe_execution.Resume(fx_job.runner_name)
+		if fx_job.config.fx_ui then
+			fx_job.config.fx_ui:Show(show)
+		end		
+	end
+end
+
 function reset_fx(fx_id)
 	local fx_job = FX_JOBS[fx_id]
 	if fx_job then
@@ -357,7 +367,7 @@ function run_scanlines(runner_name)
 				config.accel_increment = 1
 			end
 
-			if config.accel_direction > 0 	  and config.accel_cycle > (config.accel_event - math.ceil(config.accel_event/(config.accel_increment + config.accel_direction))) and config.accel_increment < 5 then
+			if config.accel_direction > 0 and config.accel_cycle > (config.accel_event - math.ceil(config.accel_event/(config.accel_increment + config.accel_direction))) and config.accel_increment < 5 then
 				Printer:Debug(LOG.INFO, CAT.UI_ACTION," scanlines %s increasing acceleration to %s", runner_name, config.accel_increment + 1)
 				config.accel_increment = config.accel_increment + 1
 			elseif config.accel_direction < 0 and config.accel_cycle < (config.accel_event - math.ceil(config.accel_event/(config.accel_increment + config.accel_direction))) and config.accel_increment > 1 then
@@ -411,15 +421,15 @@ function on_start_scanlines(runner_name)
 	if not config.dialog then return end
 	Printer:Debug(LOG.INFO, CAT.UI_ACTION," on_start_scanlines %s", runner_name)
 
-	config.starting_y = config.margin_v + (config.dialog:GetHeight() * config.offset)
+	config.starting_y = config.margin_v
 	config.ending_y = config.dialog:GetHeight() - config.margin_v
-
+	local start_pos = config.margin_v + (config.dialog:GetHeight() * config.offset)
 	if not config.fx_ui or config.init_on_start then
 		config.fx_ui = xml:InitStatic(config.fx_element, config.dialog)
 	end
 
 	change_ui_alpha(config.fx_ui, (config.intensity and config.intensity * 255) or SCANLINES_ALPHA)
-	config.fx_ui:SetWndPos(vector2():set(config.margin_h, config.starting_y))
+	config.fx_ui:SetWndPos(vector2():set(config.margin_h, start_pos))
     config.fx_ui:SetWndSize(vector2():set(config.dialog:GetWidth() - (config.margin_h + config.margin_h / 2), config.fx_ui:GetHeight() * config.scale))
 	Printer:TraceTable("Scanline Config:", config)
 	return true

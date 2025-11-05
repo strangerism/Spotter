@@ -208,7 +208,7 @@
 
 	<npc_panel x="320" y="210" width="433" height="187" stretch="1">
 		<info_frame x="0" y="0" width="433" height="187" stretch="1">
-			<texture a="200">ui_npcd_pda_npc_detail_panel_frame</texture>
+			<texture a="255">ui_npcd_pda_npc_detail_panel_frame</texture>
 		</info_frame>
 		<info_bg x="31" y="26" width="347" height="147" stretch="1">
 			<texture a="255">ui_npcd_pda_npc_detail_panel_background</texture>
@@ -219,15 +219,24 @@
 		<info_dirt x="33" y="28" width="347" height="147" stretch="1">
 			<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
 		</info_dirt>
-		<info_portrait x="13" y="13" width="122" height="85" stretch="1">
+		<info_portrait x="25" y="25" width="122" height="85" stretch="1">
 			<texture></texture>
 		</info_portrait>
-		<info_name x="18" y="105" width="140" height="16">
+		<info_name x="27" y="118" width="140" height="16">
 			<text align="l" font="letterica18" color="ui_2"/>
 		</info_name>
-		<info_community x="18" y="125" width="140" height="14">
+		<info_community x="27" y="135" width="140" height="14">
 			<text align="l" font="letterica16" color="ui_3"/>
 		</info_community>
+		<info_vseparator x="207" y="45" width="1" height="115" stretch="1">
+			<texture a="150">ui_npcd_codec_750_scanline</texture>
+		</info_vseparator> 	
+		<info_char_cap x="220" y="43" width="140" height="16">
+			<text align="c" font="letterica18" color="ui_2">Characteristics</text>
+		</info_char_cap>
+		<info_hseparator x="220" y="60" width="140" height="1" stretch="1">
+			<texture a="150">ui_npcd_codec_750_scanline</texture>
+		</info_hseparator>		
 		<info_rank x="402" y="19" width="140" height="14">
 			<text align="l" font="letterica25" color="ui_black"/>
 		</info_rank>
