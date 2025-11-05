@@ -193,6 +193,7 @@ function npcd_dashboard_tab:InitControls()
     self:InitDeckPanel()
     self:InitAppsMenu()
     self:InitItemScroller()
+    self:InitNPCPanelInfo()
     self:ActivateAppPanel(APP.HOME)
     xml:InitStatic("right_side", self)
     -- Footer
@@ -391,6 +392,7 @@ function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
         item.button:TextControl():SetFont(GetFontSmall())
         Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Item Added - Item: " .. gc(menu_item.name) or menu_item.name)
         menu_item.idx = index
+        menu_item.app_name = app_name
         self:Register(item.button, "item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. menu_item.id)
         self:AddCallback("item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. menu_item.id, ui_events.BUTTON_CLICKED, function ()
             Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Button Clicked - Item[%s]: " .. menu_item.name, menu_item.idx)
@@ -405,6 +407,7 @@ function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
                 self.menu_scroller.selected:Enable(false)
                 self.menu_scroller.selected:TextControl():SetFont(GetFontMedium())
             end
+            self:UpdateItemPanel(menu_item.app_name, menu_item.id)
         end, self)
     end
     self.menu_scroller.ui.dialog:Show(true)
@@ -446,7 +449,124 @@ function npcs_scroller_glass_showing_fx_stop()
     end
 end
 
+--------------------------------
+--- Panel Info
+--- ----------------------------
 
+
+function npcd_dashboard_tab:UpdateItemPanel(app_name, item_id)
+    Printer:Debug(LOG.INFO, CAT.UI, "Updating Item Panel - App: " .. app_name .. " Item ID: " .. item_id)
+    if app_name == APP.NPCS then
+        npcd_ui_fx.stop_fx(self.npc_panel.info.fx.flickering.id)
+        npcd_ui_fx.stop_fx(self.npc_panel.info.fx.scanline.id)
+        npcd_ui_fx.stop_fx(self.npc_panel.info.fx.wide_scanline.id)
+        self:UpdateNPCPanelInfo(item_id)
+    end
+    npcd_ui_fx.resume_fx(self.npc_panel.info.fx.showing.id)
+end
+
+--- NPC Panel Info
+--- ----------------------------
+
+function npcd_dashboard_tab:InitNPCPanelInfo()
+    Printer:Debug(LOG.INFO, CAT.UI, "Init NPC Panel Info ")
+
+    self.npc_panel = {}
+    self.npc_panel.info = {}
+    self.npc_panel.info.fx = {}
+    local info_dialog = xml:InitStatic("npc_panel", self)
+    self.npc_panel.info.dialog = info_dialog
+    self.npc_panel.info.frame = xml:InitStatic("npc_panel:info_frame", info_dialog)
+
+    -- background
+    self.npc_panel.info.background = xml:InitStatic("npc_panel:info_bg", info_dialog)
+    self.npc_panel.info.background:Show(true)
+    -- glass
+    self.npc_panel.info.glass = xml:InitStatic("npc_panel:info_glass", info_dialog)
+    self.npc_panel.info.glass:Show(false)
+-- FX: Showing on glass
+    local showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
+    showing.dialog = self.npc_panel.info.glass
+    showing.speed = 0.005
+    showing.stop = {"npcd_pda_dashboard", "npc_panel_info_showing_fx_stop"}
+    npcd_ui_fx.add_fx(showing)
+    self.npc_panel.info.fx.showing = showing
+-- FX: Scanlines on glass
+    local scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
+    scanlines.dialog = self.npc_panel.info.glass
+    scanlines.speed = 0.025
+    scanlines.random_accel = false
+    scanlines.accel_length = 5
+    scanlines.margin_v = -5
+    scanlines.margin_h = 0
+    scanlines.orientation = 1
+    npcd_ui_fx.add_fx(scanlines)
+    self.npc_panel.info.fx.scanline = scanlines
+
+-- FX: Wide Scanlines on glass
+    local wide_scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
+    wide_scanlines.dialog = self.npc_panel.info.glass
+    wide_scanlines.speed = 0.06
+    wide_scanlines.random_accel = false
+    wide_scanlines.margin_v = -5
+    wide_scanlines.margin_h = 0
+    wide_scanlines.orientation = 1
+    wide_scanlines.scale = 15
+    wide_scanlines.intensity = 0.05
+    npcd_ui_fx.add_fx(wide_scanlines)
+    self.npc_panel.info.fx.wide_scanline = wide_scanlines
+
+    -- dirt
+    self.npc_panel.info.dirt = xml:InitStatic("npc_panel:info_dirt", info_dialog)
+
+    -- portrait
+    self.npc_panel.info.portrait = xml:InitStatic("npc_panel:info_portrait", self.npc_panel.info.background)
+
+-- FX: Flickering on portrait
+    local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
+    flickering.dialog = self.npc_panel.info.portrait
+    flickering.random_duration = {"npcd_pda_dashboard", "npcs_scroller_glitch_duration"}
+    flickering.random_cooldown = {"npcd_pda_dashboard", "npcs_scroller_glitch_cooldown"}
+    npcd_ui_fx.add_fx(flickering)
+    self.npc_panel.info.fx.flickering = flickering
+    npcd_ui_fx.add_fx_to_manager(flickering.id, self.flickering_manager.id)
+
+    self.npc_panel.info.name = xml:InitTextWnd("npc_panel:info_name", self.npc_panel.info.background)
+    self.npc_panel.info.community = xml:InitTextWnd("npc_panel:info_community", self.npc_panel.info.background)
+    self.npc_panel.info.rank = xml:InitTextWnd("npc_panel:info_rank", self.npc_panel.info.frame)
+    self.npc_panel.info.rank_cap = xml:InitTextWnd("npc_panel:info_rank_cap", self.npc_panel.info.frame)
+
+    self.npc_panel.info.dialog:Show(false)
+end
+
+function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
+    Printer:Debug(LOG.INFO, CAT.UI, "Updating NPC Panel Info - NPC ID: " .. npc_id)
+    self.npc_panel.info.dialog:Show(false)
+
+    -- Update the NPC panel info with the new NPC data
+    local npc_data = npcd.get_npc_data(npc_id)
+    if npc_data then
+        self.npc_panel.info.portrait:InitTexture(npc_data.icon)
+        self.npc_panel.info.name:SetText(npc_data.name)
+        self.npc_panel.info.community:SetText(npc_data.community)
+        self.npc_panel.info.rank:SetText(npc_data.perk_rank)
+        -- self.npc_panel.info.rank:SetFont(GetFontMedium())
+        self.npc_panel.info.dialog:Show(true)
+    end
+end
+
+function npc_panel_info_showing_fx_stop()
+    Printer:Debug(LOG.INFO, CAT.UI, "NPC Panel Info Showing FX Stopped")
+    local ui = get_ui()
+    if ui then
+        Printer:Debug(LOG.START, CAT.UI, "Forcing NPC Panel Info Flickering FX to start")
+        npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.flickering.id)
+        ui.npc_panel.info.fx.flickering.force = 100 -- 0.5 seconds
+        npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.scanline.id)
+        npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.wide_scanline.id)
+        ui.npc_panel.info.background:Show(true)
+    end
+end
 --------------------------------
 --- Apps Menu
 --- ----------------------------

@@ -191,7 +191,7 @@
 		<!-- item_button x,y are relative to scroller_bg -->
 		<scroll x="5" y="9" width="113" height="340" right_ident="0" left_ident="0" top_indent="0" bottom_indent="0" vert_interval="0" always_show_scroll="0"/>
 		<item_button x="5" y="0" width="103" height="30" stretch="1">
-			<text align="l" vert_align="b" x="7" y="5" font="letterica16"></text>
+			<text align="l" vert_align="b" x="7" y="5" font="arial_14"></text>
 			<texture>ui_npcd_pda_scroller_item_darkfill_button</texture>
 			<text_color>
 				<e r="200" g="200" b="200"/>
@@ -202,9 +202,65 @@
 		</item_button>							
 	</scroller>			
 
-	<panel_bg x="43" y="185" width="733" height="500" stretch="1">
+	<panel_bg x="176" y="185" width="733" height="500" stretch="1">
 		<texture a="100">ui_npcd_pda_dashboard_panel_bg</texture>
 	</panel_bg>	
+
+	<npc_panel x="320" y="210" width="433" height="187" stretch="1">
+		<info_frame x="0" y="0" width="433" height="187" stretch="1">
+			<texture a="200">ui_npcd_pda_npc_detail_panel_frame</texture>
+		</info_frame>
+		<info_bg x="31" y="26" width="347" height="147" stretch="1">
+			<texture a="255">ui_npcd_pda_npc_detail_panel_background</texture>
+		</info_bg>
+		<info_glass x="33" y="28" width="347" height="147" stretch="1">
+			<texture a="100">ui_npcd_pda_npc_detail_panel_glass</texture>
+		</info_glass>
+		<info_dirt x="33" y="28" width="347" height="147" stretch="1">
+			<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
+		</info_dirt>
+		<info_portrait x="13" y="13" width="122" height="85" stretch="1">
+			<texture></texture>
+		</info_portrait>
+		<info_name x="18" y="105" width="140" height="16">
+			<text align="l" font="letterica18" color="ui_2"/>
+		</info_name>
+		<info_community x="18" y="125" width="140" height="14">
+			<text align="l" font="letterica16" color="ui_3"/>
+		</info_community>
+		<info_rank x="402" y="19" width="140" height="14">
+			<text align="l" font="letterica25" color="ui_black"/>
+		</info_rank>
+		<info_rank_cap x="398" y="34" width="140" height="14">
+			<text align="l" font="letterica18" color="ui_black">rank</text>
+		</info_rank_cap>			
+	</npc_panel>
+
+<!-- 
+	<npc_panel x="320" y="210" width="666" height="288" stretch="1">
+		<info_frame x="0" y="0" width="666" height="288" stretch="1">
+			<texture a="200">ui_npcd_pda_npc_detail_panel_frame</texture>
+		</info_frame>
+		<info_bg x="48" y="41" width="535" height="227" stretch="1">
+			<texture>ui_npcd_pda_npc_detail_panel_background</texture>
+		</info_bg>
+		<info_glass x="48" y="41" width="535" height="227" stretch="1">
+			<texture>ui_npcd_pda_npc_detail_panel_glass</texture>
+		</info_glass>
+		<info_dirt x="48" y="41" width="535" height="227" stretch="1">
+			<texture>ui_npcd_pda_npc_detail_panel_dirt</texture>
+		</info_dirt>
+		<info_portrait x="80" y="80" width="122" height="87" stretch="1">
+			<texture></texture>
+		</info_portrait>
+		<info_name x="80" y="180" width="140" height="16">
+			<text align="l" font="letterica18" color="ui_2"/>
+		</info_name>
+		<info_community x="80" y="200" width="140" height="14">
+			<text align="l" font="letterica16" color="ui_3"/>
+		</info_community>
+	</npc_panel>
+	 -->
 <!-- 
 	<main x="34" y="185" width="751" height="500" stretch="1">
 		<texture a="100">ui_npcd_pda_dashboard_panel_bg</texture>
