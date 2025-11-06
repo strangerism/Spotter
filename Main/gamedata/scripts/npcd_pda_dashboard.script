@@ -489,16 +489,10 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 
 
     -- background
-    self.npc_panel.info.background = xml:InitStatic("npc_panel:info_bg", info_dialog)
+    self.npc_panel.info.background = xml:InitStatic("npc_panel:bg", info_dialog)
     self.npc_panel.info.background:Show(true)
-    self.npc_panel.info.vseparator = xml:InitStatic("npc_panel:info_vseparator", info_dialog)
-    self.npc_panel.info.vseparator:Show(true)
-    self.npc_panel.info.char_cap = xml:InitStatic("npc_panel:info_char_cap", info_dialog)
-    self.npc_panel.info.char_cap:Show(true)    
-    self.npc_panel.info.hseparator = xml:InitStatic("npc_panel:info_hseparator", info_dialog)
-    self.npc_panel.info.hseparator:Show(true)
     -- glass
-    self.npc_panel.info.glass = xml:InitStatic("npc_panel:info_glass", info_dialog)
+    self.npc_panel.info.glass = xml:InitStatic("npc_panel:glass", info_dialog)
     self.npc_panel.info.glass:Show(false)
 -- FX: Showing on glass
     local showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
@@ -536,11 +530,20 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.fx.wide_scanline = wide_scanlines
 
     -- dirt
-    self.npc_panel.info.dirt = xml:InitStatic("npc_panel:info_dirt", info_dialog)
+    self.npc_panel.info.dirt = xml:InitStatic("npc_panel:dirt", info_dialog)
 
+    -- frame
+    self.npc_panel.info.frame = xml:InitStatic("npc_panel:frame", info_dialog)
+    self.npc_panel.info.rank = xml:InitTextWnd("npc_panel:rank", info_dialog)
+    self.npc_panel.info.rank_cap = xml:InitTextWnd("npc_panel:rank_cap", info_dialog)
+
+    --------------------------------
+    -- portrait frame
+    -- ------------------------------
+    local portrait_frame = xml:InitFrame("npc_panel:portrait_frame", info_dialog)
+    self.npc_panel.info.portrait_frame = portrait_frame
     -- portrait
-    self.npc_panel.info.portrait = xml:InitStatic("npc_panel:info_portrait", self.npc_panel.info.background)
-
+    self.npc_panel.info.portrait = xml:InitStatic("npc_panel:portrait_frame:portrait", portrait_frame)
 -- FX: Showing on portrait
     local showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
     showing.dialog = self.npc_panel.info.portrait
@@ -548,7 +551,6 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     -- showing.stop = {"npcd_pda_dashboard", "npc_panel_info_showing_fx_stop"}
     npcd_ui_fx.add_fx(showing)
     self.npc_panel.info.fx.portrait_showing = showing
-
 -- FX: Flickering on portrait
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     flickering.dialog = self.npc_panel.info.portrait
@@ -557,13 +559,24 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     npcd_ui_fx.add_fx(flickering)
     self.npc_panel.info.fx.flickering = flickering
     npcd_ui_fx.add_fx_to_manager(flickering.id, self.npc_panel.info.fx.flickering_manager.id)
+    -- name and community
+    self.npc_panel.info.name = xml:InitTextWnd("npc_panel:portrait_frame:name", portrait_frame)
+    self.npc_panel.info.community = xml:InitTextWnd("npc_panel:portrait_frame:community", portrait_frame)
 
-    self.npc_panel.info.frame = xml:InitStatic("npc_panel:info_frame", info_dialog)
+    --------------------------------
+    -- char frame
+    -- ------------------------------
+    local char_frame = xml:InitFrame("npc_panel:char_frame", info_dialog)
+    self.npc_panel.info.char_frame = char_frame
+    self.npc_panel.info.vseparator = xml:InitStatic("npc_panel:char_frame:vseparator", char_frame)
+    self.npc_panel.info.vseparator:Show(true)
+    self.npc_panel.info.hseparator = xml:InitStatic("npc_panel:char_frame:hseparator", char_frame)
+    self.npc_panel.info.hseparator:Show(true)
+    self.npc_panel.info.char_bg = xml:InitStatic("npc_panel:char_frame:char_bg", char_frame)
+    self.npc_panel.info.char_bg:Show(true)
+    self.npc_panel.info.char_cap = xml:InitTextWnd("npc_panel:char_frame:char_cap", char_frame)
+    self.npc_panel.info.char_cap:Show(true)
 
-    self.npc_panel.info.name = xml:InitTextWnd("npc_panel:info_name", self.npc_panel.info.background)
-    self.npc_panel.info.community = xml:InitTextWnd("npc_panel:info_community", self.npc_panel.info.background)
-    self.npc_panel.info.rank = xml:InitTextWnd("npc_panel:info_rank", self.npc_panel.info.frame)
-    self.npc_panel.info.rank_cap = xml:InitTextWnd("npc_panel:info_rank_cap", self.npc_panel.info.frame)
 
     self.npc_panel.info.dialog:Show(false)
 end
