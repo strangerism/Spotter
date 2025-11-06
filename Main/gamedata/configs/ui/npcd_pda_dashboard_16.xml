@@ -211,10 +211,10 @@
 			<texture a="255">ui_npcd_pda_npc_detail_panel_frame</texture>
 		</frame>
 		<bg x="31" y="26" width="347" height="147" stretch="1">
-			<texture a="255">ui_npcd_pda_npc_detail_panel_background</texture>
+			<texture a="255">ui_npcd_pda_npc_detail_info_display_bg</texture>
 		</bg>
 		<glass x="33" y="28" width="347" height="147" stretch="1">
-			<texture a="100">ui_npcd_pda_npc_detail_panel_glass</texture>
+			<texture a="100">ui_npcd_pda_npc_detail_info_display_glass</texture>
 		</glass>
 		<dirt x="33" y="28" width="347" height="147" stretch="1">
 			<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
@@ -234,8 +234,8 @@
 			<vseparator x="3" y="20" width="1" height="125" stretch="1">
 				<texture a="100">ui_npcd_codec_750_scanline</texture>
 			</vseparator> 	
-			<top_line x="08" y="15" width="210" height="1" stretch="1">
-				<texture a="150">ui_npcd_codec_750_scanline</texture>
+			<top_line x="08" y="15" width="210" height="2" stretch="1">
+				<texture a="150">ui_npcd_pda_npc_detail_info_header</texture>
 			</top_line>			
 			<char_bg x="08" y="15" width="210" height="16" stretch="1">
 				<texture a="50">ui_npcd_pda_scroller_item_green_button_d</texture>

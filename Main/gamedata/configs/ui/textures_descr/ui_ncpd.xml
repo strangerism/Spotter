@@ -89,6 +89,11 @@
 		<texture id="ui_npcd_pda_npc_detail_panel_glass" x="2213" y="371" width="535" height="227" />
 		<texture id="ui_npcd_pda_npc_detail_panel_dirt" x="2213" y="621" width="535" height="227" />
 		<texture id="ui_npcd_pda_npc_detail_panel_background" x="2213" y="888" width="535" height="227" />
+		<texture id="ui_npcd_pda_npc_detail_info_header" x="1136" y="23" width="361" height="7" />
+
+		<!-- npc info display -->
+		<texture id="ui_npcd_pda_npc_detail_info_display_bg" x="12" y="894" width="877" height="419" />
+		<texture id="ui_npcd_pda_npc_detail_info_display_glass" x="11" y="1323" width="877" height="419" />
 
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">
