@@ -16,6 +16,7 @@ LOG = {
     ADD = { tag = "-"},
     REMOVE = { tag = "*"},
     RUN = { tag = "/"},
+    NOTICE = { tag = "#"},
 }
 -- categories
 CAT = {

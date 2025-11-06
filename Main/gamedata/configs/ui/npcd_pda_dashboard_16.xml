@@ -224,25 +224,28 @@
 				<texture></texture>
 			</portrait>
 			<name x="2" y="93" width="140" height="16">
-				<text align="l" font="letterica18" color="ui_2"/>
+				<text align="l" font="letterica18" color="pda_green"/>
 			</name>
 			<community x="2" y="110" width="140" height="14">
 				<text align="l" font="letterica16" color="ui_3"/>
 			</community>
 		</portrait_frame>
-		<char_frame x="175" y="20" width="175" height="187">
-			<vseparator x="0" y="18" width="1" height="125" stretch="1">
-				<texture a="150">ui_npcd_codec_750_scanline</texture>
+		<char_frame x="175" y="20" width="175" height="150">
+			<vseparator x="0" y="20" width="1" height="125" stretch="1">
+				<texture a="100">ui_npcd_codec_750_scanline</texture>
 			</vseparator> 	
-			<hseparator x="08" y="18" width="170" height="1" stretch="1">
+			<top_line x="08" y="20" width="180" height="1" stretch="1">
 				<texture a="150">ui_npcd_codec_750_scanline</texture>
-			</hseparator>			
-			<char_bg x="08" y="18" width="170" height="16" stretch="1">
+			</top_line>			
+			<char_bg x="08" y="20" width="180" height="16" stretch="1">
 				<texture a="50">ui_npcd_pda_scroller_item_green_button_d</texture>
 			</char_bg>				
-			<char_cap x="08" y="21" width="170" height="16">
-				<text align="c" font="letterica18" color="ui_2">Characteristics</text>
-			</char_cap>			
+			<char_cap x="08" y="23" width="180" height="16">
+				<text align="c" font="letterica18" color="pda_green">Characteristics</text>
+			</char_cap>		
+			<bottom_line x="08" y="145" width="180" height="1" stretch="1">
+				<texture a="150">ui_npcd_codec_750_scanline</texture>
+			</bottom_line>					
 		</char_frame>
 		<rank x="402" y="19" width="140" height="14">
 			<text align="l" font="letterica25" color="ui_black"/>

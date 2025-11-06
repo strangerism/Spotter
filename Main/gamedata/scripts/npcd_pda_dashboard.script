@@ -201,6 +201,12 @@ function npcd_dashboard_tab:InitControls()
 
 end
 
+-- destroy UI
+function npcd_dashboard_tab:Destroy()
+    Printer:Debug(LOG.INFO, CAT.UI, "Destroying NPCD PDA Dashboard UI")
+    npcd_ui_fx.remove_all_fx()
+    SINGLETON = nil
+end
 
 --------------------------------
 --- APP Bar
@@ -525,7 +531,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     wide_scanlines.offset = 0.5
     wide_scanlines.orientation = 1
     wide_scanlines.scale = 15
-    wide_scanlines.intensity = 0.05
+    wide_scanlines.intensity = 0.07
     -- npcd_ui_fx.add_fx(wide_scanlines)
     self.npc_panel.info.fx.wide_scanline = wide_scanlines
 
@@ -554,6 +560,8 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 -- FX: Flickering on portrait
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     flickering.dialog = self.npc_panel.info.portrait
+    flickering.intensity = 0.65
+    -- flickering.max_intensity = 0.9
     flickering.random_duration = {"npcd_pda_dashboard", "npcs_scroller_glitch_duration"}
     flickering.random_cooldown = {"npcd_pda_dashboard", "npcs_scroller_glitch_cooldown"}
     npcd_ui_fx.add_fx(flickering)
@@ -570,13 +578,14 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.char_frame = char_frame
     self.npc_panel.info.vseparator = xml:InitStatic("npc_panel:char_frame:vseparator", char_frame)
     self.npc_panel.info.vseparator:Show(true)
-    self.npc_panel.info.hseparator = xml:InitStatic("npc_panel:char_frame:hseparator", char_frame)
-    self.npc_panel.info.hseparator:Show(true)
+    self.npc_panel.info.top_line = xml:InitStatic("npc_panel:char_frame:top_line", char_frame)
+    self.npc_panel.info.top_line:Show(true)
     self.npc_panel.info.char_bg = xml:InitStatic("npc_panel:char_frame:char_bg", char_frame)
     self.npc_panel.info.char_bg:Show(true)
     self.npc_panel.info.char_cap = xml:InitTextWnd("npc_panel:char_frame:char_cap", char_frame)
     self.npc_panel.info.char_cap:Show(true)
-
+    self.npc_panel.info.bottom_line = xml:InitStatic("npc_panel:char_frame:bottom_line", char_frame)
+    self.npc_panel.info.bottom_line:Show(true)
 
     self.npc_panel.info.dialog:Show(false)
 end

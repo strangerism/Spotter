@@ -212,6 +212,12 @@ function remove_fx(fx_id)
 	end
 end
 
+function remove_all_fx()
+	for fx_id, _ in pairs(FX_JOBS) do
+		remove_fx(fx_id)
+	end
+end
+
 function stop_fx(fx_id)
 	local fx_job = FX_JOBS[fx_id]
 	if fx_job then

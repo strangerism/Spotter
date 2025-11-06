@@ -286,6 +286,12 @@ function add_npc(npc_id)
 	npcs[npc_id]["Info"]["last_place_seen"] = nil
 	npcs[npc_id]["Info"]["last_place_tracked"] = nil
 	npcs[npc_id]["Info"]["codec_frequency"] = nil
+	npcs[npc_id]["Characteristics"]["survival"] = 100
+	npcs[npc_id]["Characteristics"]["energy"] = 100
+	npcs[npc_id]["Characteristics"]["recuperation"] = 100
+	npcs[npc_id]["Characteristics"]["marksmanship"] = 100
+	npcs[npc_id]["Characteristics"]["resolve"] = 100
+	npcs[npc_id]["Characteristics"]["comradery"] = 100
 	return true
 end
 
