@@ -461,18 +461,13 @@ function npcd_dashboard_tab:UpdateItemPanel(app_name, item_id)
             Printer:Debug(LOG.INFO, CAT.UI, "Initializing new panel")
             npcd_ui_fx.stop_fx(self.npc_panel.info.fx.flickering.id)
             npcd_ui_fx.stop_fx(self.npc_panel.info.fx.scanline.id)
-            npcd_ui_fx.stop_fx(self.npc_panel.info.fx.wide_scanline.id)
+            -- npcd_ui_fx.stop_fx(self.npc_panel.info.fx.wide_scanline.id)
             npcd_ui_fx.resume_fx(self.npc_panel.info.fx.showing.id)
         else
             npcd_ui_fx.resume_fx(self.npc_panel.info.fx.portrait_showing.id)
-            -- Printer:Debug(LOG.INFO, CAT.UI, "Stopping panel FXs")
-            -- npcd_ui_fx.show_fx(self.npc_panel.info.fx.flickering.id, false)
-            -- npcd_ui_fx.show_fx(self.npc_panel.info.fx.scanline.id, false)
-            -- npcd_ui_fx.show_fx(self.npc_panel.info.fx.wide_scanline.id, false)
         end
         self:UpdateNPCPanelInfo(item_id)
     end
-    -- npcd_ui_fx.resume_fx(self.npc_panel.info.fx.showing.id)
 end
 
 --- NPC Panel Info
@@ -484,7 +479,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel = {}
     self.npc_panel.info = {}
     self.npc_panel.info.fx = {}
-    local info_dialog = xml:InitStatic("npc_panel", self)
+    local info_dialog = xml:InitFrame("npc_panel", self)
     self.npc_panel.info.dialog = info_dialog
 
 -- FX: Flickering Manager 
@@ -529,7 +524,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 -- FX: Wide Scanlines on glass
     local wide_scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
     wide_scanlines.dialog = self.npc_panel.info.glass
-    wide_scanlines.speed = 0.06
+    wide_scanlines.speed = 0.04
     wide_scanlines.random_accel = false
     wide_scanlines.margin_v = 3
     wide_scanlines.margin_h = 0
@@ -537,7 +532,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     wide_scanlines.orientation = 1
     wide_scanlines.scale = 15
     wide_scanlines.intensity = 0.05
-    npcd_ui_fx.add_fx(wide_scanlines)
+    -- npcd_ui_fx.add_fx(wide_scanlines)
     self.npc_panel.info.fx.wide_scanline = wide_scanlines
 
     -- dirt
@@ -603,14 +598,6 @@ function npc_panel_info_showing_fx_stop()
         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.wide_scanline.id)
         ui.npc_panel.info.background:Show(true)
         panel_init = true
-    -- else
-    --     Printer:Debug(LOG.START, CAT.UI, "Resuming NPC Panel Info Flickering FX")
-    --     npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.portrait_showing.id)
-    --     -- npcd_ui_fx.show_fx(ui.npc_panel.info.fx.flickering.id, true)
-    --     -- npcd_ui_fx.show_fx(ui.npc_panel.info.fx.scanline.id, true)
-    --     -- npcd_ui_fx.show_fx(ui.npc_panel.info.fx.wide_scanline.id, true)
-    --     -- npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.portrait_showing.id)
-    --     ui.npc_panel.info.background:Show(true)
     end
 end
 --------------------------------

@@ -199,6 +199,7 @@ function add_fx(fx_config)
 	fx_config.id = fx_id
 	if fx_config.fx_element and not fx_config.init_on_start then
 		fx_config.fx_ui = xml:InitStatic(fx_config.fx_element, fx_config.dialog)
+		fx_config.fx_ui:Show(false)
 	end
 	Printer:TraceTable("Adding FX:", fx_config)
 end
