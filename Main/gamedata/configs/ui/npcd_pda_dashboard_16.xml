@@ -219,33 +219,42 @@
 		<dirt x="33" y="28" width="347" height="147" stretch="1">
 			<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
 		</dirt>
-		<portrait_frame x="45" y="45" width="216" height="187">
-			<portrait x="0" y="0" width="122" height="85" stretch="1">
+		<portrait_frame x="45" y="45" width="150" height="187">
+			<portrait x="0" y="0" width="109" height="76" stretch="1">
 				<texture></texture>
 			</portrait>
-			<name x="2" y="93" width="140" height="16">
+			<name x="2" y="93" width="100" height="16">
 				<text align="l" font="letterica18" color="pda_green"/>
 			</name>
-			<community x="2" y="110" width="140" height="14">
+			<community x="2" y="110" width="100" height="14">
 				<text align="l" font="letterica16" color="ui_3"/>
 			</community>
 		</portrait_frame>
-		<char_frame x="175" y="20" width="175" height="150">
-			<vseparator x="0" y="20" width="1" height="125" stretch="1">
+		<char_frame x="155" y="22" width="210" height="150">
+			<vseparator x="3" y="20" width="1" height="125" stretch="1">
 				<texture a="100">ui_npcd_codec_750_scanline</texture>
 			</vseparator> 	
-			<top_line x="08" y="20" width="180" height="1" stretch="1">
+			<top_line x="08" y="15" width="210" height="1" stretch="1">
 				<texture a="150">ui_npcd_codec_750_scanline</texture>
 			</top_line>			
-			<char_bg x="08" y="20" width="180" height="16" stretch="1">
+			<char_bg x="08" y="15" width="210" height="16" stretch="1">
 				<texture a="50">ui_npcd_pda_scroller_item_green_button_d</texture>
 			</char_bg>				
-			<char_cap x="08" y="23" width="180" height="16">
+			<char_header x="08" y="18" width="210" height="16">
 				<text align="c" font="letterica18" color="pda_green">Characteristics</text>
-			</char_cap>		
-			<bottom_line x="08" y="145" width="180" height="1" stretch="1">
+			</char_header>		
+			<bottom_line x="08" y="145" width="210" height="1" stretch="1">
 				<texture a="150">ui_npcd_codec_750_scanline</texture>
-			</bottom_line>					
+			</bottom_line>
+			<char_ico x="08" y="20" width="16" height="16" stretch="1">
+				<texture a="150"></texture>
+			</char_ico>				
+			<char_label x="28" y="25" width="60" height="16">
+				<text align="l" font="letterica18" color="pda_green"></text>
+			</char_label>		
+			<char_value x="75" y="25" width="30" height="16">
+				<text align="r" font="letterica18" color="pda_green"></text>
+			</char_value>									
 		</char_frame>
 		<rank x="402" y="19" width="140" height="14">
 			<text align="l" font="letterica25" color="ui_black"/>

@@ -286,12 +286,7 @@ function add_npc(npc_id)
 	npcs[npc_id]["Info"]["last_place_seen"] = nil
 	npcs[npc_id]["Info"]["last_place_tracked"] = nil
 	npcs[npc_id]["Info"]["codec_frequency"] = nil
-	npcs[npc_id]["Characteristics"]["survival"] = 100
-	npcs[npc_id]["Characteristics"]["energy"] = 100
-	npcs[npc_id]["Characteristics"]["recuperation"] = 100
-	npcs[npc_id]["Characteristics"]["marksmanship"] = 100
-	npcs[npc_id]["Characteristics"]["resolve"] = 100
-	npcs[npc_id]["Characteristics"]["comradery"] = 100
+	npcs[npc_id]["Characteristics"] = {}
 	return true
 end
 
@@ -561,6 +556,18 @@ local function add_random_perk(npc_id, perk_type, amount)
 	end
 end
 
+function add_characteristics(npc_id)
+	-- characteristics can be further customized here
+	-- for now they are randomly generated within a range
+	npcs[npc_id].Characteristics["survival"] = math.random(50, 90)
+	npcs[npc_id].Characteristics["energy"] = math.random(60, 100)
+	npcs[npc_id].Characteristics["recuperation"] = math.random(40, 80)
+	npcs[npc_id].Characteristics["marksmanship"] = math.random(70, 100)
+	npcs[npc_id].Characteristics["resolve"] = math.random(50, 90)
+	npcs[npc_id].Characteristics["comradery"] = math.random(20, 70)
+	npcs[npc_id].Characteristics["capacity"] = math.random(40, 80)
+end
+
 function create_profile(npc_id)
 	Printer:Log(LOG.RUN, CAT.CONF,"npc %s create profile", npc_id)
 	-- ARCHETYPE
@@ -569,6 +576,8 @@ function create_profile(npc_id)
 	add_random_perk(npc_id, PERK_TYPE.MAIN, get_archetype_perk(npc_id) and (MAX_MAIN_PERKS - 1) or MAX_MAIN_PERKS)
 	-- SECONDARY PERKS
 	add_random_perk(npc_id, PERK_TYPE.SECONDARY, MAX_SECONDARY_PERKS)
+
+	add_characteristics(npc_id)
 
 	npcs[npc_id].has_profile = true
 	Printer:LogTable(string.format("Create Profile NPC %s", npc_id), npcs[npc_id])

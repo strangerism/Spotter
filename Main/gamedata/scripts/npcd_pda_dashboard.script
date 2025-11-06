@@ -52,6 +52,16 @@ local MENU = {
         EFFECTS = "effects",
 }
 
+NPCS_CHARACTERISTICS = {
+    SURVIVAL = {id = "survival", ico = "ui_inGame2_inv_state_fire_wound", label = "st_npcd_char_survival"},
+    ENERGY = {id = "energy", ico = "ui_inGame2_inv_state_shock", label = "st_npcd_char_energy"},
+    RECUPERATION = {id = "recuperation", ico = "ui_inGame2_inv_state_health", label = "st_npcd_char_recuperation"},
+    MARKSMANSHIP = {id = "marksmanship", ico = "ui_inGame2_btn_sort_weapon_e", label = "st_npcd_char_marksmanship"},
+    RESOLVE = {id = "resolve", ico = "ui_inGame2_inv_state_psi", label = "st_npcd_char_resolve"},
+    COMRADERY = {id = "comradery", ico = "ui_inGame2_inv_state_power", label = "st_npcd_char_comradery"},
+    CAPACITY = {id = "capacity", ico = "ui_inGame2_btn_sort_all_e", label = "st_npcd_char_capacity"},
+}
+
 local STRING_PREFIX = "pda_btn_npcd_"
 
 local UI_APP = {}
@@ -516,7 +526,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     scanlines.margin_v = 3
     scanlines.margin_h = 0
     scanlines.scale = 15
-    scanlines.intensity = 0.05
+    scanlines.intensity = 0.07
     scanlines.orientation = 1
     npcd_ui_fx.add_fx(scanlines)
     self.npc_panel.info.fx.scanline = scanlines
@@ -582,11 +592,37 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.top_line:Show(true)
     self.npc_panel.info.char_bg = xml:InitStatic("npc_panel:char_frame:char_bg", char_frame)
     self.npc_panel.info.char_bg:Show(true)
-    self.npc_panel.info.char_cap = xml:InitTextWnd("npc_panel:char_frame:char_cap", char_frame)
-    self.npc_panel.info.char_cap:Show(true)
+    self.npc_panel.info.char_header = xml:InitTextWnd("npc_panel:char_frame:char_header", char_frame)
+    self.npc_panel.info.char_header:Show(true)
     self.npc_panel.info.bottom_line = xml:InitStatic("npc_panel:char_frame:bottom_line", char_frame)
     self.npc_panel.info.bottom_line:Show(true)
+    self.npc_panel.info.characteristics = {}
+    local i = 1
+    local x_offset = 0
+    for _, char_name in pairs(NPCS_CHARACTERISTICS) do
+        self.npc_panel.info.characteristics[char_name.id] = {}
+        local icon = xml:InitStatic("npc_panel:char_frame:char_ico", char_frame)
+        self.npc_panel.info.characteristics[char_name.id].icon = icon
+        self.npc_panel.info.characteristics[char_name.id].icon:InitTexture(char_name.ico)
+        self.npc_panel.info.characteristics[char_name.id].icon:SetWndPos(vector2():set(icon:GetWndPos().x + x_offset, icon:GetWndPos().y + i * icon:GetHeight()))
 
+        local label = xml:InitTextWnd("npc_panel:char_frame:char_label", char_frame)
+        self.npc_panel.info.characteristics[char_name.id].label = label
+        self.npc_panel.info.characteristics[char_name.id].label:SetText(gc(char_name.label))
+        self.npc_panel.info.characteristics[char_name.id].label:SetFont(GetFontSmall())
+        self.npc_panel.info.characteristics[char_name.id].label:SetWndPos(vector2():set(label:GetWndPos().x + x_offset, label:GetWndPos().y + i * icon:GetHeight()))
+
+        local value = xml:InitTextWnd("npc_panel:char_frame:char_value", char_frame)
+        self.npc_panel.info.characteristics[char_name.id].value = value
+        self.npc_panel.info.characteristics[char_name.id].value:SetText("n/a")
+        self.npc_panel.info.characteristics[char_name.id].value:SetWndPos(vector2():set(value:GetWndPos().x + x_offset, value:GetWndPos().y + i * icon:GetHeight()))
+        self.npc_panel.info.characteristics[char_name.id].value:SetFont(GetFontSmall())
+        i = i + 1
+        if i > 6 then
+            i = 1
+            x_offset = x_offset + 105
+        end
+    end
     self.npc_panel.info.dialog:Show(false)
 end
 
@@ -602,9 +638,21 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
         self.npc_panel.info.community:SetText(npc_data.community)
         self.npc_panel.info.rank:SetText(npc_data.perk_rank)
         -- self.npc_panel.info.rank:SetFont(GetFontMedium())
-        self.npc_panel.info.dialog:Show(true)
-        self.npc_panel.info.portrait:Show(false)
     end
+
+    local npc_deck = npcd.get_npc(npc_id)
+    Printer:DebugTable("NPC DECK", npc_deck)
+    if npc_deck then
+        for name, value in pairs(npc_deck.Characteristics or {}) do
+            Printer:Debug(LOG.INFO, CAT.UI, "NPC Characteristic[" .. name .. "]: " .. value)
+            if self.npc_panel.info.characteristics[name] then
+                self.npc_panel.info.characteristics[name].value:SetText(tostring(value) or "n/a")
+            end
+        end
+    end
+
+    self.npc_panel.info.dialog:Show(true)
+    self.npc_panel.info.portrait:Show(false)
 end
 
 panel_init = false

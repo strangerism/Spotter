@@ -281,5 +281,27 @@
 	</string>
 	<string id="pda_btn_npcd_menu_effects">
 		<text>Effects</text>
-	</string>					
+	</string>
+	<!-- NPCS Characteristics-->
+	<string id="st_npcd_char_survival">
+		<text>Survival</text>
+	</string>
+	<string id="st_npcd_char_energy">
+		<text>Energy</text>
+	</string>
+	<string id="st_npcd_char_recuperation">
+		<text>Recuperation</text>
+	</string>
+	<string id="st_npcd_char_marksmanship">
+		<text>Marksmanship</text>
+	</string>
+	<string id="st_npcd_char_resolve">
+		<text>Resolve</text>
+	</string>
+	<string id="st_npcd_char_comradery">
+		<text>Comradery</text>
+	</string>		
+	<string id="st_npcd_char_capacity">
+		<text>Capacity</text>
+	</string>		
 </string_table>
