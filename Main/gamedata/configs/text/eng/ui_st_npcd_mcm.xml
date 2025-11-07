@@ -243,7 +243,7 @@
 	<string id="pda_btn_npcd">
 		<text>NPCD</text>
 	</string>	
-	<string id="pda_btn_npcd_app_npcs">
+	<string id="pda_btn_npcd_app_profiles">
 		<text>Profiles</text>
 	</string>
 	<string id="pda_btn_npcd_app_perks">
