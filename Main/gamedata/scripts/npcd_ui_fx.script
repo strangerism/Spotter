@@ -91,8 +91,6 @@ FX = {
 }
 
 local FX_CONFIG = {
-	[FX.SHOWING] = {
-	},
 	[FX.HIDING] = {
 	},
 	[FX.SCANLINES] = {
@@ -147,6 +145,7 @@ local FX_CONFIG = {
 		cursor = 0,
 		y = 0,
 		height = 0,
+		on_showing_complete = nil,
 	},
 	[FX.TRANSLATE] = { -- translate the dialog from its initial position along the specified orientation and direction
 		type = FX.TRANSLATE,
@@ -608,7 +607,7 @@ function run_show(runner_name)
 	local new_height = config.cursor * 2
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, new_y))
 	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), new_height))
-	Printer:Debug(LOG.INFO, CAT.UI_ACTION," showing portrait %s at y:%s height:%s", runner_name, new_y, new_height)
+	Printer:Debug(LOG.INFO, CAT.UI," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
 end
 
 function on_start_show(runner_name)
@@ -617,11 +616,14 @@ function on_start_show(runner_name)
 	local config = fx_job.config
 	if not config.dialog then return end
 	config.fx_ui = config.dialog
-	Printer:Debug(LOG.START, CAT.UI_ACTION," starting show_portrait")
-
-	config.cursor = 0
+	Printer:Debug(LOG.START, CAT.UI," starting show_dialog")
+	config.original = {}
+	-- save original y position
+	config.original_y = config.fx_ui:GetWndPos().y
 	-- save original height
 	config.height = config.fx_ui:GetHeight()
+	-- reset cursor
+	config.cursor = 0
 	-- set y postion to middle
 	config.y = config.fx_ui:GetWndPos().y + config.fx_ui:GetHeight() / 2
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.y))
@@ -632,7 +634,18 @@ function on_start_show(runner_name)
 end
 
 function on_stop_show(runner_name)
-	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping show_portrait %s", runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping show_dialog %s", runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.fx_ui then return end
+	-- restore original position and size
+	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.original_y))
+	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), config.height))
+	if config.on_showing_complete then
+		Printer:DebugTable("Executing on_showing_complete for:", config.on_showing_complete)
+		execute_func(unpack(config.on_showing_complete))
+	end
 end
 
 function showing_completed(runner_name)

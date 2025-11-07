@@ -266,13 +266,13 @@
 			<tabs_bg x="0" y="0" width="433" height="250" stretch="1">
 				<texture a="255">ui_npcd_pda_npc_detail_info_spec_frame</texture>
 			</tabs_bg>			
-			<display_bg x="21" y="39" width="370" height="200" stretch="1">
+			<display_bg x="22" y="39" width="370" height="181" stretch="1">
 				<texture a="180">ui_npcd_pda_npc_detail_info_display_bg</texture>
 			</display_bg>
-			<display_glass x="11" y="26" width="370" height="111" stretch="1">
-				<texture a="100">ui_npcd_pda_npc_detail_info_display_glass</texture>
+			<display_glass x="22" y="39" width="370" height="181" stretch="1">
+				<texture a="80">ui_npcd_pda_npc_detail_info_display_bg</texture>
 			</display_glass>
-			<display_dirt x="11" y="26" width="370" height="111" stretch="1">
+			<display_dirt x="22" y="39" width="370" height="181" stretch="1">
 				<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
 			</display_dirt>
 		</specs_frame>			
