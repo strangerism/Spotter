@@ -15,8 +15,8 @@ LOG = {
     WARN = { tag = "~"},
     ADD = { tag = "-"},
     REMOVE = { tag = "*"},
+    UPDATED = { tag = "#"},
     RUN = { tag = "/"},
-    NOTICE = { tag = "#"},
 }
 -- categories
 CAT = {

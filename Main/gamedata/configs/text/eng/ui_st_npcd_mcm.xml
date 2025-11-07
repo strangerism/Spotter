@@ -255,7 +255,7 @@
 	<string id="pda_btn_npcd_menu_squad">
 		<text>Squad</text>
 	</string>
-	<string id="pda_btn_npcd_menu_favorites">
+	<string id="pda_btn_npcd_menu_favorite">
 		<text>Favorites</text>
 	</string>
 	<string id="pda_btn_npcd_menu_recruitable">

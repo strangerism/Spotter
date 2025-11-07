@@ -41,7 +41,7 @@ local APP = {
 
 local MENU = {
         SQUAD = "squad",
-        FAVORITES = "favorites",
+        FAVORITE = "favorite",
         RECRUITABLE = "recruitable",
         ALL = "all",
         DEAD = "dead",
@@ -93,7 +93,7 @@ UI_APP = {
 local APP_MENU = {
     [APP.NPCS] = {
         MENU.SQUAD,
-        MENU.FAVORITES,
+        MENU.FAVORITE,
         MENU.RECRUITABLE,
         MENU.ALL,
         MENU.DEAD,
@@ -113,7 +113,7 @@ local APP_MENU = {
 UI_MENU = {}
 -- UI_MENU[APP.NPCS] = {
 --     [MENU.NPCS.SQUAD] = {},
---     [MENU.NPCS.FAVORITES] = {},
+--     [MENU.NPCS.FAVORITE] = {},
 --     [MENU.NPCS.RECRUITABLE] = {},
 --     [MENU.NPCS.ALL] = {},
 --     [MENU.NPCS.DEAD] = {},
@@ -140,7 +140,7 @@ ITEMS[APP.NPCS] = {
         { id = "stalker4", name = "Stalker 4" },
         { id = "stalker6", name = "Stalker 6" },
     },
-    [MENU.FAVORITES] = {
+    [MENU.FAVORITE] = {
         { id = "stalker1", name = "Stalker 1" },
         { id = "stalker2", name = "Stalker 2" },
     },
@@ -378,69 +378,69 @@ function npcd_dashboard_tab:InitItemScroller()
     self.menu_scroller.fx.flickering = flickering
     npcd_ui_fx.add_fx_to_manager(flickering.id, self.flickering_manager.id)
 
-    --------------------------------
-    --- NPCS Scroller Elements
-    --------------------------------
     self.menu_scroller.ui.dirt = xml:InitStatic("scroller:scroller_dirt", scroller_dialog)
 
     self.menu_scroller.ui.frame = xml:InitStatic("scroller:scroller_frame", scroller_dialog)
+    
+    --------------------------------
+    --- NPCS Scroller Elements
+    --------------------------------    
+    self.menu_scroller.scroll = xml:InitScrollView("scroller:scroll", self.menu_scroller.ui.bg)
+    self.menu_scroller.row = {}
 
     xml:InitStatic("scroller:anchor_bottom", scroller_dialog)
     self.menu_scroller.ui.dialog:Show(false)
 end
 
 function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
-    Printer:Debug(LOG.INFO, CAT.UI, "Updating Item Scroller - App: " .. app_name .. " Menu: " .. menu_name)
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating Item Scroller - App: " .. app_name .. " Menu: " .. menu_name)
     self.menu_scroller.ui.dialog:Show(false)
-    self:ResetItemScroller()
-    self.menu_scroller.items = {}
-
-    self.menu_scroller.scroll = xml:InitScrollView("scroller:scroll", self.menu_scroller.ui.bg)
+    self.menu_scroller.scroll:Clear()
     local menu_items = get_menu_items(app_name, menu_name)
-    local index = 0
-    for _, menu_item in ipairs(menu_items or {}) do
-        local item = {}
-        item.button = xml:Init3tButton("scroller:item_button", nil)
-        index = index + 1
-        table.insert(self.menu_scroller.items, item)
-        self.menu_scroller.scroll:AddWindow(item.button, true)
-        item.button:TextControl():SetText(index .. ". " .. gc(menu_item.name) or menu_item.name)
-        item.button:TextControl():SetFont(GetFontSmall())
-        Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Item Added - Item: " .. gc(menu_item.name) or menu_item.name)
-        menu_item.idx = index
-        menu_item.app_name = app_name
-        self:Register(item.button, "item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. menu_item.id)
-        self:AddCallback("item_scroller_button_" .. app_name .. "_" .. menu_name .. "_" .. menu_item.id, ui_events.BUTTON_CLICKED, function ()
-            Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Button Clicked - Item[%s]: " .. menu_item.name, menu_item.idx)
-            if self.menu_scroller.selected then
-                self.menu_scroller.selected:TextControl():SetFont(GetFontSmall())
-                self.menu_scroller.selected:Enable(true)
+    Printer:DebugTable("Menu Items", menu_items)
+    for index, menu_item in ipairs(menu_items or {}) do
+        self.menu_scroller.row[index] = {}
+        self.menu_scroller.row[index].button = xml:Init3tButton("scroller:item_button", nil)
+        self.menu_scroller.scroll:AddWindow(self.menu_scroller.row[index].button, true)
+        self:Register(self.menu_scroller.row[index].button, "item_scroller_button_" .. index)
+        self:AddCallback("item_scroller_button_" .. index, ui_events.BUTTON_CLICKED, function ()
+            local selected = self.menu_scroller.selected
+            if selected and self.menu_scroller.row[selected] then
+                self.menu_scroller.row[selected].button:TextControl():SetFont(GetFontSmall())
+                self.menu_scroller.row[selected].button:Enable(true)
             end
-            -- local index = self.scroll:GetCurrentScrollPos()
-            Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Current Scroll Pos: " .. tostring(menu_item.idx))
-            self.menu_scroller.selected = self.menu_scroller.items[menu_item.idx].button
-            if self.menu_scroller.selected then
-                self.menu_scroller.selected:Enable(false)
-                self.menu_scroller.selected:TextControl():SetFont(GetFontMedium())
-            end
+            self.menu_scroller.selected = index
+            self.menu_scroller.row[index].button:Enable(false)
+            self.menu_scroller.row[index].button:TextControl():SetFont(GetFontMedium())
+
+            local menu_item = self.menu_scroller.row[index].menu_item
             self:UpdateItemPanel(menu_item.app_name, menu_item.id)
+            Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Button Clicked - Item[%s]: " .. menu_item.name, menu_item.idx)
         end, self)
+        Printer:Debug(LOG.ADD, CAT.UI, "Item Scroller Row Created - Index: " .. index)
+        menu_item.app_name = app_name
+        self.menu_scroller.row[index].menu_item = menu_item
+        self.menu_scroller.row[index].button:TextControl():SetText(index .. ". " .. gc(menu_item.name) or menu_item.name)
+        self.menu_scroller.row[index].button:TextControl():SetFont(GetFontSmall())
+    end
+    Printer:DebugTable("Item Scroller Rows", self.menu_scroller.row)
+    if #menu_items == 1 then
+        self:UpdateItemPanel(menu_items[1].app_name, menu_items[1].id)
+        self.menu_scroller.selected = 1
+        self.menu_scroller.row[1].button:Enable(false)
+        self.menu_scroller.row[1].button:TextControl():SetFont(GetFontMedium())
     end
     self.menu_scroller.ui.dialog:Show(true)
 end
 
 function npcd_dashboard_tab:ResetItemScroller()
-    Printer:Debug(LOG.INFO, CAT.UI, "Resetting Item Scroller")
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Resetting Item Scroller")
+    self:ResetNPCPanelInfo()
     if self.menu_scroller.scroll then
         self.menu_scroller.scroll:Clear()
     end
-    for _, item in ipairs(self.menu_scroller.items or {}) do
-        if item and item.button then
-            Printer:Debug(LOG.INFO, CAT.UI, "Removing Item Scroller Item")
-            item.button:Show(false)
-            item.button = nil
-        end
-    end
+    self.menu_scroller.selected = nil
+    self.menu_scroller.ui.dialog:Show(false)
 end
 
 function npcs_scroller_glitch_duration()
@@ -455,7 +455,7 @@ function npcs_scroller_glass_showing_fx_stop()
     Printer:Debug(LOG.INFO, CAT.UI, "NPCS Scroller BG Showing FX Stopped")
     local ui = get_ui()
     if ui then
-        Printer:Debug(LOG.START, CAT.UI, "Forcing NPCS Scroller Flickering FX to start")
+        Printer:Debug(LOG.INFO, CAT.UI, "Forcing NPCS Scroller Flickering FX to start")
         npcd_ui_fx.resume_fx(ui.menu_scroller.fx.flickering.id)
         ui.menu_scroller.fx.flickering.force = 500 -- 0.5 seconds
         npcd_ui_fx.resume_fx(ui.menu_scroller.fx.scanline.id)
@@ -471,7 +471,7 @@ end
 
 
 function npcd_dashboard_tab:UpdateItemPanel(app_name, item_id)
-    Printer:Debug(LOG.INFO, CAT.UI, "Updating Item Panel - App: " .. app_name .. " Item ID: " .. item_id)
+    Printer:Debug(LOG.INFO, CAT.UI, "Requested Updating Item Panel - App: " .. app_name .. " Item ID: " .. item_id)
     if app_name == APP.NPCS then
         if not panel_init then
             Printer:Debug(LOG.INFO, CAT.UI, "Initializing new panel")
@@ -627,7 +627,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 end
 
 function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
-    Printer:Debug(LOG.INFO, CAT.UI, "Updating NPC Panel Info - NPC ID: " .. npc_id)
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating NPC Panel Info - NPC ID: " .. npc_id)
     self.npc_panel.info.dialog:Show(false)
 
     -- Update the NPC panel info with the new NPC data
@@ -641,7 +641,7 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
     end
 
     local npc_deck = npcd.get_npc(npc_id)
-    Printer:DebugTable("NPC DECK", npc_deck)
+    Printer:TraceTable("NPC DECK", npc_deck)
     if npc_deck then
         for name, value in pairs(npc_deck.Characteristics or {}) do
             Printer:Debug(LOG.INFO, CAT.UI, "NPC Characteristic[" .. name .. "]: " .. value)
@@ -657,10 +657,10 @@ end
 
 panel_init = false
 function npc_panel_info_showing_fx_stop()
-    Printer:Debug(LOG.INFO, CAT.UI, "NPC Panel Info Showing FX Stopped")
+    Printer:Debug(LOG.STOP, CAT.UI, "NPC Panel Info Showing FX Stopped")
     local ui = get_ui()
     if ui and not panel_init then
-        Printer:Debug(LOG.START, CAT.UI, "Initializing all the remaining NPC Panel Info FXs")
+        Printer:Debug(LOG.RUN, CAT.UI, "Initializing all the remaining NPC Panel Info FXs")
         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.portrait_showing.id)
         -- npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.flickering.id)
         -- ui.npc_panel.info.fx.flickering.force = 100 -- 0.5 seconds
@@ -670,6 +670,13 @@ function npc_panel_info_showing_fx_stop()
         panel_init = true
     end
 end
+
+function npcd_dashboard_tab:ResetNPCPanelInfo()
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Resetting NPC Panel Info")
+    self.npc_panel.info.dialog:Show(false)
+    panel_init = false
+end
+
 --------------------------------
 --- Apps Menu
 --- ----------------------------
@@ -717,7 +724,7 @@ function npcd_dashboard_tab:InitAppsMenu()
 end
 
 function npcd_dashboard_tab:On_Menu_Button_Clicked(app, menu)
-    Printer:Debug(LOG.INFO, CAT.UI, "Menu Button Clicked - App: " .. app .. " Menu: " .. menu)
+    Printer:Debug(LOG.START, CAT.UI, "Menu Button Clicked - App: " .. app .. " Menu: " .. menu)
     self:ActivateAppMenu(app, menu)
 end
 
@@ -833,17 +840,18 @@ end
 -- Activate App Menu
 -- ----------------------------
 function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
-    Printer:Debug(LOG.INFO, CAT.UI, "Activating App Menu - App: " .. app_name .. " Menu: " .. menu_name)
+    Printer:Debug(LOG.RUN, CAT.UI, "Activating App Menu - App: " .. app_name .. " Menu: " .. menu_name)
     -- disable current active menu panel
     if self.app_menu_panel then
         self.app_menu_panel:Show(false)
     end
-
+    self:ResetItemScroller()
     self:DeactivateOtherMenus(app_name, menu_name)
-
-    -- activate new menu panel and children
+    
+    -- activate new menu panel and children  
     self.app_menu_panel = UI_MENU[app_name][menu_name].dialog
-    Printer:Debug(LOG.INFO, CAT.UI, "Activated Menu - App: " .. app_name .. " Menu: " .. menu_name)
+    Printer:Debug(LOG.ADD, CAT.UI, "Activated Menu - App: " .. app_name .. " Menu: " .. menu_name)
+    
     -- show new active menu panel
     if self.app_menu_panel then
         self.app_menu_panel:Show(true)
@@ -861,6 +869,7 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
         npcd_ui_fx.resume_fx(activated_translate_fx.id)
     end
     UI_MENU[app_name][menu_name].active = true
+    -- show item scroller for npcs and perks apps
     if app_name == APP.NPCS or app_name == APP.PERKS then
         self:UpdateItemScroller(app_name, menu_name)
         -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
@@ -884,9 +893,7 @@ function npcd_dashboard_tab:DeactivateOtherMenus(app_name, menu_name)
             end
             UI_MENU[app_name][name].active = false
             UI_MENU[app_name][name].button:Enable(true)
-            Printer:Debug(LOG.INFO, CAT.UI, "Deactivated Menu - App: " .. app_name .. " Menu: " .. name)
-            Printer:Debug(LOG.ERROR, CAT.UI, "Resetting panel_init flag to false")
-            panel_init = false
+            Printer:Debug(LOG.REMOVE, CAT.UI, "Deactivated Menu - App: " .. app_name .. " Menu: " .. name)
         end
     end
 end
@@ -909,7 +916,7 @@ end
 -- ----------------------------
 
 function npcd_dashboard_tab:On_NPCS_Button_Clicked()
-    Printer:Debug(LOG.INFO, CAT.UI, "NPCS Button Clicked")
+    Printer:Debug(LOG.START, CAT.UI, "PROFILES Button Clicked")
 
     self.app[APP.NPCS].button:Enable(false)
     self.app[APP.PERKS].button:Enable(true)
@@ -925,7 +932,7 @@ function npcd_dashboard_tab:On_NPCS_Button_Clicked()
 end
 
 function npcd_dashboard_tab:On_Perks_Button_Clicked()
-    Printer:Debug(LOG.INFO, CAT.UI, "PERKS Button Clicked")
+    Printer:Debug(LOG.START, CAT.UI, "PERKS Button Clicked")
 
     self.app[APP.NPCS].button:Enable(true)
     self.app[APP.PERKS].button:Enable(false)
@@ -941,7 +948,7 @@ function npcd_dashboard_tab:On_Perks_Button_Clicked()
 end
 
 function npcd_dashboard_tab:On_Deck_Button_Clicked()
-    Printer:Debug(LOG.INFO, CAT.UI, "DECK Button Clicked")
+    Printer:Debug(LOG.START, CAT.UI, "DECK Button Clicked")
 
     self.app[APP.NPCS].button:Enable(true)
     self.app[APP.PERKS].button:Enable(true)
@@ -980,12 +987,12 @@ function get_menu_items(app_name, menu_name)
         for i = 1, #npcs_id_list do
             local npc_deck = npcd_npcs_mcm.get_npc(npcs_id_list[i], menu_name)
             if npc_deck then
-                Printer:Debug(LOG.INFO, CAT.UI, "Menu Item NPC Deck Found: " .. npc_deck.id)
-                Printer:DebugTable("NPC Deck", npc_deck)
+                Printer:Trace(LOG.INFO, CAT.UI, "Menu Item NPC Deck Found: " .. npc_deck.id)
+                Printer:TraceTable("NPC Deck", npc_deck)
                 local npc_data = npcd.get_npc_data(npc_deck.id)
                 if npc_data then
-                    Printer:Debug(LOG.INFO, CAT.UI, "Menu Item NPC Data Found: " .. npc_data.id)
-                    Printer:DebugTable("NPC Data", npc_data)
+                    Printer:Trace(LOG.INFO, CAT.UI, "Menu Item NPC Data Found: " .. npc_data.id)
+                    Printer:TraceTable("NPC Data", npc_data)
                     table.insert(table_items, { id = npc_data.id, name = npc_data.name })
                 end
             end
