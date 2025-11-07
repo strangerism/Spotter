@@ -85,7 +85,7 @@
 		<texture id="ui_npcd_pda_scroller_item_darkfill_button_t" x="1135" y="455" width="337" height="48" />		
 
 		<!-- npc details						 -->
-		<texture id="ui_npcd_pda_npc_detail_panel_frame" x="2165" y="22" width="666" height="288" />
+		<texture id="ui_npcd_pda_npc_detail_panel_frame" x="2162" y="22" width="669" height="288" />
 		<texture id="ui_npcd_pda_npc_detail_panel_glass" x="2213" y="371" width="535" height="227" />
 		<texture id="ui_npcd_pda_npc_detail_panel_dirt" x="2213" y="621" width="535" height="227" />
 		<texture id="ui_npcd_pda_npc_detail_panel_background" x="2213" y="888" width="535" height="227" />
@@ -94,6 +94,9 @@
 		<!-- npc info display -->
 		<texture id="ui_npcd_pda_npc_detail_info_display_bg" x="12" y="894" width="877" height="419" />
 		<texture id="ui_npcd_pda_npc_detail_info_display_glass" x="11" y="1323" width="877" height="419" />
+
+		<!-- npc specs -->
+		<texture id="ui_npcd_pda_npc_detail_info_spec_frame" x="2162" y="1136" width="669" height="284" />
 
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">

@@ -206,20 +206,20 @@
 		<texture a="100">ui_npcd_pda_dashboard_panel_bg</texture>
 	</panel_bg>	
 
-	<npc_panel x="320" y="210" width="433" height="187">
-		<frame x="0" y="0" width="433" height="187" stretch="1">
+	<npc_panel x="320" y="210" width="433" height="430">
+		<info_frame x="0" y="0" width="433" height="187" stretch="1">
 			<texture a="255">ui_npcd_pda_npc_detail_panel_frame</texture>
-		</frame>
-		<bg x="31" y="26" width="347" height="147" stretch="1">
-			<texture a="255">ui_npcd_pda_npc_detail_info_display_bg</texture>
-		</bg>
-		<glass x="33" y="28" width="347" height="147" stretch="1">
+		</info_frame>
+		<info_bg x="31" y="26" width="347" height="147" stretch="1">
+			<texture a="180">ui_npcd_pda_npc_detail_info_display_bg</texture>
+		</info_bg>
+		<info_glass x="33" y="28" width="347" height="147" stretch="1">
 			<texture a="100">ui_npcd_pda_npc_detail_info_display_glass</texture>
-		</glass>
-		<dirt x="33" y="28" width="347" height="147" stretch="1">
+		</info_glass>
+		<info_dirt x="33" y="28" width="347" height="147" stretch="1">
 			<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
-		</dirt>
-		<portrait_frame x="45" y="45" width="150" height="187">
+		</info_dirt>
+		<info_portrait_frame x="45" y="45" width="150" height="187">
 			<portrait x="0" y="0" width="109" height="76" stretch="1">
 				<texture></texture>
 			</portrait>
@@ -229,8 +229,8 @@
 			<community x="2" y="110" width="100" height="14">
 				<text align="l" font="letterica16" color="ui_3"/>
 			</community>
-		</portrait_frame>
-		<char_frame x="155" y="22" width="210" height="150">
+		</info_portrait_frame>
+		<info_char_frame x="155" y="22" width="210" height="150">
 			<vseparator x="3" y="20" width="1" height="125" stretch="1">
 				<texture a="100">ui_npcd_codec_750_scanline</texture>
 			</vseparator> 	
@@ -255,13 +255,27 @@
 			<char_value x="75" y="25" width="30" height="16">
 				<text align="r" font="letterica18" color="pda_green"></text>
 			</char_value>									
-		</char_frame>
+		</info_char_frame>
 		<rank x="402" y="19" width="140" height="14">
 			<text align="l" font="letterica25" color="ui_black"/>
 		</rank>
 		<rank_cap x="398" y="34" width="140" height="14">
 			<text align="l" font="letterica18" color="ui_black">rank</text>
-		</rank_cap>			
+		</rank_cap>
+		<specs_frame x="0" y="188" width="433" height="250" stretch="1">
+			<tabs_bg x="0" y="0" width="433" height="250" stretch="1">
+				<texture a="255">ui_npcd_pda_npc_detail_info_spec_frame</texture>
+			</tabs_bg>			
+			<display_bg x="21" y="39" width="370" height="200" stretch="1">
+				<texture a="180">ui_npcd_pda_npc_detail_info_display_bg</texture>
+			</display_bg>
+			<display_glass x="11" y="26" width="370" height="111" stretch="1">
+				<texture a="100">ui_npcd_pda_npc_detail_info_display_glass</texture>
+			</display_glass>
+			<display_dirt x="11" y="26" width="370" height="111" stretch="1">
+				<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
+			</display_dirt>
+		</specs_frame>			
 	</npc_panel>
 
 <!-- 

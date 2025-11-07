@@ -470,7 +470,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel = {}
     self.npc_panel.info = {}
     self.npc_panel.info.fx = {}
-    local info_dialog = xml:InitFrame("npc_panel", self)
+    local info_dialog = xml:InitStatic("npc_panel", self)
     self.npc_panel.info.dialog = info_dialog
 
 -- FX: Flickering Manager 
@@ -478,12 +478,12 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     npcd_ui_fx.add_fx(self.npc_panel.info.fx.flickering_manager)
     npcd_ui_fx.resume_fx(self.npc_panel.info.fx.flickering_manager.id)
 
-
+    self.npc_panel.info.frame = xml:InitStatic("npc_panel:info_frame", info_dialog)
     -- background
-    self.npc_panel.info.background = xml:InitStatic("npc_panel:bg", info_dialog)
+    self.npc_panel.info.background = xml:InitStatic("npc_panel:info_bg", info_dialog)
     self.npc_panel.info.background:Show(true)
     -- glass
-    self.npc_panel.info.glass = xml:InitStatic("npc_panel:glass", info_dialog)
+    self.npc_panel.info.glass = xml:InitStatic("npc_panel:info_glass", info_dialog)
     self.npc_panel.info.glass:Show(false)
 -- FX: Showing on glass
     local showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
@@ -521,20 +521,20 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.fx.wide_scanline = wide_scanlines
 
     -- dirt
-    self.npc_panel.info.dirt = xml:InitStatic("npc_panel:dirt", info_dialog)
+    self.npc_panel.info.dirt = xml:InitStatic("npc_panel:info_dirt", info_dialog)
 
     -- frame
-    self.npc_panel.info.frame = xml:InitStatic("npc_panel:frame", info_dialog)
+
     self.npc_panel.info.rank = xml:InitTextWnd("npc_panel:rank", info_dialog)
     self.npc_panel.info.rank_cap = xml:InitTextWnd("npc_panel:rank_cap", info_dialog)
 
     --------------------------------
     -- portrait frame
     -- ------------------------------
-    local portrait_frame = xml:InitFrame("npc_panel:portrait_frame", info_dialog)
+    local portrait_frame = xml:InitStatic("npc_panel:info_portrait_frame", info_dialog)
     self.npc_panel.info.portrait_frame = portrait_frame
     -- portrait
-    self.npc_panel.info.portrait = xml:InitStatic("npc_panel:portrait_frame:portrait", portrait_frame)
+    self.npc_panel.info.portrait = xml:InitStatic("npc_panel:info_portrait_frame:portrait", portrait_frame)
 -- FX: Showing on portrait
     local showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
     showing.dialog = self.npc_panel.info.portrait
@@ -553,41 +553,41 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.fx.flickering = flickering
     npcd_ui_fx.add_fx_to_manager(flickering.id, self.npc_panel.info.fx.flickering_manager.id)
     -- name and community
-    self.npc_panel.info.name = xml:InitTextWnd("npc_panel:portrait_frame:name", portrait_frame)
-    self.npc_panel.info.community = xml:InitTextWnd("npc_panel:portrait_frame:community", portrait_frame)
+    self.npc_panel.info.name = xml:InitTextWnd("npc_panel:info_portrait_frame:name", portrait_frame)
+    self.npc_panel.info.community = xml:InitTextWnd("npc_panel:info_portrait_frame:community", portrait_frame)
 
     --------------------------------
     -- char frame
     -- ------------------------------
-    local char_frame = xml:InitFrame("npc_panel:char_frame", info_dialog)
+    local char_frame = xml:InitStatic("npc_panel:info_char_frame", info_dialog)
     self.npc_panel.info.char_frame = char_frame
-    self.npc_panel.info.vseparator = xml:InitStatic("npc_panel:char_frame:vseparator", char_frame)
+    self.npc_panel.info.vseparator = xml:InitStatic("npc_panel:info_char_frame:vseparator", char_frame)
     self.npc_panel.info.vseparator:Show(true)
-    self.npc_panel.info.top_line = xml:InitStatic("npc_panel:char_frame:top_line", char_frame)
+    self.npc_panel.info.top_line = xml:InitStatic("npc_panel:info_char_frame:top_line", char_frame)
     self.npc_panel.info.top_line:Show(true)
-    self.npc_panel.info.char_bg = xml:InitStatic("npc_panel:char_frame:char_bg", char_frame)
+    self.npc_panel.info.char_bg = xml:InitStatic("npc_panel:info_char_frame:char_bg", char_frame)
     self.npc_panel.info.char_bg:Show(true)
-    self.npc_panel.info.char_header = xml:InitTextWnd("npc_panel:char_frame:char_header", char_frame)
+    self.npc_panel.info.char_header = xml:InitTextWnd("npc_panel:info_char_frame:char_header", char_frame)
     self.npc_panel.info.char_header:Show(true)
-    self.npc_panel.info.bottom_line = xml:InitStatic("npc_panel:char_frame:bottom_line", char_frame)
+    self.npc_panel.info.bottom_line = xml:InitStatic("npc_panel:info_char_frame:bottom_line", char_frame)
     self.npc_panel.info.bottom_line:Show(true)
     self.npc_panel.info.characteristics = {}
     local i = 1
     local x_offset = 0
     for _, char_name in pairs(NPCS_CHARACTERISTICS) do
         self.npc_panel.info.characteristics[char_name.id] = {}
-        local icon = xml:InitStatic("npc_panel:char_frame:char_ico", char_frame)
+        local icon = xml:InitStatic("npc_panel:info_char_frame:char_ico", char_frame)
         self.npc_panel.info.characteristics[char_name.id].icon = icon
         self.npc_panel.info.characteristics[char_name.id].icon:InitTexture(char_name.ico)
         self.npc_panel.info.characteristics[char_name.id].icon:SetWndPos(vector2():set(icon:GetWndPos().x + x_offset, icon:GetWndPos().y + i * icon:GetHeight()))
 
-        local label = xml:InitTextWnd("npc_panel:char_frame:char_label", char_frame)
+        local label = xml:InitTextWnd("npc_panel:info_char_frame:char_label", char_frame)
         self.npc_panel.info.characteristics[char_name.id].label = label
         self.npc_panel.info.characteristics[char_name.id].label:SetText(gc(char_name.label))
         self.npc_panel.info.characteristics[char_name.id].label:SetFont(GetFontSmall())
         self.npc_panel.info.characteristics[char_name.id].label:SetWndPos(vector2():set(label:GetWndPos().x + x_offset, label:GetWndPos().y + i * icon:GetHeight()))
 
-        local value = xml:InitTextWnd("npc_panel:char_frame:char_value", char_frame)
+        local value = xml:InitTextWnd("npc_panel:info_char_frame:char_value", char_frame)
         self.npc_panel.info.characteristics[char_name.id].value = value
         self.npc_panel.info.characteristics[char_name.id].value:SetText("n/a")
         self.npc_panel.info.characteristics[char_name.id].value:SetWndPos(vector2():set(value:GetWndPos().x + x_offset, value:GetWndPos().y + i * icon:GetHeight()))
@@ -598,6 +598,20 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
             x_offset = x_offset + 105
         end
     end
+
+    --------------------------------
+    -- specs frame
+    -- ------------------------------    
+    local specs_frame = xml:InitStatic("npc_panel:specs_frame", info_dialog)
+    self.npc_panel.info.specs_frame = specs_frame
+    self.npc_panel.info.specs_tabs_bg = xml:InitStatic("npc_panel:specs_frame:tabs_bg", specs_frame)
+    self.npc_panel.info.specs_tabs_bg:Show(true)
+    self.npc_panel.info.specs_display_bg = xml:InitStatic("npc_panel:specs_frame:display_bg", specs_frame)
+    self.npc_panel.info.specs_display_bg:Show(true)
+    self.npc_panel.info.specs_display_glass = xml:InitStatic("npc_panel:specs_frame:display_glass", specs_frame)
+    self.npc_panel.info.specs_display_glass:Show(false)
+    self.npc_panel.info.specs_display_dirt = xml:InitStatic("npc_panel:specs_frame:display_dirt", specs_frame)
+    self.npc_panel.info.specs_display_dirt:Show(false)
     self.npc_panel.info.dialog:Show(false)
 end
 
