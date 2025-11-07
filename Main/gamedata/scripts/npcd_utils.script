@@ -137,3 +137,26 @@ function is_rifle(weapon)
 	local sec = weapon:section()
     return sec and SYS_GetParam(0,sec,"kind", "na") == "w_rifle"
 end
+
+
+-- taken from Catspaw
+function int_to_rgba(i)
+	-- Converts integer to RGB or RGBA values
+	-- returns r, g, b, a, defaulting alpha to 255 if not specified (value is <= 0xffffff)
+	-- Improved bitwise version from RavenAscendant
+	-- Should be functionally identical but much more efficient
+	if not (i and type(i) == "number") then return end
+	local a
+	if i <= 0xffffff then a = 255 end
+	return 	bit.band(bit.rshift(i, 16), 255),
+			bit.band(bit.rshift(i, 8), 255),
+			bit.band(i, 255),
+			a or bit.band(bit.rshift(i, 24), 255)
+--[[
+	if not (i and type(i) == "number") then return end
+	return 	floor(floor(i / 256) / 256) % 256, 
+			floor(i / 256) % 256, 
+			(i % 256), 
+			(i > 0xffffff) and (floor(floor(floor(i / 256) / 256) / 256) % 256) or 255
+--]]
+end
