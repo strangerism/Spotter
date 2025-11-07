@@ -269,10 +269,10 @@
 				<texture a="255">ui_npcd_pda_npc_detail_info_spec_frame</texture>
 			</tabs_bg>			
 			<display_bg x="22" y="39" width="370" height="181" stretch="1">
-				<texture a="180">ui_npcd_pda_npc_detail_info_display_bg</texture>
+				<texture a="255">ui_npcd_pda_npc_detail_info_display_bg_white</texture>
 			</display_bg>
 			<display_glass x="22" y="39" width="370" height="181" stretch="1">
-				<texture a="80">ui_npcd_pda_npc_detail_info_display_bg</texture>
+				<texture a="150">ui_npcd_pda_npc_detail_info_display_bg</texture>
 			</display_glass>
 			<display_dirt x="22" y="39" width="370" height="181" stretch="1">
 				<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>

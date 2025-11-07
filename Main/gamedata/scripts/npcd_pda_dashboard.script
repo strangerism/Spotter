@@ -628,7 +628,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     specs_showing.on_showing_complete = {"npcd_pda_dashboard", "npc_panel_info_specs_showing_fx_stop"}
     npcd_ui_fx.add_fx(specs_showing)
     self.npc_panel.specs.fx.showing = specs_showing
-    self.npc_panel.specs.display_glass = xml:InitStatic("npc_panel:specs_frame:display_bg", specs_frame)
+    self.npc_panel.specs.display_glass = xml:InitStatic("npc_panel:specs_frame:display_glass", specs_frame)
     self.npc_panel.specs.display_glass:Show(true)
 -- FX: Scanlines on glass
     local specs_scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
@@ -646,8 +646,11 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 -- FX: Flickering on specs glass
     local specs_flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     specs_flickering.dialog = self.npc_panel.specs.display_glass
-    specs_flickering.flickering_duration = 500
-    npcd_ui_fx.add_fx(specs_flickering)
+    specs_flickering.speed = 0.02
+    specs_flickering.intensity = 0.3
+    specs_flickering.restore_alpha = 140
+    specs_flickering.flickering_duration = 40
+    npcd_ui_fx.add_fx(specs_flickering, "display_glass")
     self.npc_panel.specs.fx.flickering = specs_flickering
 
     -- dirt
@@ -685,6 +688,10 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
     npcd_ui_fx.resume_fx(self.npc_panel.info.fx.char_flickering.id)
     self.npc_panel.info.dialog:Show(true)
     self.npc_panel.info.portrait:Show(false)
+    if not self.npc_panel.init then
+        self.npc_panel.info.background:Show(false)    
+        self.npc_panel.specs.display_bg:Show(false)
+    end
 end
 
 function npc_panel_info_showing_fx_stop()
@@ -707,6 +714,7 @@ function npc_panel_info_specs_showing_fx_stop()
     Printer:Debug(LOG.STOP, CAT.UI, "NPC Panel Info Specs Showing FX Stopped")
     local ui = get_ui()
     npcd_ui_fx.resume_fx(ui.npc_panel.specs.fx.scanline.id)
+    ui.npc_panel.specs.fx.flickering.flickering_duration = 40
     npcd_ui_fx.resume_fx(ui.npc_panel.specs.fx.flickering.id)
     
 end

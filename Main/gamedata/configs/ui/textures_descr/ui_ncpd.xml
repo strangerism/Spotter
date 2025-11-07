@@ -93,6 +93,7 @@
 
 		<!-- npc info display -->
 		<texture id="ui_npcd_pda_npc_detail_info_display_bg" x="12" y="894" width="877" height="419" />
+		<texture id="ui_npcd_pda_npc_detail_info_display_bg_white" x="2843" y="0" width="759" height="790" />
 		<texture id="ui_npcd_pda_npc_detail_info_display_glass" x="11" y="1323" width="877" height="419" />
 
 		<!-- npc specs -->

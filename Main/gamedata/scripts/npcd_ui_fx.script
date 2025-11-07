@@ -466,14 +466,14 @@ function on_start_flickering(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.dialog then return end
-	Printer:Debug(LOG.START, CAT.UI," starting flickering loop for %s", runner_name)
+	Printer:Debug(LOG.START, CAT.UI_ACTION," starting flickering loop for %s", runner_name)
 
 	-- the fx element is the original dialog manipulation
 	config.fx_ui = config.dialog
 	-- starting the flickering effect by setting duration and new alpha
 	-- duration can be preset in config or calculated here
 	config.flickering_duration = time_global() + (config.flickering_duration or (math.random(10, 50) * 10))
-	Printer:Debug(LOG.INFO, CAT.UI," flickering duration set to %s for %s", config.flickering_duration, runner_name)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," flickering duration set to %s for %s", config.flickering_duration, runner_name)
 	if config.random_duration then
 		-- execute custom random duration functor
 		local duration = execute_func(unpack(config.random_duration))
@@ -488,15 +488,16 @@ function on_start_flickering(runner_name)
 		config.force = nil
 	end
 
-	if config.fx_ui.GetTextureColor then
+	if not config.restore_alpha  then
 		-- cache original alpha to restore later
-		local i = config.fx_ui:GetTextureColor()
-		local c = {}
-		c.r,c.g,c.b,c.a = i and npcdu.int_to_rgba(i)
-		Printer:DebugTable("Cached original color:", c)
-		config.restore_alpha = c.a or DEFAULT_ALPHA
-	else
-		config.restore_alpha = DEFAULT_ALPHA
+		if config.fx_ui.GetTextureColor then
+			local c = npcdu.get_ui_element_color(config.fx_ui)
+			local str  = string.format("Cached original color by %s", runner_name)
+			Printer:DebugTable(str, c and c or {})
+			config.restore_alpha = c and c.a or DEFAULT_ALPHA
+		else
+			config.restore_alpha = DEFAULT_ALPHA
+		end
 	end
 
 	local intensity = config.intensity * 255
@@ -666,7 +667,7 @@ function on_stop_show(runner_name)
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.original_y))
 	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), config.height))
 	if config.on_showing_complete then
-		Printer:DebugTable("Executing on_showing_complete for:", config.on_showing_complete)
+		-- Printer:DebugTable("Executing on_showing_complete for:", config.on_showing_complete)
 		execute_func(unpack(config.on_showing_complete))
 	end
 end

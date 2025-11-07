@@ -160,3 +160,28 @@ function int_to_rgba(i)
 			(i > 0xffffff) and (floor(floor(floor(i / 256) / 256) / 256) % 256) or 255
 --]]
 end
+
+function get_ui_element_color(ele)
+	local ele = element_name and self[element_name]
+	norm_alpha = norm_alpha or 1
+	if ele then
+		local base_a = clamp(tonumber(ele.basecolor and ele.basecolor.a) or 255, 0, 255)
+		local alpha = (base_a * norm_alpha)
+		local c = {}
+		if ele.GetTextureColor then
+			local i = ele:GetTextureColor()
+			c.r,c.g,c.b,c.a = i and int_to_rgba(i)
+			-- c.a = alpha or c.a
+			return c
+		end
+		-- if text_also then
+		-- 	c = ele.currcolor or ele.basecolor or {}
+		-- 	c.a = alpha or c.a
+		-- 	c.r = c.r or 255
+		-- 	c.g = c.g or 255
+		-- 	c.b = c.b or 255
+		-- 	ele.currcolor = c
+		-- 	ele:TextControl():SetTextColor(get_argb(c.a,c.r,c.g,c.b))
+		-- end
+	end
+end
