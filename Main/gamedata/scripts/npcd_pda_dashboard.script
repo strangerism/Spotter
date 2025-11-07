@@ -423,7 +423,7 @@ function items_scroller_glitch_duration()
 end
 
 function items_scroller_glitch_cooldown()
-    return time_global() + math.random(10, 50) * 100
+    return time_global() + math.random(50, 250) * 100
 end
 
 function items_scroller_glass_showing_fx_stop()
@@ -573,23 +573,26 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.char_header:Show(true)
     self.npc_panel.info.bottom_line = xml:InitStatic("npc_panel:info_char_frame:bottom_line", char_frame)
     self.npc_panel.info.bottom_line:Show(true)
+    -- characteristics
+    local char_group = xml:InitFrame("npc_panel:info_char_frame:char_group", char_frame)
+    self.npc_panel.info.char_group = char_group
     self.npc_panel.info.characteristics = {}
     local i = 1
     local x_offset = 0
     for _, char_name in pairs(NPCS_CHARACTERISTICS) do
         self.npc_panel.info.characteristics[char_name.id] = {}
-        local icon = xml:InitStatic("npc_panel:info_char_frame:char_ico", char_frame)
+        local icon = xml:InitStatic("npc_panel:info_char_frame:char_group:ico", char_group)
         self.npc_panel.info.characteristics[char_name.id].icon = icon
         self.npc_panel.info.characteristics[char_name.id].icon:InitTexture(char_name.ico)
         self.npc_panel.info.characteristics[char_name.id].icon:SetWndPos(vector2():set(icon:GetWndPos().x + x_offset, icon:GetWndPos().y + i * icon:GetHeight()))
 
-        local label = xml:InitTextWnd("npc_panel:info_char_frame:char_label", char_frame)
+        local label = xml:InitTextWnd("npc_panel:info_char_frame:char_group:label", char_group)
         self.npc_panel.info.characteristics[char_name.id].label = label
         self.npc_panel.info.characteristics[char_name.id].label:SetText(gc(char_name.label))
         self.npc_panel.info.characteristics[char_name.id].label:SetFont(GetFontSmall())
         self.npc_panel.info.characteristics[char_name.id].label:SetWndPos(vector2():set(label:GetWndPos().x + x_offset, label:GetWndPos().y + i * icon:GetHeight()))
 
-        local value = xml:InitTextWnd("npc_panel:info_char_frame:char_value", char_frame)
+        local value = xml:InitTextWnd("npc_panel:info_char_frame:char_group:value", char_group)
         self.npc_panel.info.characteristics[char_name.id].value = value
         self.npc_panel.info.characteristics[char_name.id].value:SetText("n/a")
         self.npc_panel.info.characteristics[char_name.id].value:SetWndPos(vector2():set(value:GetWndPos().x + x_offset, value:GetWndPos().y + i * icon:GetHeight()))
@@ -600,6 +603,12 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
             x_offset = x_offset + 105
         end
     end
+-- FX: Flickering on specs glass
+    local char_flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
+    char_flickering.dialog = self.npc_panel.info.char_group
+    npcd_ui_fx.add_fx(char_flickering, "char")
+    self.npc_panel.info.fx.char_flickering = char_flickering
+
     self.npc_panel.info.char_frame:Show(false)
     --------------------------------
     -- specs frame
@@ -668,11 +677,12 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
         for name, value in pairs(npc_deck.Characteristics or {}) do
             Printer:Debug(LOG.INFO, CAT.UI, "NPC Characteristic[" .. name .. "]: " .. value)
             if self.npc_panel.info.characteristics[name] then
-                self.npc_panel.info.characteristics[name].value:SetText(tostring(value) or "n/a")
+                self.npc_panel.info.characteristics[name].value:SetText(tostring(value) or "null")
             end
         end
     end
-
+    self.npc_panel.info.fx.char_flickering.flickering_duration = 100
+    npcd_ui_fx.resume_fx(self.npc_panel.info.fx.char_flickering.id)
     self.npc_panel.info.dialog:Show(true)
     self.npc_panel.info.portrait:Show(false)
 end
