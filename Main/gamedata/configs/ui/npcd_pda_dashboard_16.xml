@@ -191,7 +191,7 @@
 		<!-- item_button x,y are relative to scroller_bg -->
 		<scroll x="5" y="9" width="113" height="340" right_ident="0" left_ident="0" top_indent="0" bottom_indent="0" vert_interval="0" always_show_scroll="0"/>
 		<item_button x="5" y="0" width="103" height="30" stretch="1">
-			<text align="l" vert_align="b" x="7" y="5" font="arial_14"></text>
+			<text align="l" vert_align="c" x="7" y="5" font="arial_14"></text>
 			<texture>ui_npcd_pda_scroller_item_darkfill_button</texture>
 			<text_color>
 				<e r="200" g="200" b="200"/>

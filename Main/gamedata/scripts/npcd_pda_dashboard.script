@@ -391,7 +391,6 @@ function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
             self.menu_scroller.selected = index
             self.menu_scroller.row[index].button:Enable(false)
             self.menu_scroller.row[index].button:TextControl():SetFont(GetFontMedium())
-
             local menu_item = self.menu_scroller.row[index].menu_item
             self:UpdateItemPanel(menu_item.app_name, menu_item.id)
             Printer:Debug(LOG.INFO, CAT.UI, "Item Scroller Button Clicked - Item[%s]: " .. menu_item.name, menu_item.idx)
@@ -404,10 +403,7 @@ function npcd_dashboard_tab:UpdateItemScroller(app_name, menu_name)
     end
     Printer:DebugTable("Item Scroller Rows", self.menu_scroller.row)
     if #menu_items == 1 then
-        self:UpdateItemPanel(menu_items[1].app_name, menu_items[1].id)
-        self.menu_scroller.selected = 1
-        self.menu_scroller.row[1].button:Enable(false)
-        self.menu_scroller.row[1].button:TextControl():SetFont(GetFontMedium())
+        self.menu_scroller.row[1].button:Enable(true)
     end
     self.menu_scroller.ui.dialog:Show(true)
 end
@@ -452,7 +448,7 @@ end
 function npcd_dashboard_tab:UpdateItemPanel(app_name, item_id)
     Printer:Debug(LOG.INFO, CAT.UI, "Requested Updating Item Panel - App: " .. app_name .. " Item ID: " .. item_id)
     if app_name == APP.PROFILES then
-        if not panel_init then
+        if not self.npc_panel.init then
             Printer:Debug(LOG.INFO, CAT.UI, "Initializing new panel")
             npcd_ui_fx.stop_fx(self.npc_panel.info.fx.flickering.id)
             npcd_ui_fx.stop_fx(self.npc_panel.info.fx.scanline.id)
@@ -634,11 +630,10 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
     self.npc_panel.info.portrait:Show(false)
 end
 
-panel_init = false
 function npc_panel_info_showing_fx_stop()
     Printer:Debug(LOG.STOP, CAT.UI, "NPC Panel Info Showing FX Stopped")
     local ui = get_ui()
-    if ui and not panel_init then
+    if ui and not ui.npc_panel.init then
         Printer:Debug(LOG.RUN, CAT.UI, "Initializing all the remaining NPC Panel Info FXs")
         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.portrait_showing.id)
         -- npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.flickering.id)
@@ -646,14 +641,14 @@ function npc_panel_info_showing_fx_stop()
         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.scanline.id)
         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.wide_scanline.id)
         ui.npc_panel.info.background:Show(true)
-        panel_init = true
+        ui.npc_panel.init = true
     end
 end
 
 function npcd_dashboard_tab:ResetNPCPanelInfo()
     Printer:Debug(LOG.REMOVE, CAT.UI, "Resetting NPC Panel Info")
     self.npc_panel.info.dialog:Show(false)
-    panel_init = false
+    self.npc_panel.init = false
 end
 
 --------------------------------
@@ -808,7 +803,7 @@ function npcd_dashboard_tab:DeactivateOtherPanels(app_name)
                 npcd_ui_fx.stop_fx(self.menu_scroller.fx.wide_scanline_2.id)
                 npcd_ui_fx.stop_fx(self.menu_scroller.fx.flickering.id)
 
-                -- panel_init = false
+                -- self.npc_panel.init = false
             end
         end
     end
