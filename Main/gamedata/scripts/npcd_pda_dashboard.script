@@ -229,7 +229,7 @@ function npcd_dashboard_tab:InitAppsBar()
     scanline_flicker.max_intensity = 0.6
     scanline_flicker.random_duration = {"npcd_pda_dashboard", "items_scroller_glitch_duration"}
     scanline_flicker.random_cooldown = {"npcd_pda_dashboard", "items_scroller_glitch_cooldown"}
-    npcd_ui_fx.add_fx(scanline_flicker)
+    npcd_ui_fx.add_fx(scanline_flicker, "apps_bar_scanline_flicker")
     npcd_ui_fx.add_fx_to_manager(scanline_flicker.id, self.flickering_manager and self.flickering_manager.id or nil)
     self.apps_bar_scanline_flickering = scanline_flicker
 
@@ -423,7 +423,10 @@ function items_scroller_glitch_duration()
 end
 
 function items_scroller_glitch_cooldown()
-    return time_global() + math.random(50, 250) * 100
+    local cooldown = math.random(50, 200) * 100
+    Printer:Debug(LOG.INFO, CAT.UI, "Items Scroller Glitch Cooldown set to " .. cooldown .. " ms")
+    Printer:Debug(LOG.INFO, CAT.UI, "Items Scroller Glitch will be ready at " .. (time_global() + cooldown) .. " ms")
+    return time_global() + cooldown
 end
 
 function items_scroller_glass_showing_fx_stop()
@@ -548,7 +551,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     flickering.dialog = self.npc_panel.info.portrait
     flickering.intensity = 0.65
-    -- flickering.max_intensity = 0.9
+    flickering.max_intensity = 0.9
     flickering.random_duration = {"npcd_pda_dashboard", "items_scroller_glitch_duration"}
     flickering.random_cooldown = {"npcd_pda_dashboard", "items_scroller_glitch_cooldown"}
     npcd_ui_fx.add_fx(flickering)
