@@ -97,7 +97,7 @@
 		<texture id="ui_npcd_pda_npc_detail_info_display_glass" x="11" y="1323" width="877" height="419" />
 
 		<!-- npc specs -->
-		<texture id="ui_npcd_pda_npc_detail_info_spec_frame" x="2162" y="1136" width="669" height="284" />
+		<texture id="ui_npcd_pda_npc_detail_info_spec_frame" x="2162" y="1136" width="669" height="352" />
 
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">

@@ -622,25 +622,30 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.specs.dialog:Show(true)
     self.npc_panel.specs.frame = xml:InitStatic("npc_panel:specs:specs_frame", specs)
     self.npc_panel.specs.frame:Show(true)
-    local specs_content = xml:InitStatic("npc_panel:specs:content", nil)
-    self.npc_panel.specs.content = {}
-    self.npc_panel.specs.content.dialog = specs_content
-    self.npc_panel.specs.content.header = xml:InitTextWnd("npc_panel:specs:content:header", specs_content)
-    self.npc_panel.specs.content.rows = {}
-    for i = 1, 5 do
-        self.npc_panel.specs.content.rows[i] = {}
-        self.npc_panel.specs.content.rows[i].text = xml:InitTextWnd("npc_panel:specs:content:header", specs_content)
-        self.npc_panel.specs.content.rows[i].text:SetWndPos(vector2():set(self.npc_panel.specs.content.rows[i].text:GetWndPos().x, self.npc_panel.specs.content.rows[i].text:GetWndPos().y + i * 20))
-    end
--- specs terminal
+    --------------------------------
+    -- specs terminal
+    -- ------------------------------
     local terminal_config = npcd_ui_fx.get_sfx_config(npcd_ui_fx.SFX.VIDEO_TERMINAL, "npc_specs_terminal")
     terminal_config.xml_init = "npcd_pda_dashboard.xml"
     terminal_config.parent = specs
     terminal_config.display = "npc_panel:specs:terminal_display"
-    terminal_config.scroll = "npc_panel:specs:terminal_scroll"
-    terminal_config.glass = "npc_panel:specs:terminal_glass"
-    -- terminal_config.dirt = "npc_panel:specs:terminal_dirt"
+    terminal_config.scroll = "npc_panel:specs:terminal_display:terminal_scroll"
+    -- set the scroll content
+    local specs_content = xml:InitStatic("npc_panel:specs:terminal_display:content", nil)
+    self.npc_panel.specs.content = {}
+    self.npc_panel.specs.content.dialog = specs_content
+    self.npc_panel.specs.content.header = xml:InitTextWnd("npc_panel:specs:terminal_display:content:header", specs_content)
+    self.npc_panel.specs.content.rows = {}
+    for i = 1, 5 do
+        self.npc_panel.specs.content.rows[i] = {}
+        self.npc_panel.specs.content.rows[i].text = xml:InitTextWnd("npc_panel:specs:terminal_display:content:header", specs_content)
+        self.npc_panel.specs.content.rows[i].text:SetWndPos(vector2():set(self.npc_panel.specs.content.rows[i].text:GetWndPos().x, self.npc_panel.specs.content.rows[i].text:GetWndPos().y + i * 20))
+    end    
     terminal_config.content = specs_content
+
+    terminal_config.glass = "npc_panel:specs:terminal_display:terminal_glass"
+    -- terminal_config.dirt = "npc_panel:specs:terminal_dirt"
+    -- instantiate the terminal
     self.npc_panel.specs.terminal = npcd_ui_fx.SFXVideoTerminal_Create(terminal_config)
     
     self.npc_panel.info.dialog:Show(false)
@@ -687,7 +692,7 @@ function npc_panel_info_showing_fx_stop()
         Printer:Debug(LOG.RUN, CAT.UI, "Initializing all the remaining NPC Panel Info FXs")
         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.portrait_showing.id)
         -- npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.flickering.id)
-        -- ui.npc_panel.info.fx.flickering.force = 100 -- 0.5 seconds
+        ui.npc_panel.info.fx.flickering.force = 100 -- 0.5 seconds
         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.scanline.id)
         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.wide_scanline.id)
         -- ui.npc_panel.info.background:Show(true)
