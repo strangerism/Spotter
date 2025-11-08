@@ -99,23 +99,23 @@ local FX_CONFIG = {
 		start = nil,
 		speed = nil,
 		random_accel = false,
-		accel_length = nil,
+		accel_length = nil, -- acceleration event length multiplier in ms (100 * accel_length, 500 * accel_length)
 		orientation = 1, -- 0 - horizontal, 1 - vertical
 		scale = 1.0,
-		intensity = nil, -- 0 to 1
-		margin_v = 0,
-		margin_h = 0,
+		intensity = nil, -- 0 to 1 - the intensity of the scanline
+		margin_v = 0, -- vertical margin of the scanline respective to dialog
+		margin_h = 0, -- horizontal margin of the scanline respective to dialog
 		direction = 1, -- 1 - in, -1 - out
 		start_x = nil,
 		start_y = nil,
-		offset = 0,
+		offset = 0, -- offset starting position as percentage of dialog height/width
 		fx_ui = nil,
 		fx_element = "scanline",
-		init_on_start = false,
+		init_on_start = false, -- initialize the fx_ui element on start callback 
 		accel_event = nil,
 		accel_cycle = 0,
 		accel_increment = nil,
-		accel_direction = 1,
+		accel_direction = 1, -- internal -- 1 - accelerating, -1 - decelerating
 	},
 	[FX.FLICKERING] = {
 		type = FX.FLICKERING,
@@ -125,9 +125,9 @@ local FX_CONFIG = {
 		flickering_cooldown = nil,
 		random_cooldown = false,
 		cooldown_value = 0,
-		restore_alpha = nil,
-		intensity = 1,
-		max_intensity = nil,
+		intensity = 1, -- 0 to 1 - the intensity of the flickering -- if 1 then full hide/show instead of alpha change -- must be used on non texture dialogs
+		restore_alpha = nil, -- explicitly set the alpha to restore after flickering ends
+		max_intensity = nil, -- instead of using alpha restore, restore to this intensity value (0 to 1)*255
 		speed = nil,
 		fx_ui = nil,
 		fx_element = nil,
@@ -518,7 +518,12 @@ function on_stop_flickering(runner_name)
 	-- ending the flickering effect by restoring default alpha and visibility, also setting cooldown for a flickering manager if used
 	if config.intensity ~= 1 then
 		-- restore original alpha
-		change_ui_alpha(config.fx_ui, config.restore_alpha)
+		if config.max_intensity and config.intensity < config.max_intensity then
+			-- if max intensity is set, restore to that value
+			change_ui_alpha(config.fx_ui, config.max_intensity * 255)
+		else
+			change_ui_alpha(config.fx_ui, config.restore_alpha < 255 and config.restore_alpha or 255)
+		end
 	end
 	config.fx_ui:Show(true)
 	config.flickering_duration = nil
