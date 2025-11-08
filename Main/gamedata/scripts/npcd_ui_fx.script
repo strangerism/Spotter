@@ -493,7 +493,7 @@ function on_start_flickering(runner_name)
 		if config.fx_ui.GetTextureColor then
 			local c = npcdu.get_ui_element_color(config.fx_ui)
 			local str  = string.format("Cached original color by %s", runner_name)
-			Printer:DebugTable(str, c and c or {})
+			-- Printer:DebugTable(str, c and c or {})
 			config.restore_alpha = c and c.a or DEFAULT_ALPHA
 		else
 			config.restore_alpha = DEFAULT_ALPHA
@@ -513,7 +513,7 @@ function on_stop_flickering(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.fx_ui then return end
-	Printer:Debug(LOG.STOP, CAT.UI," stopping caller_flickering loop for %s", runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping caller_flickering loop for %s", runner_name)
 
 	-- ending the flickering effect by restoring default alpha and visibility, also setting cooldown for a flickering manager if used
 	if config.intensity ~= 1 then
@@ -534,7 +534,7 @@ function on_stop_flickering(runner_name)
 		-- execute custom random cooldown functor
 		local cooldown = execute_func(unpack(config.random_cooldown))
 		if cooldown and type(cooldown) == "number" then
-			Printer:Debug(LOG.INFO, CAT.UI," flickering cooldown for %s set to %s", runner_name, cooldown)
+			Printer:Debug(LOG.INFO, CAT.UI_ACTION," flickering cooldown for %s set to %s", runner_name, cooldown)
 			config.cooldown_value = time_global() + cooldown
 		end
 	end
@@ -573,11 +573,11 @@ end
 function run_flickering_manager(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
-	Printer:Debug(LOG.RUN, CAT.UI," running flickering manager %s", runner_name)
+	Printer:Debug(LOG.RUN, CAT.UI_ACTION," running flickering manager %s", runner_name)
 	for _, managed_id in pairs(	Managed[FX.FLICKERING]) do
 		local managed = FX_JOBS[managed_id] and FX_JOBS[managed_id]
 		if not managed then return false end
-		Printer:DebugTable("Flickering Manager checking managed fx:", managed)
+		-- Printer:DebugTable("Flickering Manager checking managed fx:", managed)
 		
 		-- cannot run if scanline loop is active or it has a cooldown
 		if managed.config.force then
@@ -588,7 +588,7 @@ function run_flickering_manager(runner_name)
 			-- start caller scanlines loop by chance			
 			local flicker_chance = get_flicker_chance()
 			if flicker_chance > 70 then
-				Printer:Debug(LOG.START, CAT.UI," starting flickering loop for %s with chance %s", managed.runner_name, flicker_chance)
+				Printer:Debug(LOG.START, CAT.UI_ACTION," starting flickering loop for %s with chance %s", managed.runner_name, flicker_chance)
 				npe_execution.Resume(managed.runner_name)
 				current_level = current_level + 1
 			end
@@ -596,7 +596,7 @@ function run_flickering_manager(runner_name)
 			if time_global() > managed.config.cooldown_value then
 				managed.config.cooldown_value = 0
 			end
-			Printer:Debug(LOG.INFO, CAT.UI," flickering cooldown active for %s %s", managed.runner_name, managed.config.cooldown_value)
+			Printer:Debug(LOG.INFO, CAT.UI_ACTION," flickering cooldown active for %s %s", managed.runner_name, managed.config.cooldown_value)
 		end
 	end
 end
@@ -680,7 +680,7 @@ function on_stop_show(runner_name)
 	if config.on_showing_complete then
 		local ex_funtor = npcdu.copy(config.on_showing_complete)
 		-- table.insert(ex_funtor, runner_name)
-		Printer:DebugTable("Executing on_showing_complete:", ex_funtor)		
+		-- Printer:DebugTable("Executing on_showing_complete:", ex_funtor)
 		execute_func(unpack(ex_funtor))
 	end
 end
@@ -790,7 +790,7 @@ local SFX_INSTANCES = {
 
 function get_sfx_config(sfx_name, group)
 	Printer:Debug(LOG.INFO, CAT.UI_ACTION," getting SFX config for %s", sfx_name)
-	Printer:DebugTable("SFX Config:", SFX_CONFIG)
+	-- Printer:DebugTable("SFX Config:", SFX_CONFIG)
 	local config = npcdu.copy(SFX_CONFIG[sfx_name])
 	if group then
 		config.group = group
@@ -809,13 +809,26 @@ function SFXVideoTerminal:__init(sfx_config)
 	self.xml = CScriptXmlInit()
 	self.xml:ParseFile(sfx_config.xml_init)
 
+	-- display area
 	self.display = self.xml:InitStatic(sfx_config.display, self.dialog)
 	self.display:Show(false)
+
+	-- optional header to display
+	self.header = sfx_config.header
+
 	self.scroll = self.xml:InitScrollView(sfx_config.scroll, self.display)
 	self.content = sfx_config.content
 	self.scroll:AddWindow(self.content, true)
-	-- self.content:Show(false)
 	self.scroll:Show(false)
+
+	-- if self.header then
+	-- 	self.header_scroll = xml:InitScrollView("header_scroll", self.display)
+	-- 	self.header_scroll:AddWindow(self.header, true)
+	-- 	self.header_scroll:Show(true)
+	-- 	self.header_scroll:SetFixedScrollBar(true)
+	-- 	self.header_scroll:Enable(true)
+	-- 	Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: header initialized")
+	-- end
 
 	-- FX: showing display 
 	local showing = get_fx_config(FX.SHOWING, sfx_config.group)
@@ -837,8 +850,6 @@ function SFXVideoTerminal:__init(sfx_config)
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING, sfx_config.group)
     flickering.dialog = self.content
     flickering.speed = 0.02
-    -- flickering.intensity = 0.3
-    -- flickering.restore_alpha = 140
     flickering.flickering_duration = 40
     npcd_ui_fx.add_fx(flickering, "flickering")
     self.fx.flickering = flickering
@@ -867,6 +878,16 @@ function SFXVideoTerminal:__on_started()
 	scanlines.init_on_start = true
 	npcd_ui_fx.add_fx(scanlines)
 	self.fx.scanlines = scanlines
+
+	-- if self.header then
+	-- 	self.header_scroll = xml:InitScrollView("header_scroll", self.glass)
+	-- 	self.header_scroll:AddWindow(self.header, true)
+	-- 	self.header_scroll:Show(true)
+	-- 	self.header_scroll:SetFixedScrollBar(true)
+	-- 	self.header_scroll:Enable(false)
+	-- 	Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: header initialized")
+	-- end
+
 	-- add dirt overlay
 	if self.config.dirt then
 		self.dirt = self.xml:InitStatic(self.config.dirt, self.glass)
@@ -879,6 +900,11 @@ function SFXVideoTerminal:__on_content_displayed()
 	npcd_ui_fx.resume_fx(self.fx.scanlines.id)
 	self.fx.flickering.flickering_duration = 40
 	npcd_ui_fx.resume_fx(self.fx.flickering.id)
+	if not self.header then
+		Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: no header to show")
+	end
+	self.display:AttachChild(self.header)
+	self.header:Show(true)
 end
 
 function SFXVideoTerminal:__destroy()
@@ -891,11 +917,25 @@ function SFXVideoTerminal:__destroy()
 	self.dirt = nil
 end
 
-function SFXVideoTerminal:Reset()
-	Printer:Debug(LOG.STOP, CAT.UI," SFXVideoTerminal: reset")
-	self.display:Show(false)
-	self.scroll:Show(false)
+function SFXVideoTerminal:UpdateHeader(header)
+	Printer:Debug(LOG.STOP, CAT.UI," SFXVideoTerminal: update header")
+	if self.header then
+		self.header_scroll:Show(false)
+		self.header_scroll:Clear()
+		self.header_scroll:AddWindow(header, true)
+		self.header = header
+		self.header_scroll:Show(true)
+	end
 end
+
+-- function SFXVideoTerminal:Reset()
+-- 	Printer:Debug(LOG.STOP, CAT.UI," SFXVideoTerminal: reset")
+-- 	self.display:Show(false)
+-- 	self.scroll:Show(false)
+-- 	if self.header then
+-- 		self.header_scroll:Show(false)
+-- 	end
+-- end
 
 function SFXVideoTerminal_Create(sfx_config)
 	Printer:Debug(LOG.START, CAT.UI," Creating SFXVideoTerminal")
@@ -927,6 +967,11 @@ function SFXVideoTerminal:SwitchOff()
 	end
 	npcd_ui_fx.stop_fx(self.fx.flickering.id)
 	self.scroll:Show(false)
+	if self.header_scroll then
+		self.header_scroll:Show(false)
+		self.header_scroll:Clear()
+		self.header = nil
+	end
 	if self.glass then
 		self.glass:Show(false)
 		self.glass = nil

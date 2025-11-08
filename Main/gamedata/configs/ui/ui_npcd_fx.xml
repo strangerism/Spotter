@@ -2,4 +2,7 @@
     <scanline x="15" y="5" width="751" height="1" stretch="1">
         <texture a="100">ui_npcd_codec_750_scanline</texture>
     </scanline>   
+    <content_scroll x="10" y="25" width="350" height="160" right_ident="0" left_ident="0" top_indent="0" bottom_indent="0" vert_interval="0" always_show_scroll="0"/>
+    <header_scroll x="10" y="10" width="370" height="20" right_ident="0" left_ident="0" top_indent="0" bottom_indent="0" vert_interval="0" always_show_scroll="1"/>
+    <terminal_scroll x="10" y="25" width="350" height="160" right_ident="0" left_ident="0" top_indent="0" bottom_indent="0" vert_interval="0" always_show_scroll="0"/>
 </w>

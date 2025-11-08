@@ -424,8 +424,8 @@ end
 
 function items_scroller_glitch_cooldown()
     local cooldown = math.random(50, 200) * 100
-    Printer:Debug(LOG.INFO, CAT.UI, "Items Scroller Glitch Cooldown set to " .. cooldown .. " ms")
-    Printer:Debug(LOG.INFO, CAT.UI, "Items Scroller Glitch will be ready at " .. (time_global() + cooldown) .. " ms")
+    -- Printer:Debug(LOG.INFO, CAT.UI, "Items Scroller Glitch Cooldown set to " .. cooldown .. " ms")
+    -- Printer:Debug(LOG.INFO, CAT.UI, "Items Scroller Glitch will be ready at " .. (time_global() + cooldown) .. " ms")
     return time_global() + cooldown
 end
 
@@ -629,16 +629,29 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     terminal_config.xml_init = "npcd_pda_dashboard.xml"
     terminal_config.parent = specs
     terminal_config.display = "npc_panel:specs:terminal_display"
+
+    -- header
+    -- ------------------------------
+    local specs_header = xml:InitStatic("npc_panel:specs:terminal_display:header", nil)
+    self.npc_panel.specs.header = {}
+    self.npc_panel.specs.header.dialog = specs_header
+    self.npc_panel.specs.header.top_line = xml:InitStatic("npc_panel:specs:terminal_display:header:top_line", specs_header)
+    self.npc_panel.specs.header.background = xml:InitStatic("npc_panel:specs:terminal_display:header:background", specs_header)
+    self.npc_panel.specs.header.label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:label", specs_header)
+    terminal_config.header = specs_header
+
+    -- content
+    -- ------------------------------
     terminal_config.scroll = "npc_panel:specs:terminal_display:terminal_scroll"
-    -- set the scroll content
     local specs_content = xml:InitStatic("npc_panel:specs:terminal_display:content", nil)
     self.npc_panel.specs.content = {}
     self.npc_panel.specs.content.dialog = specs_content
-    self.npc_panel.specs.content.header = xml:InitTextWnd("npc_panel:specs:terminal_display:content:header", specs_content)
+
+    -- content rows
     self.npc_panel.specs.content.rows = {}
-    for i = 1, 5 do
+    for i = 1, 15 do
         self.npc_panel.specs.content.rows[i] = {}
-        self.npc_panel.specs.content.rows[i].text = xml:InitTextWnd("npc_panel:specs:terminal_display:content:header", specs_content)
+        self.npc_panel.specs.content.rows[i].text = xml:InitTextWnd("npc_panel:specs:terminal_display:content:text_sample", specs_content)
         self.npc_panel.specs.content.rows[i].text:SetWndPos(vector2():set(self.npc_panel.specs.content.rows[i].text:GetWndPos().x, self.npc_panel.specs.content.rows[i].text:GetWndPos().y + i * 20))
     end    
     terminal_config.content = specs_content
