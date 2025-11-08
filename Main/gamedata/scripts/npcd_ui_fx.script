@@ -820,17 +820,9 @@ function SFXVideoTerminal:__init(sfx_config)
 	self.content = sfx_config.content
 	self.scroll:AddWindow(self.content, true)
 	self.scroll:Show(false)
+	self.scroll:SetFixedScrollBar(true)
 
-	-- if self.header then
-	-- 	self.header_scroll = xml:InitScrollView("header_scroll", self.display)
-	-- 	self.header_scroll:AddWindow(self.header, true)
-	-- 	self.header_scroll:Show(true)
-	-- 	self.header_scroll:SetFixedScrollBar(true)
-	-- 	self.header_scroll:Enable(true)
-	-- 	Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: header initialized")
-	-- end
-
-	-- FX: showing display 
+	-- FX: showing display
 	local showing = get_fx_config(FX.SHOWING, sfx_config.group)
 	showing.dialog = self.display
 	showing.speed = 0.005
@@ -878,16 +870,6 @@ function SFXVideoTerminal:__on_started()
 	scanlines.init_on_start = true
 	npcd_ui_fx.add_fx(scanlines)
 	self.fx.scanlines = scanlines
-
-	-- if self.header then
-	-- 	self.header_scroll = xml:InitScrollView("header_scroll", self.glass)
-	-- 	self.header_scroll:AddWindow(self.header, true)
-	-- 	self.header_scroll:Show(true)
-	-- 	self.header_scroll:SetFixedScrollBar(true)
-	-- 	self.header_scroll:Enable(false)
-	-- 	Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: header initialized")
-	-- end
-
 	-- add dirt overlay
 	if self.config.dirt then
 		self.dirt = self.xml:InitStatic(self.config.dirt, self.glass)
@@ -900,11 +882,11 @@ function SFXVideoTerminal:__on_content_displayed()
 	npcd_ui_fx.resume_fx(self.fx.scanlines.id)
 	self.fx.flickering.flickering_duration = 40
 	npcd_ui_fx.resume_fx(self.fx.flickering.id)
-	if not self.header then
-		Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: no header to show")
+	if self.header then
+		self.display:AttachChild(self.header)
+		self.header:Show(true)
+		Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: header shown")
 	end
-	self.display:AttachChild(self.header)
-	self.header:Show(true)
 end
 
 function SFXVideoTerminal:__destroy()
@@ -920,11 +902,10 @@ end
 function SFXVideoTerminal:UpdateHeader(header)
 	Printer:Debug(LOG.STOP, CAT.UI," SFXVideoTerminal: update header")
 	if self.header then
-		self.header_scroll:Show(false)
-		self.header_scroll:Clear()
-		self.header_scroll:AddWindow(header, true)
+		self.header:Show(false)
+		self.display:AttachChild(header)
+		self.header:Show(true)
 		self.header = header
-		self.header_scroll:Show(true)
 	end
 end
 
@@ -933,7 +914,7 @@ end
 -- 	self.display:Show(false)
 -- 	self.scroll:Show(false)
 -- 	if self.header then
--- 		self.header_scroll:Show(false)
+-- 		self.header:Show(false)
 -- 	end
 -- end
 
@@ -967,10 +948,8 @@ function SFXVideoTerminal:SwitchOff()
 	end
 	npcd_ui_fx.stop_fx(self.fx.flickering.id)
 	self.scroll:Show(false)
-	if self.header_scroll then
-		self.header_scroll:Show(false)
-		self.header_scroll:Clear()
-		self.header = nil
+	if self.header then
+		self.header:Show(false)
 	end
 	if self.glass then
 		self.glass:Show(false)

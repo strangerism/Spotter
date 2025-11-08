@@ -657,7 +657,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     terminal_config.content = specs_content
 
     terminal_config.glass = "npc_panel:specs:terminal_display:terminal_glass"
-    -- terminal_config.dirt = "npc_panel:specs:terminal_dirt"
+    terminal_config.dirt = "npc_panel:specs:terminal_display:terminal_dirt"
     -- instantiate the terminal
     self.npc_panel.specs.terminal = npcd_ui_fx.SFXVideoTerminal_Create(terminal_config)
     
