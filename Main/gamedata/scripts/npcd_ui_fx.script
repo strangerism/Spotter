@@ -667,8 +667,10 @@ function on_stop_show(runner_name)
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.original_y))
 	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), config.height))
 	if config.on_showing_complete then
-		-- Printer:DebugTable("Executing on_showing_complete for:", config.on_showing_complete)
-		execute_func(unpack(config.on_showing_complete))
+		local ex_funtor = npcdu.copy(config.on_showing_complete)
+		-- table.insert(ex_funtor, runner_name)
+		Printer:DebugTable("Executing on_showing_complete:", ex_funtor)		
+		execute_func(unpack(ex_funtor))
 	end
 end
 
@@ -751,3 +753,201 @@ end
 function on_stop_translate(runner_name)
 	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping translate_dialog %s", runner_name)
 end
+
+-- SFX: VIDEO TERMINAL
+
+SFX = {
+	VIDEO_TERMINAL = "video_terminal",
+}
+
+local SFX_CONFIG = {
+	[SFX.VIDEO_TERMINAL] = {
+		type = SFX.VIDEO_TERMINAL,
+		group = nil,
+		xml_init = nil,
+		parent = nil,
+		display = nil,
+		content = nil,
+		glass = nil,
+		dirt = nil,
+		fx = nil,
+	},
+}
+
+local SFX_INSTANCES = {
+}
+
+function get_sfx_config(sfx_name, group)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," getting SFX config for %s", sfx_name)
+	Printer:DebugTable("SFX Config:", SFX_CONFIG)
+	local config = npcdu.copy(SFX_CONFIG[sfx_name])
+	if group then
+		config.group = group
+	end
+	return config
+end
+
+class "SFXVideoTerminal"
+function SFXVideoTerminal:__init(sfx_config)
+	Printer:Debug(LOG.START, CAT.UI," SFXVideoTerminal: initializing")
+	Printer:DebugTable("SFXVideoTerminal Config:", sfx_config)
+
+	self.dialog = sfx_config.parent
+	self.fx = {}
+
+	self.xml = CScriptXmlInit()
+	self.xml:ParseFile(sfx_config.xml_init)
+
+	self.display = self.xml:InitStatic(sfx_config.display, self.dialog)
+	self.display:Show(false)
+	self.scroll = self.xml:InitScrollView(sfx_config.scroll, self.display)
+	self.content = sfx_config.content
+	self.scroll:AddWindow(self.content, true)
+	-- self.content:Show(false)
+	self.scroll:Show(false)
+
+	-- FX: showing display 
+	local showing = get_fx_config(FX.SHOWING, sfx_config.group)
+	showing.dialog = self.display
+	showing.speed = 0.005
+	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_started", sfx_config.id}
+	npcd_ui_fx.add_fx(showing)
+	self.fx.showing_display = showing
+
+	-- FX: showing content
+	showing = get_fx_config(FX.SHOWING, sfx_config.group)
+	showing.dialog = self.scroll
+	showing.speed = 0.005
+	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_content_displayed", sfx_config.id}
+	npcd_ui_fx.add_fx(showing, "showing_content")
+	self.fx.showing_content = showing
+
+-- FX: Flickering on content
+    local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING, sfx_config.group)
+    flickering.dialog = self.content
+    flickering.speed = 0.02
+    -- flickering.intensity = 0.3
+    -- flickering.restore_alpha = 140
+    flickering.flickering_duration = 40
+    npcd_ui_fx.add_fx(flickering, "flickering")
+    self.fx.flickering = flickering
+
+	Printer:Debug(LOG.ADD, CAT.UI," SFXVideoTerminal: initialized")
+	self.config = sfx_config
+end
+
+function SFXVideoTerminal:__on_started()
+	Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: started")
+	self.display:Show(true)
+	-- add glass overlay
+	self.glass = self.xml:InitStatic(self.config.glass, self.display)
+	-- FX: scanlines on glass
+	local scanlines = get_fx_config(FX.SCANLINES, self.config.group)
+	scanlines.dialog = self.glass
+    scanlines.speed = 0.04
+	scanlines.start = 1
+    scanlines.random_accel = false
+    scanlines.accel_length = 5
+    scanlines.margin_v = 3
+    scanlines.margin_h = 0
+    scanlines.scale = 15
+    scanlines.intensity = 0.07
+    scanlines.orientation = 1
+	scanlines.init_on_start = true
+	npcd_ui_fx.add_fx(scanlines)
+	self.fx.scanlines = scanlines
+	-- add dirt overlay
+	if self.config.dirt then
+		self.dirt = self.xml:InitStatic(self.config.dirt, self.glass)
+	end
+	npcd_ui_fx.resume_fx(self.fx.showing_content.id)
+end
+
+function SFXVideoTerminal:__on_content_displayed()
+	Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: content displayed")
+	npcd_ui_fx.resume_fx(self.fx.scanlines.id)
+	self.fx.flickering.flickering_duration = 40
+	npcd_ui_fx.resume_fx(self.fx.flickering.id)
+end
+
+function SFXVideoTerminal:__destroy()
+	npcd_ui_fx.remove_fx(self.fx.scanlines.id)
+	npcd_ui_fx.remove_fx(self.fx.showing_content.id)
+	npcd_ui_fx.remove_fx(self.fx.showing_display.id)
+	self.display = nil
+	self.content = nil
+	self.glass = nil
+	self.dirt = nil
+end
+
+function SFXVideoTerminal:Reset()
+	Printer:Debug(LOG.STOP, CAT.UI," SFXVideoTerminal: reset")
+	self.display:Show(false)
+	self.scroll:Show(false)
+end
+
+function SFXVideoTerminal_Create(sfx_config)
+	Printer:Debug(LOG.START, CAT.UI," Creating SFXVideoTerminal")
+	local sfx_id = sfx_config.type .. "_" .. (name or "") .. "_".. tostring(math.random(10000, 99999))
+	sfx_config.id = sfx_id
+	local video_terminal = SFXVideoTerminal(sfx_config)
+	SFX_INSTANCES[sfx_id] = video_terminal
+	return video_terminal
+end
+
+function SFXVideoTerminal:Show(show)
+	Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: show %s", tostring(show))
+	if self.dialog then
+		Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: setting dialog visibility to %s", tostring(show))
+		self.dialog:Show(show)
+	end
+end
+
+function SFXVideoTerminal:SwitchOn()
+	Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: switch on")
+	Printer:Debug(LOG.RUN, CAT.UI,"Starting FX: %s", self.fx.showing_display.id)
+	npcd_ui_fx.resume_fx(self.fx.showing_display.id)
+end
+
+function SFXVideoTerminal:SwitchOff()
+	self.display:Show(false)
+	if self.fx.scanlines then
+		npcd_ui_fx.remove_fx(self.fx.scanlines.id)
+	end
+	npcd_ui_fx.stop_fx(self.fx.flickering.id)
+	self.scroll:Show(false)
+	if self.glass then
+		self.glass:Show(false)
+		self.glass = nil
+	end
+	if self.dirt then
+		self.dirt:Show(false)
+		self.dirt = nil
+	end
+end
+
+
+function sfx_video_terminal_on_started(sfx_id)
+	Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: started callback %s", sfx_id)
+	Printer:DebugTable("SFX INSTANCES:", SFX_INSTANCES)
+	local video_terminal = SFX_INSTANCES[sfx_id]
+	if video_terminal and video_terminal.__on_started then
+		video_terminal:__on_started()
+	else
+		Printer:Debug(LOG.ERROR, CAT.UI," SFXVideoTerminal: started failed, invalid self reference")
+	end
+end
+
+function sfx_video_terminal_on_content_displayed(sfx_id)
+	Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: content displayed callback %s", sfx_id)
+	local video_terminal = SFX_INSTANCES[sfx_id]
+	if video_terminal and video_terminal.__on_content_displayed then
+		video_terminal:__on_content_displayed()
+	else
+		Printer:Debug(LOG.ERROR, CAT.UI," SFXVideoTerminal: on_content_displayed failed, invalid self reference")
+	end
+end
+
+
+
+--- SFX HANDLERS: VIDEO TERMINAL

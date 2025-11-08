@@ -455,7 +455,7 @@ function npcd_dashboard_tab:UpdateItemPanel(app_name, item_id)
             npcd_ui_fx.stop_fx(self.npc_panel.info.fx.scanline.id)
             -- npcd_ui_fx.stop_fx(self.npc_panel.info.fx.wide_scanline.id)
             npcd_ui_fx.resume_fx(self.npc_panel.info.fx.showing.id)
-            npcd_ui_fx.resume_fx(self.npc_panel.specs.fx.showing.id)
+            self.npc_panel.specs.terminal:SwitchOn()
         else
             npcd_ui_fx.resume_fx(self.npc_panel.info.fx.portrait_showing.id)
         end
@@ -612,50 +612,33 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.char_frame:Show(false)
     --------------------------------
     -- specs frame
-    -- ------------------------------    
+    -- ------------------------------  
     self.npc_panel.specs = {}
-    self.npc_panel.specs.fx = {}
-    local specs_frame = xml:InitStatic("npc_panel:specs_frame", info_dialog)
-    self.npc_panel.specs.frame = specs_frame
-    self.npc_panel.specs.tabs_bg = xml:InitStatic("npc_panel:specs_frame:tabs_bg", specs_frame)
-    self.npc_panel.specs.tabs_bg:Show(true)
-    self.npc_panel.specs.display_bg = xml:InitStatic("npc_panel:specs_frame:display_bg", specs_frame)
-    self.npc_panel.specs.display_bg:Show(false)
--- -- FX: Showing on background
-    local specs_showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
-    specs_showing.dialog = self.npc_panel.specs.display_bg
-    specs_showing.speed = 0.005
-    specs_showing.on_showing_complete = {"npcd_pda_dashboard", "npc_panel_info_specs_showing_fx_stop"}
-    npcd_ui_fx.add_fx(specs_showing)
-    self.npc_panel.specs.fx.showing = specs_showing
-    self.npc_panel.specs.display_glass = xml:InitStatic("npc_panel:specs_frame:display_glass", specs_frame)
-    self.npc_panel.specs.display_glass:Show(true)
--- FX: Scanlines on glass
-    local specs_scanlines = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
-    specs_scanlines.dialog = self.npc_panel.specs.display_glass
-    specs_scanlines.speed = 0.04
-    specs_scanlines.random_accel = false
-    specs_scanlines.accel_length = 5
-    specs_scanlines.margin_v = 3
-    specs_scanlines.margin_h = 0
-    specs_scanlines.scale = 15
-    specs_scanlines.intensity = 0.07
-    specs_scanlines.orientation = 1
-    npcd_ui_fx.add_fx(specs_scanlines)
-    self.npc_panel.specs.fx.scanline = specs_scanlines
--- FX: Flickering on specs glass
-    local specs_flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
-    specs_flickering.dialog = self.npc_panel.specs.display_glass
-    specs_flickering.speed = 0.02
-    specs_flickering.intensity = 0.3
-    specs_flickering.restore_alpha = 140
-    specs_flickering.flickering_duration = 40
-    npcd_ui_fx.add_fx(specs_flickering, "display_glass")
-    self.npc_panel.specs.fx.flickering = specs_flickering
-
-    -- dirt
-    self.npc_panel.specs.display_dirt = xml:InitStatic("npc_panel:specs_frame:display_dirt", specs_frame)
-    self.npc_panel.specs.display_dirt:Show(false)
+    local specs = xml:InitStatic("npc_panel:specs", info_dialog)
+    self.npc_panel.specs.dialog = specs
+    self.npc_panel.specs.dialog:Show(true)
+    self.npc_panel.specs.frame = xml:InitStatic("npc_panel:specs:specs_frame", specs)
+    self.npc_panel.specs.frame:Show(true)
+    local specs_content = xml:InitStatic("npc_panel:specs:content", nil)
+    self.npc_panel.specs.content = {}
+    self.npc_panel.specs.content.dialog = specs_content
+    self.npc_panel.specs.content.header = xml:InitTextWnd("npc_panel:specs:content:header", specs_content)
+    self.npc_panel.specs.content.rows = {}
+    for i = 1, 5 do
+        self.npc_panel.specs.content.rows[i] = {}
+        self.npc_panel.specs.content.rows[i].text = xml:InitTextWnd("npc_panel:specs:content:header", specs_content)
+        self.npc_panel.specs.content.rows[i].text:SetWndPos(vector2():set(self.npc_panel.specs.content.rows[i].text:GetWndPos().x, self.npc_panel.specs.content.rows[i].text:GetWndPos().y + i * 20))
+    end
+-- specs terminal
+    local terminal_config = npcd_ui_fx.get_sfx_config(npcd_ui_fx.SFX.VIDEO_TERMINAL, "npc_specs_terminal")
+    terminal_config.xml_init = "npcd_pda_dashboard.xml"
+    terminal_config.parent = specs
+    terminal_config.display = "npc_panel:specs:terminal_display"
+    terminal_config.scroll = "npc_panel:specs:terminal_scroll"
+    terminal_config.glass = "npc_panel:specs:terminal_glass"
+    -- terminal_config.dirt = "npc_panel:specs:terminal_dirt"
+    terminal_config.content = specs_content
+    self.npc_panel.specs.terminal = npcd_ui_fx.SFXVideoTerminal_Create(terminal_config)
     
     self.npc_panel.info.dialog:Show(false)
 end
@@ -690,7 +673,7 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
     self.npc_panel.info.portrait:Show(false)
     if not self.npc_panel.init then
         self.npc_panel.info.background:Show(false)    
-        self.npc_panel.specs.display_bg:Show(false)
+        self.npc_panel.specs.terminal:SwitchOff()
     end
 end
 
