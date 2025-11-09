@@ -633,7 +633,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
         terminal_config.tabs.tab[i].name = spec_data.name
         terminal_config.tabs.tab[i].default = spec_data.default or false
         terminal_config.tabs.tab[i].label = spec_data.label
-        terminal_config.tabs.tab[i].on_click = {"npcd_pda_dashboard", "npc_panel_specs_tab_clicked", spec_data.name}
+        terminal_config.tabs.tab[i].on_click_callback = { functor = self.OnTerminalTabClicked, self = self}
     end
 
     -- header
@@ -655,11 +655,6 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 
     -- content rows
     self.npc_panel.specs.content.rows = {}
-    for i = 1, 15 do
-        self.npc_panel.specs.content.rows[i] = {}
-        self.npc_panel.specs.content.rows[i].text = xml:InitTextWnd("npc_panel:specs:terminal_display:content:text_sample", specs_content)
-        self.npc_panel.specs.content.rows[i].text:SetWndPos(vector2():set(self.npc_panel.specs.content.rows[i].text:GetWndPos().x, self.npc_panel.specs.content.rows[i].text:GetWndPos().y + i * 20))
-    end    
     terminal_config.content = specs_content
 
     terminal_config.glass = "npc_panel:specs:terminal_display:terminal_glass"
@@ -672,15 +667,26 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.dialog:Show(false)
 end
 
-function npc_panel_specs_tab_clicked(spec_name)
-    Printer:Debug(LOG.CLICK, CAT.UI, "NPC Panel Specs Tab Clicked - Spec: " .. spec_name)
+function npcd_dashboard_tab:OnTerminalTabClicked(tab_index, spec_name)
+    Printer:Debug(LOG.RUN, CAT.UI, "NPC Panel Specs Tab " .. tab_index .. " Clicked - Spec: " .. spec_name)
 
+    if spec_name == SPECS.ABILITIES then
+        local npc_deck = npcd.get_npc(self.npc_panel.npc_id)
+        Printer:DebugTable("NPC DECK", npc_deck)
+        if npc_deck then
+            local abilities = npc_deck.Ability or {}
+            for _, ability in ipairs(abilities) do
+                local feat = npcd.get_feat(ability.feat_id)
+                Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability: " .. ability.id .. " Level: " .. tostring(ability.feat_id))
+            end
+        end
+    end
 end
 
 function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
     Printer:Debug(LOG.RUN, CAT.UI, "Updating NPC Panel Info - NPC ID: " .. npc_id)
     self.npc_panel.info.dialog:Show(false)
-
+    self.npc_panel.npc_id = npc_id
     -- Update the NPC panel info with the new NPC data
     local npc_data = npcd.get_npc_data(npc_id)
     if npc_data then
@@ -706,7 +712,7 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
     self.npc_panel.info.dialog:Show(true)
     self.npc_panel.info.portrait:Show(false)
     if not self.npc_panel.init then
-        self.npc_panel.info.background:Show(false)    
+        self.npc_panel.info.background:Show(false)
         self.npc_panel.specs.terminal:SwitchOff()
     end
 end

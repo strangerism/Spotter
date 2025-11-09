@@ -902,9 +902,11 @@ function SFXVideoTerminal:__init(sfx_config)
 			self.parent_dialog:Register(self.tabs.button[index], sfx_config.id .. "_terminal_tab_" .. index)
 			self.parent_dialog:AddCallback(sfx_config.id .. "_terminal_tab_" .. index, ui_events.BUTTON_CLICKED, function ()
 				Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: tab %s clicked", index)
-				execute_func(unpack(tab_config.on_click))
-				if tab_config.update then
-					execute_func(unpack(tab_config.update))
+				if tab_config.on_click_callback then
+					Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: executing tab callback impl for tab %s", tab_config.name)
+					if (type(tab_config.on_click_callback.functor) == "function") then 
+						tab_config.on_click_callback.functor(tab_config.on_click_callback.self, index, tab_config.name)
+					end
 				end
 				-- set active/inactive states
 				for i, tab_button in ipairs(self.tabs.button) do
