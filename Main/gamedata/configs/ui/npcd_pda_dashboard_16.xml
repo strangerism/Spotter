@@ -270,8 +270,8 @@
 			</specs_frame>	
 			<terminal_tabs x="21" y="5" width="433" height="21" stretch="1">
 				<button x="0" y="0" width="85" height="15" stretch="1">
-					<text align="c" vert_align="c" x="0" y="4" font="letterica16"></text>
-					<texture>ui_npcd_pda_scroller_item_highlight_green_button</texture>
+					<text align="c" vert_align="c" x="0" y="0" font="letterica16"></text>
+					<texture>ui_npcd_pda_npc_detail_info_spec_tab_button</texture>
 					<text_color>
 						<e r="200" g="200" b="200"/>
 						<t color ="ui_white"/>

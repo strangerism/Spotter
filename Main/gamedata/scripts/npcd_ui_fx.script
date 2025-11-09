@@ -883,7 +883,7 @@ function SFXVideoTerminal:__init(sfx_config)
 
 			self.tabs.button[index] = self.xml:Init3tButton(sfx_config.tabs.button or tab_config.button, self.tabs.dialog)
 			self.tabs.button[index]:SetWndPos(vector2():set(
-				sfx_config.tabs.auto_orient and (sfx_config.tabs.orient == 0 and ((index - 1) * (self.tabs.button[index]:GetWidth() + (sfx_config.tabs.spacing or 5))) or 0) or tab_config.pos.x,
+				sfx_config.tabs.auto_orient and (sfx_config.tabs.orient == 0 and ((index - 1) * (self.tabs.button[index]:GetWidth() + (sfx_config.tabs.spacing or 5))) or 0) + (index - 1) or tab_config.pos.x,
 				sfx_config.tabs.auto_orient and (sfx_config.tabs.orient == 1 and ((index - 1) * (self.tabs.button[index]:GetHeight() + (sfx_config.tabs.spacing or 5))) or 0) or tab_config.pos.y
 			))
 

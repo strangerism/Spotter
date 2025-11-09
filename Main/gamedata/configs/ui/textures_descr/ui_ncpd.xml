@@ -98,7 +98,10 @@
 
 		<!-- npc specs -->
 		<texture id="ui_npcd_pda_npc_detail_info_spec_frame" x="2162" y="1136" width="669" height="352" />
-
+		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_d" x="1220" y="203" width="85" height="85" />
+		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_e" x="1135" y="399" width="337" height="48" />
+		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_h" x="1135" y="758" width="337" height="48" />
+		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_t" x="1135" y="758" width="337" height="48" />
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">
 		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />

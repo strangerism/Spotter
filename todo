@@ -166,3 +166,221 @@ end
 
 
 bugs
+
+
+[NPCD][Main][CONF]TABLE: | 150738 | 
+-- Create Profile NPC 26135
+{
+	['recruited'] = false,
+	['id'] = 26135,
+	['show_profile'] = false,
+	['alive'] = true,
+	['Info'] = {
+ 
+	},
+	['has_profile'] = true,
+	['Characteristics'] = {
+		['energy'] = 67,
+		['marksmanship'] = 77,
+		['survival'] = 76,
+		['comradery'] = 39,
+		['capacity'] = 71,
+		['resolve'] = 74,
+		['recuperation'] = 69
+	},
+	['Perk'] = {
+		['perk_sportshooter'] = {
+			['enabled'] = false,
+			['id'] = 'perk_sportshooter'
+		},
+		['perk_deadeye'] = {
+			['enabled'] = false,
+			['id'] = 'perk_deadeye'
+		},
+		['perk_spotter'] = {
+			['enabled'] = false,
+			['id'] = 'perk_spotter'
+		},
+		['perk_cybereye'] = {
+			['enabled'] = false,
+			['id'] = 'perk_cybereye'
+		},
+		['perk_rifleman'] = {
+			['enabled'] = false,
+			['id'] = 'perk_rifleman'
+		}
+	},
+	['Ability'] = {
+ 
+	}
+}
+/[NPCD][Main][CONF]creating new profile for npc 26138 sim_default_stalker_126138 Bohdan Choker
+/[NPCD][Main][CONF]npc 26138 create profile
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_spotter is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_spotter is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_spotter is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_teamcom is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_sportshooter is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_deadeye is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_sportshooter is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_rifleman is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_cybereye is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_rifleman is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_cybereye is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_rifleman is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_rifleman is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_rifleman is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+/[NPCD][Main][CONF]rolling npc 26138 perk
+[NPCD][Main][CONF]perk perk_rifleman is available
+/[NPCD][Main][CONF]executing npc 26138 roll
+[NPCD][Main][CONF]TABLE: | 150738 | 
+-- Create Profile NPC 26138
+{
+	['recruited'] = false,
+	['id'] = 26138,
+	['show_profile'] = false,
+	['alive'] = true,
+	['Info'] = {
+ 
+	},
+	['has_profile'] = true,
+	['Characteristics'] = {
+		['energy'] = 76,
+		['marksmanship'] = 86,
+		['survival'] = 74,
+		['comradery'] = 21,
+		['capacity'] = 60,
+		['resolve'] = 54,
+		['recuperation'] = 79
+	},
+	['Perk'] = {
+		['perk_sportshooter'] = {
+			['enabled'] = false,
+			['id'] = 'perk_sportshooter'
+		},
+		['perk_deadeye'] = {
+			['enabled'] = false,
+			['id'] = 'perk_deadeye'
+		},
+		['perk_spotter'] = {
+			['enabled'] = false,
+			['id'] = 'perk_spotter'
+		},
+		['perk_cybereye'] = {
+			['enabled'] = false,
+			['id'] = 'perk_cybereye'
+		},
+		['perk_rifleman'] = {
+			['enabled'] = false,
+			['id'] = 'perk_rifleman'
+		}
+	},
+	['Ability'] = {
+ 
+	}
+}
+! [LUA]  0 : [C  ] __len
+! [LUA]  1 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(82) : play_voice
+! [LUA]  2 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(282) : mark_enemy
+! [LUA]  3 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(725) : execute_func
+! [LUA]  4 : [Lua] ...amma/anomaly/bin/..\gamedata\scripts\npcd_manager.script(40) : execute_activate
+! [LUA]  5 : [Lua] ...amma/anomaly/bin/..\gamedata\scripts\npcd_manager.script(398) : f
+! [LUA]  6 : [Lua] d:/games/gamma/anomaly/bin/..\gamedata\scripts\_g.script(378) : functor_a
+! [LUA]  7 : [Lua] d:/games/gamma/anomaly/bin/..\gamedata\scripts\_g.script(466) : 
+! [LUA] SCRIPT RUNTIME ERROR
+! [LUA]  0 : [C  ] __len
+! [LUA]  1 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(82) : play_voice
+! [LUA]  2 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(282) : mark_enemy
+! [LUA]  3 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(725) : execute_func
+! [LUA]  4 : [Lua] ...amma/anomaly/bin/..\gamedata\scripts\npcd_manager.script(40) : execute_activate
+! [LUA]  5 : [Lua] ...amma/anomaly/bin/..\gamedata\scripts\npcd_manager.script(398) : f
+! [LUA]  6 : [Lua] d:/games/gamma/anomaly/bin/..\gamedata\scripts\_g.script(378) : functor_a
+! [LUA]  7 : [Lua] d:/games/gamma/anomaly/bin/..\gamedata\scripts\_g.script(466) : 
+! [LUA] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script:82: attempt to get length of a nil value
+! [LUA]  0 : [C  ] __len
+! [LUA]  1 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(82) : play_voice
+! [LUA]  2 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(282) : mark_enemy
+! [LUA]  3 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(725) : execute_func
+! [LUA]  4 : [Lua] ...amma/anomaly/bin/..\gamedata\scripts\npcd_manager.script(40) : execute_activate
+! [LUA]  5 : [Lua] ...amma/anomaly/bin/..\gamedata\scripts\npcd_manager.script(398) : f
+! [LUA]  6 : [Lua] d:/games/gamma/anomaly/bin/..\gamedata\scripts\_g.script(378) : functor_a
+! [LUA]  7 : [Lua] d:/games/gamma/anomaly/bin/..\gamedata\scripts\_g.script(466) : 
+! [SCRIPT ERROR]: ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script:82: attempt to get length of a nil value
+ 
+FATAL ERROR
+ 
+[error]Expression    : <no expression>
+[error]Function      : CScriptEngine::lua_pcall_failed
+[error]File          : E:\dev\anomaly\xray-monolith\src\xrServerEntities\script_engine.cpp
+[error]Line          : 262
+[error]Description   : fatal error
+[error]Arguments     : 
+ 1 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(82) : play_voice
+ 
+LUA error: ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script:82: attempt to get length of a nil value
+ 
+Check log for details
+ 
+
+stack trace:
+
+! [LUA]  0 : [C  ] __len
+! [LUA]  1 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(82) : play_voice
+! [LUA]  2 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(282) : mark_enemy
+! [LUA]  3 : [Lua] ...es/gamma/anomaly/bin/..\gamedata\scripts\spotters.script(725) : execute_func
+! [LUA]  4 : [Lua] ...amma/anomaly/bin/..\gamedata\scripts\npcd_manager.script(40) : execute_activate
+! [LUA]  5 : [Lua] ...amma/anomaly/bin/..\gamedata\scripts\npcd_manager.script(398) : f
+! [LUA]  6 : [Lua] d:/games/gamma/anomaly/bin/..\gamedata\scripts\_g.script(378) : functor_a
+! [LUA]  7 : [Lua] d:/games/gamma/anomaly/bin/..\gamedata\scripts\_g.script(466) : 
+ 
+
+SymInit: Symbol-SearchPath: '.;D:\games\GAMMA\Anomaly\bin;D:\games\GAMMA\Anomaly\bin;C:\WINDOWS;C:\WINDOWS\system32;', symOptions: 530, UserName: 'massi'
+OS-Version: 6.2.9200 () 0x100-0x1
+D:\games\GAMMA\Anomaly\bin\AnomalyDX11AVX.exe:AnomalyDX11AVX.exe (0000000140000000), size: 25653248 (result: 0), SymType: 'PDB', PDB: '.\AnomalyDX11AVX.pdb'
+E:\dev\anomaly\xray-monolith\src\xrCore\xrDebugNew.cpp (123): LogStackTrace
+E:\dev\anomaly\xray-monolith\src\xrCore\xrDebugNew.cpp (264): xrDebug::backend
+E:\dev\anomaly\xray-monolith\src\xrCore\xrDebugNew.cpp (496): xrDebug::fatal
+E:\dev\anomaly\xray-monolith\src\xrServerEntities\script_engine.cpp (264): CScriptEngine::lua_pcall_failed
+E:\dev\anomaly\xray-monolith\src\3rd party\luajit-2\src\lj_err.c (565): lj_err_run
+E:\dev\anomaly\xray-monolith\src\3rd party\luajit-2\src\lj_err.c (580): err_msgv
+E:\dev\anomaly\xray-monolith\src\3rd party\luajit-2\src\lj_err.c (616): lj_err_optype
+E:\dev\anomaly\xray-monolith\src\3rd party\luajit-2\src\lj_meta.c (321): lj_meta_len
+E:\dev\anomaly\xray-monolith\src\3rd party\luabind\luabind\src\pcall.cpp (40): luabind::detail::pcall
+E:\dev\anomaly\xray-monolith\src\xrGame\PHScriptCall.cpp (35): CPHScriptCondition::is_true
+E:\dev\anomaly\xray-monolith\src\xrGame\PHCommander.cpp (83): CPHCommander::update
+E:\dev\anomaly\xray-monolith\src\xrGame\Level.cpp (1062): CLevel::OnFrame
+E:\dev\anomaly\xray-monolith\src\xrEngine\pure.h (106): CRegistrator<pureFrame>::Process
+E:\dev\anomaly\xray-monolith\src\xrEngine\device.cpp (653): CRenderDevice::FrameMove
+E:\dev\anomaly\xray-monolith\src\xrEngine\device.cpp (358): CRenderDevice::on_idle
+E:\dev\anomaly\xray-monolith\src\xrEngine\device.cpp (586): CRenderDevice::Run
+E:\dev\anomaly\xray-monolith\src\xrEngine\x_ray.cpp (618): Startup
+E:\dev\anomaly\xray-monolith\src\xrEngine\x_ray.cpp (1117): WinMain_impl
+E:\dev\anomaly\xray-monolith\src\xrEngine\x_ray.cpp (1184): WinMain
