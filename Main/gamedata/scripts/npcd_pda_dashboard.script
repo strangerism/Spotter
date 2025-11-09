@@ -62,6 +62,13 @@ NPCS_CHARACTERISTICS = {
     CAPACITY = {id = "capacity", ico = "ui_inGame2_btn_sort_all_e", label = "st_npcd_char_capacity"},
 }
 
+local SPECS = {
+    ABILITIES = "abilities",
+    TALENTS = "talents",
+    EFFECTS = "effects",
+    EQUIPMENT = "equipment",
+}
+
 local STRING_PREFIX = "pda_btn_npcd_"
 
 local UI_APP = {}
@@ -112,46 +119,26 @@ local APP_MENU = {
 
 UI_MENU = {}
 
-ITEMS = {}
-ITEMS[APP.PROFILES] = {
-    [MENU.SQUAD] = {
-        { id = "stalker1", name = "Stalker 1" },
-        { id = "stalker4", name = "Stalker 4" },
-        { id = "stalker6", name = "Stalker 6" },
+TERMINAL_TABS = {
+    [1] = {
+        name = SPECS.ABILITIES,
+        label = "st_npcd_specs_tab_abilities",
+        default = true,
     },
-    [MENU.FAVORITE] = {
-        { id = "stalker1", name = "Stalker 1" },
-        { id = "stalker2", name = "Stalker 2" },
+    [2] = {
+        name = SPECS.TALENTS,
+        label = "st_npcd_specs_tab_talents",
     },
-    [MENU.RECRUITABLE] = {
-        { id = "stalker3", name = "Stalker 3" },
-        { id = "stalker4", name = "Stalker 4" },
+    [3] = {
+        name = SPECS.EFFECTS,
+        label = "st_npcd_specs_tab_effects",
     },
-    [MENU.ALL] = {
-        { id = "stalker1", name = "Stalker 1" },
-        { id = "stalker2", name = "Stalker 2" },
-        { id = "stalker3", name = "Stalker 3" },
-        { id = "stalker4", name = "Stalker 4" },
-        { id = "stalker5", name = "Stalker 5" },
-        { id = "stalker6", name = "Stalker 6" },
-        { id = "stalker7", name = "Stalker 7" },
-        { id = "stalker8", name = "Stalker 8" },
-        { id = "stalker9", name = "Stalker 9" },
-
-    },
-    [MENU.DEAD] = {},
-}
-
-ITEMS[APP.PERKS] = {
-    [MENU.DISCOVERED] = {
-        { id = "perk1", name = "Perk 1" },
-        { id = "perk2", name = "Perk 2" },
-        { id = "perk3", name = "Perk 3" },
-    },
-    [MENU.LEARNED] = {
-        { id = "perk1", name = "Perk 1" },
+    [4] = {
+        name = SPECS.EQUIPMENT,
+        label = "st_npcd_specs_tab_equipment",
     },
 }
+
 
 -- Constructor.
 class "npcd_dashboard_tab" (CUIScriptWnd)
@@ -629,6 +616,25 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     terminal_config.xml_init = "npcd_pda_dashboard.xml"
     terminal_config.parent = specs
     terminal_config.display = "npc_panel:specs:terminal_display"
+    terminal_config.parent_dialog = self
+
+    -- tabs
+    -- ------------------------------
+    terminal_config.tabs = {}
+    terminal_config.tabs.frame = "npc_panel:specs:terminal_tabs"
+    terminal_config.tabs.auto_orient = true
+    terminal_config.tabs.orient = 0
+    terminal_config.tabs.button = "npc_panel:specs:terminal_tabs:button"
+    terminal_config.tabs.spacing = 10
+    terminal_config.tabs.positional_spacing = 1
+    terminal_config.tabs.tab = {}
+    for i, spec_data in ipairs(TERMINAL_TABS) do
+        terminal_config.tabs.tab[i] = {}
+        terminal_config.tabs.tab[i].name = spec_data.name
+        terminal_config.tabs.tab[i].default = spec_data.default or false
+        terminal_config.tabs.tab[i].label = spec_data.label
+        terminal_config.tabs.tab[i].on_click = {"npcd_pda_dashboard", "npc_panel_specs_tab_clicked", spec_data.name}
+    end
 
     -- header
     -- ------------------------------
@@ -658,10 +664,17 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 
     terminal_config.glass = "npc_panel:specs:terminal_display:terminal_glass"
     terminal_config.dirt = "npc_panel:specs:terminal_display:terminal_dirt"
+
     -- instantiate the terminal
+    -- ------------------------------
     self.npc_panel.specs.terminal = npcd_ui_fx.SFXVideoTerminal_Create(terminal_config)
     
     self.npc_panel.info.dialog:Show(false)
+end
+
+function npc_panel_specs_tab_clicked(spec_name)
+    Printer:Debug(LOG.CLICK, CAT.UI, "NPC Panel Specs Tab Clicked - Spec: " .. spec_name)
+
 end
 
 function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
@@ -961,7 +974,10 @@ function enable_active_menu_button(app_name, menu_name, enable)
     end
 end
 
-
+-- function npcd_dashboard_tab:ActivateSpecsTabs()
+--     Printer:Debug(LOG.RUN, CAT.UI, "Activating Specs Tabs")
+--     self.npc_panel.specs.terminal:SwitchOn()
+-- end
 -------------------------------
 -- App Button Callbacks
 -- ----------------------------

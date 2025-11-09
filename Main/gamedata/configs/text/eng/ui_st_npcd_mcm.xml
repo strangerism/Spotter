@@ -303,5 +303,17 @@
 	</string>		
 	<string id="st_npcd_char_capacity">
 		<text>Capacity</text>
-	</string>		
+	</string>	
+	<string id="st_npcd_specs_tab_abilities">
+		<text>Abilities</text>
+	</string>
+	<string id="st_npcd_specs_tab_talents">
+		<text>Talents</text>
+	</string>	
+	<string id="st_npcd_specs_tab_effects">
+		<text>Effects</text>
+	</string>
+	<string id="st_npcd_specs_tab_equipment">
+		<text>Equipment</text>
+	</string>					
 </string_table>
