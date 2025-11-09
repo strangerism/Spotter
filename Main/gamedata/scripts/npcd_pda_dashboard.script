@@ -669,18 +669,29 @@ end
 
 function npcd_dashboard_tab:OnTerminalTabClicked(tab_index, spec_name)
     Printer:Debug(LOG.RUN, CAT.UI, "NPC Panel Specs Tab " .. tab_index .. " Clicked - Spec: " .. spec_name)
+    self:UpdateTerminalDisplay(spec_name, self.npc_panel.npc_id)
+end
+
+function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating Terminal Display - Spec: " .. spec_name .. " NPC ID: " .. npc_id)
 
     if spec_name == SPECS.ABILITIES then
-        local npc_deck = npcd.get_npc(self.npc_panel.npc_id)
+        local npc_deck = npcd.get_npc(npc_id)
         Printer:DebugTable("NPC DECK", npc_deck)
         if npc_deck then
             local abilities = npc_deck.Ability or {}
             for _, ability in ipairs(abilities) do
                 local feat = npcd.get_feat(ability.feat_id)
                 Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability: " .. ability.id .. " Level: " .. tostring(ability.feat_id))
+
+                local row_data = {
+                    label = gc(feat and feat.name or "Unknown Ability"),
+                    value = "Level " .. tostring(ability.level or "N/A"),
+                }
             end
         end
     end
+
 end
 
 function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
@@ -715,6 +726,15 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
         self.npc_panel.info.background:Show(false)
         self.npc_panel.specs.terminal:SwitchOff()
     end
+
+    -- get the default TERMINAL_TABS tab
+    for _, tab_data in ipairs(TERMINAL_TABS) do
+        if tab_data.default then
+            spec_name = tab_data.name
+            break
+        end
+    end
+    self:UpdateTerminalDisplay(spec_name, npc_id)
 end
 
 function npc_panel_info_showing_fx_stop()

@@ -818,11 +818,8 @@ function SFXVideoTerminal:__init(sfx_config)
 	-- optional header to display
 	self.header = sfx_config.header
 
-	self.scroll = self.xml:InitScrollView(sfx_config.scroll, self.display)
 	self.content = sfx_config.content
-	self.scroll:AddWindow(self.content, true)
-	self.scroll:Show(false)
-	self.scroll:SetFixedScrollBar(true)
+	self.display:AttachChild(self.content)
 
 	-- FX: showing display
 	local showing = get_fx_config(FX.SHOWING, sfx_config.group)
@@ -834,7 +831,7 @@ function SFXVideoTerminal:__init(sfx_config)
 
 	-- FX: showing content
 	showing = get_fx_config(FX.SHOWING, sfx_config.group)
-	showing.dialog = self.scroll
+	showing.dialog = self.content
 	showing.speed = 0.005
 	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_content_displayed", sfx_config.id}
 	npcd_ui_fx.add_fx(showing, "showing_content")
@@ -989,7 +986,7 @@ end
 -- function SFXVideoTerminal:Reset()
 -- 	Printer:Debug(LOG.STOP, CAT.UI," SFXVideoTerminal: reset")
 -- 	self.display:Show(false)
--- 	self.scroll:Show(false)
+-- 	self.content:Show(false)
 -- 	if self.header then
 -- 		self.header:Show(false)
 -- 	end
@@ -1024,7 +1021,7 @@ function SFXVideoTerminal:SwitchOff()
 		npcd_ui_fx.remove_fx(self.fx.scanlines.id)
 	end
 	npcd_ui_fx.stop_fx(self.fx.flickering.id)
-	self.scroll:Show(false)
+	self.content:Show(false)
 	if self.header then
 		self.header:Show(false)
 	end
