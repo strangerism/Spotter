@@ -102,6 +102,18 @@
 		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_e" x="1135" y="399" width="337" height="48" />
 		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_h" x="1135" y="758" width="337" height="48" />
 		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_t" x="1135" y="758" width="337" height="48" />
+
+		<!-- specs scoller -->
+		<texture id="ui_npcd_pda_scroller_item_ability_button_d" x="1220" y="203" width="85" height="85" />
+		<texture id="ui_npcd_pda_scroller_item_ability_button_e" x="1135" y="399" width="337" height="48" />
+		<texture id="ui_npcd_pda_scroller_item_ability_button_h" x="1135" y="875" width="337" height="48" />
+		<texture id="ui_npcd_pda_scroller_item_ability_button_t" x="1135" y="875" width="337" height="48" />		
+
+		<!-- stats icons -->
+		<texture id="ui_npcd_hud_stat_cooldown" x="1012" y="603" width="50" height="50" />
+		<texture id="ui_npcd_hud_stat_duration" x="1013" y="707" width="50" height="50" />
+		<texture id="ui_npcd_hud_stat_damage" x="1075" y="654" width="50" height="50" />
+		<texture id="ui_npcd_hud_stat_chance" x="1016" y="653" width="50" height="50" />
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">
 		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />

@@ -313,38 +313,55 @@
 					</content>																			
 				</header>
 				<content x="0" y="0" width="370" height="200" stretch="1">
-					<scroll x="10" y="30" width="350" height="140" right_ident="0" left_ident="0" top_indent="0" bottom_indent="0" vert_interval="0" always_show_scroll="0"/>		
+					<scroll x="10" y="30" width="356" height="140" right_ident="0" left_ident="0" top_indent="0" bottom_indent="0" vert_interval="0" always_show_scroll="0"/>		
 				</content>		
 			</terminal_display>
-			<ability x="0" y="0" width="350" height="50" stretch="1">
+			<ability x="0" y="0" width="345" height="50" stretch="1">
 				<text align="c" vert_align="t" x="0" y="5" font="letterica16"></text>
-				<texture>ui_npcd_pda_scroller_item_darkfill_button</texture>
+				<texture>ui_npcd_pda_scroller_item_ability_button</texture>
 				<text_color>
 					<e r="200" g="200" b="200"/>
 					<t color ="ui_white"/>
 					<e r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>			
-				<!-- <name x="0" y="0" width="350" height="16" stretch="1">
-					<text align="c" font="letterica18" color="pda_green"></text>
-				</name> -->
 				<icon x="10" y="10" width="30" height="30" stretch="1">
 				</icon>
 				<h_type x="50" y="5" width="30" height="16">
 					<text align="c" font="letterica18" color="pda_green">Type</text>
 				</h_type>				
-				<type x="50" y="30" width="30" height="16" stretch="1">
-					<text align="c" vert_align="b" font="letterica18" color="pda_green"></text>
+				<type x="50" y="10" width="30" height="30" stretch="1">
+					<text align="c" vert_align="b" font="letterica18" color="ui_white"></text>
 				</type>
 				<h_mode x="95" y="5" width="30" height="16">
 					<text align="c" font="letterica18" color="pda_green">Mode</text>
 				</h_mode>				
-				<mode x="95" y="30" width="30" height="16" stretch="1">
-					<text align="c" vert_align="b" font="letterica18" color="pda_green"></text>
+				<mode x="95" y="10" width="30" height="30" stretch="1">
+					<text align="c" vert_align="b" font="letterica18" color="ui_white"></text>
 				</mode>	
-				<source x="90" y="5" width="30" height="16">
-					<text align="c" font="letterica18" color="pda_green"></text>
+				<stat_group x="135" y="16" width="120" height="40" stretch="1">
+					<stat x="0" y="0" width="30" height="40" stretch="1">
+						<vline x="0" y="5" width="1" height="20" stretch="1">
+							<texture a="100">ui_npcd_codec_750_scanline</texture>
+						</vline>		
+						<icon x="10" y="5" width="12" height="12" stretch="1">
+						</icon>
+						<value x="0" y="20" width="30" height="10">
+							<text align="c" vert_align="b" font="letterica16" color="pda_green"></text>
+						</value>			
+					</stat>				
+				</stat_group>
+				<h_source x="270" y="5" width="30" height="16">
+					<text align="c" font="letterica18" color="pda_green">Source</text>
+				</h_source>				
+				<source x="270" y="10" width="30" height="30" stretch="1">
 				</source>
+				<h_rank x="305" y="5" width="30" height="16">
+					<text align="c" font="letterica18" color="pda_green">Rank</text>
+				</h_rank>				
+				<rank x="305" y="10" width="30" height="30" stretch="1">
+					<text align="c" vert_align="c" font="letterica18" color="ui_white"></text>
+				</rank>	 							
 			</ability>
 		</specs>			
 	</npc_panel>

@@ -121,8 +121,34 @@ FEAT_SETTING = {
 	STAT = {
 		COOLDOWN = "cooldown",
 		DURATION = "duration",
+		DAMAGE = "damage",
+		CHANCE = "chance",
 	},
 }
+
+FEAT_STAT = {
+	[FEAT_SETTING.STAT.COOLDOWN] = {
+		name = "st_npcd_feat_stat_cooldown",
+		icon = "ui_npcd_hud_stat_cooldown",
+		desc = "st_npcd_feat_stat_cooldown_desc",
+	},
+	[FEAT_SETTING.STAT.DURATION] = {
+		name = "st_npcd_feat_stat_duration",
+		icon = "ui_npcd_hud_stat_duration",
+		desc = "st_npcd_feat_stat_duration_desc",
+	},
+	[FEAT_SETTING.STAT.DAMAGE] = {
+		name = "st_npcd_feat_stat_damage",
+		icon = "ui_npcd_hud_stat_damage",
+		desc = "st_npcd_feat_stat_damage_desc",
+	},
+	[FEAT_SETTING.STAT.CHANCE] = {
+		name = "st_npcd_feat_stat_chance",
+		icon = "ui_npcd_hud_stat_chance",
+		desc = "st_npcd_feat_stat_chance_desc",
+	},
+}
+
 
 INPUT_MANAGER = {
 	NPCD = "npcd",
