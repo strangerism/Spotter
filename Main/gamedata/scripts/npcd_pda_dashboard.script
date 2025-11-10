@@ -141,12 +141,12 @@ TERMINAL_TABS = {
 }
 TERMINAL_TABS_UTIL = {
     get_default_tab = function ()
-        for _, tab in pairs(TERMINAL_TABS) do
+        for i, tab in ipairs(TERMINAL_TABS) do
             if tab.default then
-                return tab.name
+                return { index = i, name = tab.name }
             end
         end
-        return TERMINAL_TABS[1].name
+        return { index = 1, name = TERMINAL_TABS[1].name }
     end,
     get_label = function (tab_name)
         for _, tab in pairs(TERMINAL_TABS) do
@@ -702,7 +702,7 @@ function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
 
     --- setup when no params are passed (init callback from terminal)
     if spec_name == nil or npc_id == nil then
-        spec_name = TERMINAL_TABS_UTIL.get_default_tab()
+        spec_name = TERMINAL_TABS_UTIL.get_default_tab().name
         npc_id = self.npc_panel.npc_id
     end
 
@@ -740,70 +740,10 @@ function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
             local index = 0
             for _, ability in pairs(npc_deck.Ability) do
                 local feat = npcd.get_ability_feat(ability.id)
-                local perk = npcd.get_perk(feat.perk_id)
-                local rank = npcdu.get_perk_rank(npc_id, perk.id)
-                local rank_desc = npcdu.get_perk_rank_desc(npc_id, perk.id)
-                Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability[" .. index .. "]: " .. ability.id .. " Feat: " .. tostring(ability.feat_id))
-                scroll.row[index] = {}
-                scroll.row[index].button = xml:Init3tButton("npc_panel:specs:ability", nil)
-                scroll:AddWindow(scroll.row[index].button, true)
-                local row_data = {
-                    name = gc(feat and feat.name) or "NULL",
-                    icon = feat and feat.icon or "ui_npcd_hud_default_icon",
-                    type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
-                    mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
-                    source = perk and perk.icon or "ui_npcd_hud_default_icon",
-                    rank = rank_desc or "NULL",
-                }
-                i = 0
-                local stat_group = xml:InitFrame("npc_panel:specs:ability:stat_group", scroll.row[index].button)
-                for stat_name, stat_value in pairs(feat.stats[rank]) do
-                    if npcd.FEAT_STAT[stat_name] then
-                        local stat = xml:InitStatic("npc_panel:specs:ability:stat_group:stat", stat_group)
-                        stat:SetWndPos(vector2():set(stat:GetWndPos().x  + (i * stat:GetWidth()), stat:GetWndPos().y))
-                        if i > 0 then
-                            local vline = xml:InitStatic("npc_panel:specs:ability:stat_group:stat:vline", stat)
-                            vline:SetWndPos(vector2():set(vline:GetWndPos().x, vline:GetWndPos().y))
-                        end
-
-                        local icon = xml:InitStatic("npc_panel:specs:ability:stat_group:stat:icon", stat)
-                        icon:SetWndPos(vector2():set(icon:GetWndPos().x, icon:GetWndPos().y))
-                        icon:InitTexture(npcd.FEAT_STAT[stat_name].icon)
-
-                        local label = xml:InitTextWnd("npc_panel:specs:ability:stat_group:stat:value", stat)
-                        label:SetWndPos(vector2():set(label:GetWndPos().x, label:GetWndPos().y))
-                        local suffix = ""
-                        if stat_name == npcd.FEAT_SETTING.STAT.CHANCE then
-                            suffix = " %"
-                        end
-                        if stat_name == npcd.FEAT_SETTING.STAT.DURATION or stat_name == npcd.FEAT_SETTING.STAT.COOLDOWN then
-                            suffix = " s"
-                        end
-                        label:SetText(tostring(stat_value) .. suffix)
-
-                        i = i + 1
-                    end
+                if feat.type == npcd.FEAT_TYPE.ACTIVE  then
+                    self:__CreateAbilityRow(npc_id, feat, scroll, index)
+                    index = index + 1
                 end
-                scroll.row[index].button:TextControl():SetText("+++   " .. row_data.name .. "   +++")
-                local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
-                icon:InitTexture(row_data.icon)
-                local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
-                type:SetText(row_data.type)
-                type:SetFont(GetFontSmall())
-                local mode = xml:InitTextWnd("npc_panel:specs:ability:mode", scroll.row[index].button)
-                mode:SetText(row_data.mode)
-                mode:SetFont(GetFontSmall())
-                local source = xml:InitStatic("npc_panel:specs:ability:source", scroll.row[index].button)
-                source:InitTexture(row_data.source)             
-                local rank = xml:InitTextWnd("npc_panel:specs:ability:rank", scroll.row[index].button)
-                rank:SetText(row_data.rank)
-                rank:SetFont(GetFontMedium())
-                -- register button callback
-                self:Register(scroll.row[index].button, "npc_ability_button_" .. index)
-                self:AddCallback("npc_ability_button_" .. index, ui_events.BUTTON_CLICKED, function ()
-                    Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.name)
-                end, self)
-                index = index + 1
             end
         end
         scroll:Show(true)
@@ -813,8 +753,11 @@ function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
         self.npc_panel.specs.header.content:Show(false)
         self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
         local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
+        local type = xml:InitTextWnd("npc_panel:specs:ability:h_type", self.npc_panel.specs.header.content)
+        local mode = xml:InitTextWnd("npc_panel:specs:ability:h_mode", self.npc_panel.specs.header.content)
+        local source = xml:InitTextWnd("npc_panel:specs:ability:h_source", self.npc_panel.specs.header.content)
+        local rank = xml:InitTextWnd("npc_panel:specs:ability:h_rank", self.npc_panel.specs.header.content)
         label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
-
         --------------------------------
         -- update the content
         -- --------------------------------
@@ -824,13 +767,153 @@ function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
         scroll:Show(false)
         scroll:Clear()
         local npc_deck = npcd.get_npc(npc_id)
-        Printer:DebugTable("NPC DECK", npc_deck)
         if npc_deck then
+            local index = 0
+            for _, feat in pairs(npcd.get_npc_feats(npc_id) or {}) do
 
+                if feat.type ~= npcd.FEAT_TYPE.ACTIVE  then
+                    self:__CreateFeatRow(npc_id, feat, scroll, index)
+                    index = index + 1
+                end
+            end
         end
+        scroll:Show(true)
     end
 
-    -- self.npc_panel.specs.content.dialog:Show(true)
+    if spec_name == SPECS.EFFECTS then
+        -- update the header
+        self.npc_panel.specs.header.content:Show(false)
+        self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
+        local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)        
+        label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+        local scroll = self.npc_panel.specs.content.scroll
+        scroll:Show(false)
+        scroll:Clear()
+    end
+
+    if spec_name == SPECS.EQUIPMENT then
+        -- update the header
+        self.npc_panel.specs.header.content:Show(false)
+        self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
+        local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)        
+        label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+        local scroll = self.npc_panel.specs.content.scroll
+        scroll:Show(false)
+        scroll:Clear()
+    end
+
+end
+
+function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
+
+    local perk = npcd.get_perk(feat.perk_id)
+    local rank = npcdu.get_perk_rank(npc_id, perk.id)
+    local rank_desc = npcdu.get_perk_rank_desc(npc_id, perk.id)
+
+    scroll.row[index] = {}
+    scroll.row[index].button = xml:Init3tButton("npc_panel:specs:ability", nil)
+    scroll:AddWindow(scroll.row[index].button, true)
+    local row_data = {
+        name = gc(feat and feat.name) or "NULL",
+        icon = feat and feat.icon or "ui_npcd_hud_default_icon",
+        type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
+        mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
+        source = perk and perk.icon or "ui_npcd_hud_default_icon",
+        rank = rank_desc or "NULL",
+    }
+    i = 0
+    local stat_group = xml:InitFrame("npc_panel:specs:ability:stat_group", scroll.row[index].button)
+    self:__CreateStatGroup(feat.stats[rank], stat_group)
+    scroll.row[index].button:TextControl():SetText("+++   " .. row_data.name .. "   +++")
+    local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
+    icon:InitTexture(row_data.icon)
+    local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
+    type:SetText(row_data.type)
+    type:SetFont(GetFontSmall())
+    local mode = xml:InitTextWnd("npc_panel:specs:ability:mode", scroll.row[index].button)
+    mode:SetText(row_data.mode)
+    mode:SetFont(GetFontSmall())
+    local source = xml:InitStatic("npc_panel:specs:ability:source", scroll.row[index].button)
+    source:InitTexture(row_data.source)             
+    local rank = xml:InitTextWnd("npc_panel:specs:ability:rank", scroll.row[index].button)
+    rank:SetText(row_data.rank)
+    rank:SetFont(GetFontMedium())
+    -- register button callback
+    self:Register(scroll.row[index].button, "npc_ability_button_" .. index)
+    self:AddCallback("npc_ability_button_" .. index, ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.name)
+    end, self)
+end
+
+function npcd_dashboard_tab:__CreateFeatRow(npc_id, feat, scroll, index)
+
+    local perk = npcd.get_perk(feat.perk_id)
+    local rank = npcdu.get_perk_rank(npc_id, perk.id)
+    local rank_desc = npcdu.get_perk_rank_desc(npc_id, perk.id)
+
+    scroll.row[index] = {}
+    scroll.row[index].button = xml:Init3tButton("npc_panel:specs:ability", nil)
+    scroll:AddWindow(scroll.row[index].button, true)
+    local row_data = {
+        name = gc(feat and feat.name) or "NULL",
+        icon = feat and feat.icon or "ui_npcd_hud_default_icon",
+        type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
+        mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
+        source = perk and perk.icon or "ui_npcd_hud_default_icon",
+        rank = rank_desc or "NULL",
+    }
+    i = 0
+    local stat_group = xml:InitFrame("npc_panel:specs:ability:stat_group", scroll.row[index].button)
+    self:__CreateStatGroup(feat.stats, stat_group)
+    scroll.row[index].button:TextControl():SetText("+++   " .. row_data.name .. "   +++")
+    local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
+    icon:InitTexture(row_data.icon)
+    local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
+    type:SetText(row_data.type)
+    type:SetFont(GetFontSmall())
+    local mode = xml:InitTextWnd("npc_panel:specs:ability:mode", scroll.row[index].button)
+    mode:SetText(row_data.mode)
+    mode:SetFont(GetFontSmall())
+    local source = xml:InitStatic("npc_panel:specs:ability:source", scroll.row[index].button)
+    source:InitTexture(row_data.source)             
+    local rank = xml:InitTextWnd("npc_panel:specs:ability:rank", scroll.row[index].button)
+    rank:SetText(row_data.rank)
+    rank:SetFont(GetFontMedium())
+    -- register button callback
+    self:Register(scroll.row[index].button, "npc_ability_button_" .. index)
+    self:AddCallback("npc_ability_button_" .. index, ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.name)
+    end, self)
+end
+
+function npcd_dashboard_tab:__CreateStatGroup(stats, stat_group)
+    for stat_name, stat_value in pairs(stats) do
+        if npcd.FEAT_STAT[stat_name] then
+            local stat = xml:InitStatic("npc_panel:specs:stat_group:stat", stat_group)
+            stat:SetWndPos(vector2():set(stat:GetWndPos().x  + (i * stat:GetWidth()), stat:GetWndPos().y))
+            if i > 0 then
+                local vline = xml:InitStatic("npc_panel:specs:stat_group:stat:vline", stat)
+                vline:SetWndPos(vector2():set(vline:GetWndPos().x, vline:GetWndPos().y))
+            end
+
+            local icon = xml:InitStatic("npc_panel:specs:stat_group:stat:icon", stat)
+            icon:SetWndPos(vector2():set(icon:GetWndPos().x, icon:GetWndPos().y))
+            icon:InitTexture(npcd.FEAT_STAT[stat_name].icon)
+
+            local label = xml:InitTextWnd("npc_panel:specs:stat_group:stat:value", stat)
+            label:SetWndPos(vector2():set(label:GetWndPos().x, label:GetWndPos().y))
+            local suffix = ""
+            if stat_name == npcd.FEAT_SETTING.STAT.CHANCE then
+                suffix = " %"
+            end
+            if stat_name == npcd.FEAT_SETTING.STAT.DURATION or stat_name == npcd.FEAT_SETTING.STAT.COOLDOWN then
+                suffix = " s"
+            end
+            label:SetText(tostring(stat_value) .. suffix)
+
+            i = i + 1
+        end
+    end
 end
 
 function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
@@ -867,7 +950,10 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
         self.npc_panel.specs.terminal:SwitchOff()
     else
         self.npc_panel.info.char_frame:Show(true)
-        self:UpdateTerminalDisplay(TERMINAL_TABS_UTIL.get_default_tab(), npc_id)
+        local default_tab = TERMINAL_TABS_UTIL.get_default_tab()
+        Printer:DebugTable("$ Default Tab", default_tab)
+        self:UpdateTerminalDisplay(default_tab.name, npc_id)
+        self.npc_panel.specs.terminal:SetActiveTab(default_tab.index)
     end
 end
 

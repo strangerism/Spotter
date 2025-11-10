@@ -924,6 +924,18 @@ function SFXVideoTerminal:__init(sfx_config)
 	self.config = sfx_config
 end
 
+function SFXVideoTerminal:SetActiveTab(index)
+	for i, tab_button in ipairs(self.tabs.button) do
+		if i == index then
+			tab_button:Enable(false)
+			tab_button.active = true
+		else
+			tab_button:Enable(true)
+			tab_button.active = false
+		end
+	end
+end
+
 function SFXVideoTerminal:__on_started()
 	Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: started")
 	self.display:Show(true)
