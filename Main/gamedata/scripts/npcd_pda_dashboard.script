@@ -67,6 +67,7 @@ local SPECS = {
     TALENTS = "talents",
     EFFECTS = "effects",
     EQUIPMENT = "equipment",
+    FEATS = "feats",
 }
 
 local STRING_PREFIX = "pda_btn_npcd_"
@@ -126,8 +127,8 @@ TERMINAL_TABS = {
         default = true,
     },
     [2] = {
-        name = SPECS.TALENTS,
-        label = "st_npcd_specs_tab_talents",
+        name = SPECS.FEATS,
+        label = "st_npcd_specs_tab_feats",
     },
     [3] = {
         name = SPECS.EFFECTS,
@@ -138,7 +139,24 @@ TERMINAL_TABS = {
         label = "st_npcd_specs_tab_equipment",
     },
 }
-
+TERMINAL_TABS_UTIL = {
+    get_default_tab = function ()
+        for _, tab in pairs(TERMINAL_TABS) do
+            if tab.default then
+                return tab.name
+            end
+        end
+        return TERMINAL_TABS[1].name
+    end,
+    get_label = function (tab_name)
+        for _, tab in pairs(TERMINAL_TABS) do
+            if tab.name == tab_name then
+                return gc(tab.label)
+            end
+        end
+        return "n/a"
+    end,
+}
 
 -- Constructor.
 class "npcd_dashboard_tab" (CUIScriptWnd)
@@ -434,11 +452,12 @@ end
 --- Panel Info
 --- ----------------------------
 
-
+-- called by item scroller when an item is selected or when we enter a new menu
 function npcd_dashboard_tab:UpdateItemPanel(app_name, item_id)
     Printer:Debug(LOG.INFO, CAT.UI, "Requested Updating Item Panel - App: " .. app_name .. " Item ID: " .. item_id)
     if app_name == APP.PROFILES then
         if not self.npc_panel.init then
+            -- we only do the animations when we switch app or menu
             Printer:Debug(LOG.INFO, CAT.UI, "Initializing new panel")
             self.npc_panel.info.char_frame:Show(false)
             npcd_ui_fx.stop_fx(self.npc_panel.info.fx.flickering.id)
@@ -600,15 +619,15 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.fx.char_flickering = char_flickering
 
     self.npc_panel.info.char_frame:Show(false)
+
     --------------------------------
-    -- specs frame
+    -- specs panel
     -- ------------------------------  
     self.npc_panel.specs = {}
     local specs = xml:InitStatic("npc_panel:specs", info_dialog)
     self.npc_panel.specs.dialog = specs
     self.npc_panel.specs.dialog:Show(true)
-    self.npc_panel.specs.frame = xml:InitStatic("npc_panel:specs:specs_frame", specs)
-    self.npc_panel.specs.frame:Show(true)
+
     --------------------------------
     -- specs terminal
     -- ------------------------------
@@ -648,17 +667,21 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 
     -- content
     -- ------------------------------
-    terminal_config.scroll = "npc_panel:specs:terminal_display:terminal_scroll"
     local specs_content = xml:InitStatic("npc_panel:specs:terminal_display:content", nil)
     self.npc_panel.specs.content = {}
     self.npc_panel.specs.content.dialog = specs_content
-
-    -- content rows
-    self.npc_panel.specs.content.rows = {}
+    self.npc_panel.specs.content.scroll = xml:InitScrollView("npc_panel:specs:terminal_display:content:scroll", specs_content)
+    self.npc_panel.specs.content.scroll.row = {}
+    self.npc_panel.specs.content.scroll:Show(false)
     terminal_config.content = specs_content
 
+    -- frame
+    self.npc_panel.specs.frame = xml:InitStatic("npc_panel:specs:specs_frame", specs)
+    self.npc_panel.specs.frame:Show(true)
+
+    -- glass and dirt
     terminal_config.glass = "npc_panel:specs:terminal_display:terminal_glass"
-    terminal_config.dirt = "npc_panel:specs:terminal_display:terminal_dirt"
+    -- terminal_config.dirt = "npc_panel:specs:terminal_display:terminal_glass:terminal_dirt"
 
     -- instantiate the terminal
     -- ------------------------------
@@ -675,23 +698,83 @@ end
 function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
     Printer:Debug(LOG.RUN, CAT.UI, "Updating Terminal Display - Spec: " .. spec_name .. " NPC ID: " .. npc_id)
 
+    -- self.npc_panel.specs.content.dialog:Show(false)
+
+    --------------------------------
+    --- clears content
+    --- ------------------------------
+
+    -- detach the scroll (if already attached)
+    -- --------------------------------
+    -- self.npc_panel.specs.content.dialog:DetachChild(self.npc_panel.specs.content.scroll)
     if spec_name == SPECS.ABILITIES then
+        Printer:Debug(LOG.INFO, CAT.UI, "Updating Abilities Spec Content")
+        -- update the header
+        self.npc_panel.specs.header.label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+
+        --------------------------------
+        -- update the content
+        -- --------------------------------
+
+        -- update the scroll
+        local scroll = self.npc_panel.specs.content.scroll
+        scroll:Show(false)
+        scroll:Clear()
+        local npc_deck = npcd.get_npc(npc_id)
+        Printer:DebugTable("NPC Abilities", npc_deck.Ability)
+        if npc_deck then
+            local index = 0
+            for _, ability in pairs(npc_deck.Ability) do
+                local feat = npcd.get_ability_feat(ability.id)
+                Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability[" .. index .. "]: " .. ability.id .. " Feat: " .. tostring(ability.feat_id))
+                scroll.row[index] = {}
+                scroll.row[index].button = xml:Init3tButton("npc_panel:specs:ability", nil)
+                scroll:AddWindow(scroll.row[index].button, true)
+                local row_data = {
+                    name = gc(feat and feat.name) or "NULL",
+                    icon = feat and feat.icon or "ui_npcd_hud_default_icon",
+                    type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
+                    mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
+                }
+                -- local name = xml:InitTextWnd("npc_panel:specs:ability:name", scroll.row[index].button)
+                scroll.row[index].button:TextControl():SetText(row_data.name)
+                local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
+                icon:InitTexture(row_data.icon)
+                local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
+                type:SetText(row_data.type)
+                type:SetFont(GetFontSmall())
+                local mode = xml:InitTextWnd("npc_panel:specs:ability:mode", scroll.row[index].button)
+                mode:SetText(row_data.mode)
+                mode:SetFont(GetFontSmall())
+                self:Register(scroll.row[index].button, "npc_ability_button_" .. index)
+                self:AddCallback("npc_ability_button_" .. index, ui_events.BUTTON_CLICKED, function ()
+                    Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.name)
+                end, self)
+                index = index + 1
+            end
+        end
+        -- scroll:Show(true)
+    end
+    if spec_name == SPECS.FEATS then
+        -- update the header
+        self.npc_panel.specs.header.label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+
+        --------------------------------
+        -- update the content
+        -- --------------------------------
+
+        -- update the scroll
+        local scroll = self.npc_panel.specs.content.scroll
+        scroll:Show(false)
+        scroll:Clear()
         local npc_deck = npcd.get_npc(npc_id)
         Printer:DebugTable("NPC DECK", npc_deck)
         if npc_deck then
-            local abilities = npc_deck.Ability or {}
-            for _, ability in ipairs(abilities) do
-                local feat = npcd.get_feat(ability.feat_id)
-                Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability: " .. ability.id .. " Level: " .. tostring(ability.feat_id))
 
-                local row_data = {
-                    label = gc(feat and feat.name or "Unknown Ability"),
-                    value = "Level " .. tostring(ability.level or "N/A"),
-                }
-            end
         end
     end
 
+    -- self.npc_panel.specs.content.dialog:Show(true)
 end
 
 function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
@@ -723,18 +806,12 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
     self.npc_panel.info.dialog:Show(true)
     self.npc_panel.info.portrait:Show(false)
     if not self.npc_panel.init then
+        --- SWITCHING OFF SO ANIMATION CAN PLAY
         self.npc_panel.info.background:Show(false)
         self.npc_panel.specs.terminal:SwitchOff()
     end
 
-    -- get the default TERMINAL_TABS tab
-    for _, tab_data in ipairs(TERMINAL_TABS) do
-        if tab_data.default then
-            spec_name = tab_data.name
-            break
-        end
-    end
-    self:UpdateTerminalDisplay(spec_name, npc_id)
+    self:UpdateTerminalDisplay(TERMINAL_TABS_UTIL.get_default_tab(), npc_id)
 end
 
 function npc_panel_info_showing_fx_stop()

@@ -310,6 +310,9 @@
 	<string id="st_npcd_specs_tab_talents">
 		<text>Talents</text>
 	</string>	
+	<string id="st_npcd_specs_tab_feats">
+		<text>Feats</text>
+	</string>	
 	<string id="st_npcd_specs_tab_effects">
 		<text>Effects</text>
 	</string>

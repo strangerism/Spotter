@@ -973,6 +973,12 @@ function SFXVideoTerminal:__destroy()
 	self.dirt = nil
 end
 
+
+--- UpdateHeader
+--- Updates the terminal header UI element.
+--- @param header CUIWindow The new header UI element to set.
+--- Only use if you want to change to a new header
+--- To update the content of the existing header use direct manipulation of the header element.
 function SFXVideoTerminal:UpdateHeader(header)
 	Printer:Debug(LOG.STOP, CAT.UI," SFXVideoTerminal: update header")
 	if self.header then

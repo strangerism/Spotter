@@ -98,6 +98,7 @@ ideas for archetypes
  * mind control
 
 stuff to do
+- change feat.category to feat.field. define feat category as (defense, offense, support, archetype, etc.)
 - make misc items give buffs, improve perks and feat effects, etc..
 - add artifact perk mutators
 - reworkd all script on game start to depend on NPCD_BOOTED
