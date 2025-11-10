@@ -674,6 +674,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.specs.content.scroll.row = {}
     self.npc_panel.specs.content.scroll:Show(false)
     terminal_config.content = specs_content
+    terminal_config.on_content_displayed_callback = { functor = self.UpdateTerminalDisplay, self = self}
 
     -- frame
     self.npc_panel.specs.frame = xml:InitStatic("npc_panel:specs:specs_frame", specs)
@@ -696,7 +697,13 @@ function npcd_dashboard_tab:OnTerminalTabClicked(tab_index, spec_name)
 end
 
 function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
-    Printer:Debug(LOG.RUN, CAT.UI, "Updating Terminal Display - Spec: " .. spec_name .. " NPC ID: " .. npc_id)
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating Terminal Display - Spec: %s NPC ID: %s", spec_name, npc_id)
+
+    --- setup when no params are passed (init callback from terminal)
+    if spec_name == nil or npc_id == nil then
+        spec_name = TERMINAL_TABS_UTIL.get_default_tab()
+        npc_id = self.npc_panel.npc_id
+    end
 
     -- self.npc_panel.specs.content.dialog:Show(false)
 
@@ -737,7 +744,7 @@ function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
                     mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
                 }
                 -- local name = xml:InitTextWnd("npc_panel:specs:ability:name", scroll.row[index].button)
-                scroll.row[index].button:TextControl():SetText(row_data.name)
+                scroll.row[index].button:TextControl():SetText("+++   " .. row_data.name .. "   +++")
                 local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
                 icon:InitTexture(row_data.icon)
                 local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
@@ -753,7 +760,7 @@ function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
                 index = index + 1
             end
         end
-        -- scroll:Show(true)
+        scroll:Show(true)
     end
     if spec_name == SPECS.FEATS then
         -- update the header
@@ -809,9 +816,10 @@ function npcd_dashboard_tab:UpdateNPCPanelInfo(npc_id)
         --- SWITCHING OFF SO ANIMATION CAN PLAY
         self.npc_panel.info.background:Show(false)
         self.npc_panel.specs.terminal:SwitchOff()
+    else
+        self.npc_panel.info.char_frame:Show(true)
+        self:UpdateTerminalDisplay(TERMINAL_TABS_UTIL.get_default_tab(), npc_id)
     end
-
-    self:UpdateTerminalDisplay(TERMINAL_TABS_UTIL.get_default_tab(), npc_id)
 end
 
 function npc_panel_info_showing_fx_stop()

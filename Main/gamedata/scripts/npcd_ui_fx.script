@@ -961,6 +961,12 @@ function SFXVideoTerminal:__on_content_displayed()
 		self.header:Show(true)
 		Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: header shown")
 	end
+	if self.config.on_content_displayed_callback then
+		Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: executing on_content_displayed_callback")
+		if (type(self.config.on_content_displayed_callback.functor) == "function") then 
+			self.config.on_content_displayed_callback.functor(self.config.on_content_displayed_callback.self)
+		end
+	end
 end
 
 function SFXVideoTerminal:__destroy()
