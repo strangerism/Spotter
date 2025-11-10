@@ -662,7 +662,8 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.specs.header.dialog = specs_header
     self.npc_panel.specs.header.top_line = xml:InitStatic("npc_panel:specs:terminal_display:header:top_line", specs_header)
     self.npc_panel.specs.header.background = xml:InitStatic("npc_panel:specs:terminal_display:header:background", specs_header)
-    self.npc_panel.specs.header.label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:label", specs_header)
+    self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", specs_header)
+    local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
     terminal_config.header = specs_header
 
     -- content
@@ -717,8 +718,12 @@ function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
     if spec_name == SPECS.ABILITIES then
         Printer:Debug(LOG.INFO, CAT.UI, "Updating Abilities Spec Content")
         -- update the header
-        self.npc_panel.specs.header.label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
-
+        self.npc_panel.specs.header.content:Show(false)
+        self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
+        local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
+        local type = xml:InitTextWnd("npc_panel:specs:ability:h_type", self.npc_panel.specs.header.content)
+        local mode = xml:InitTextWnd("npc_panel:specs:ability:h_mode", self.npc_panel.specs.header.content)
+        label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
         --------------------------------
         -- update the content
         -- --------------------------------
@@ -764,7 +769,10 @@ function npcd_dashboard_tab:UpdateTerminalDisplay(spec_name, npc_id)
     end
     if spec_name == SPECS.FEATS then
         -- update the header
-        self.npc_panel.specs.header.label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+        self.npc_panel.specs.header.content:Show(false)
+        self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
+        local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
+        label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
 
         --------------------------------
         -- update the content
