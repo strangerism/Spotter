@@ -207,6 +207,70 @@
 	</panel_bg>	
 
 	<npc_panel x="320" y="210" width="433" height="430">
+		<info x="0" y="0" width="433" height="187" stretch="1">
+			<info_frame x="0" y="0" width="433" height="187" stretch="1">
+				<texture a="255">ui_npcd_pda_npc_detail_panel_frame</texture>
+			</info_frame>		
+			<terminal_display x="31" y="26" width="347" height="147" stretch="1">
+				<texture a="180">ui_npcd_pda_npc_detail_info_display_bg</texture>
+				<terminal_glass x="0" y="0" width="347" height="147" stretch="1">
+					<texture a="100">ui_npcd_pda_npc_detail_info_display_glass</texture>
+					<terminal_dirt x="0" y="0" width="347" height="147" stretch="1">
+						<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
+					</terminal_dirt>			
+				</terminal_glass>
+				<content x="0" y="0" width="347" height="147" stretch="1">
+					<idcard x="10" y="10" width="150" height="187"/>
+					<characteristics x="124" y="0" width="210" height="150"/>
+				</content>			
+			</terminal_display>		
+			<idcard_group x="0" y="0" width="150" height="187">
+				<portrait x="0" y="0" width="109" height="76" stretch="1">
+					<texture></texture>
+				</portrait>
+				<name x="2" y="93" width="100" height="16">
+					<text align="l" font="letterica18" color="pda_green"/>
+				</name>
+				<community x="2" y="110" width="100" height="14">
+					<text align="l" font="letterica16" color="ui_3"/>
+				</community>
+			</idcard_group>
+			<char_frame x="0" y="0" width="210" height="150">
+				<vseparator x="3" y="20" width="1" height="125" stretch="1">
+					<texture a="100">ui_npcd_codec_750_scanline</texture>
+				</vseparator> 	
+				<top_line x="08" y="15" width="210" height="2" stretch="1">
+					<texture a="150">ui_npcd_pda_npc_detail_info_header</texture>
+				</top_line>			
+				<char_bg x="08" y="15" width="210" height="16" stretch="1">
+					<texture a="50">ui_npcd_pda_scroller_item_green_button_d</texture>
+				</char_bg>				
+				<char_header x="08" y="18" width="210" height="16">
+					<text align="c" font="letterica18" color="pda_green">Characteristics</text>
+				</char_header>		
+				<bottom_line x="08" y="145" width="210" height="1" stretch="1">
+					<texture a="150">ui_npcd_codec_750_scanline</texture>
+				</bottom_line>
+				<char_group>	
+					<ico x="08" y="20" width="16" height="16" stretch="1">
+						<texture a="150"></texture>
+					</ico>				
+					<label x="28" y="25" width="60" height="16">
+						<text align="l" font="letterica18" color="pda_green"></text>
+					</label>		
+					<value x="75" y="25" width="30" height="16">
+						<text align="r" font="letterica18" color="pda_green"></text>
+					</value>
+				</char_group>								
+			</char_frame>
+			<rank x="402" y="19" width="140" height="14">
+				<text align="l" font="letterica25" color="ui_black"/>
+			</rank>
+			<rank_cap x="398" y="34" width="140" height="14">
+				<text align="l" font="letterica18" color="ui_black">rank</text>
+			</rank_cap>				
+		</info>	
+<!-- 
 		<info_frame x="0" y="0" width="433" height="187" stretch="1">
 			<texture a="255">ui_npcd_pda_npc_detail_panel_frame</texture>
 		</info_frame>
@@ -258,12 +322,7 @@
 				</value>
 			</char_group>								
 		</info_char_frame>
-		<rank x="402" y="19" width="140" height="14">
-			<text align="l" font="letterica25" color="ui_black"/>
-		</rank>
-		<rank_cap x="398" y="34" width="140" height="14">
-			<text align="l" font="letterica18" color="ui_black">rank</text>
-		</rank_cap>
+		 -->
 		<specs x="0" y="188" width="433" height="250" stretch="1">
 			<specs_frame x="0" y="0" width="433" height="250" stretch="1">
 				<texture a="255">ui_npcd_pda_npc_detail_info_spec_frame</texture>
