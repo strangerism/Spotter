@@ -213,6 +213,10 @@ function remove_fx(fx_id)
 	local fx_job = FX_JOBS[fx_id]
 	if fx_job then
 		npe_execution.Remove(fx_job.runner_name)
+		if fx_job.config.fx_ui and fx_job.config.type ~= FX.SHOWING then
+			fx_job.config.fx_ui:Show(false)
+			fx_job.config.fx_ui = nil
+		end
 		FX_JOBS[fx_id] = nil
 	end
 end
@@ -559,12 +563,12 @@ local current_level = 0
 
 local function get_flicker_chance()
 	local chance = math.random(1, 100)
-	if current_level < 7 then
-		chance = chance + (7 - current_level) * 10
-	elseif current_level == 9 then
-		chance = chance - 50
-		current_level = 0
-	end
+	-- if current_level < 7 then
+	-- 	chance = chance + (7 - current_level) * 10
+	-- elseif current_level == 9 then
+	-- 	chance = chance - 50
+	-- 	current_level = 0
+	-- end
 	return chance
 end
 
@@ -917,7 +921,11 @@ function SFXVideoTerminal:__init(sfx_config)
 
 		end
 	end
-
+	self.glass = self.xml:InitStatic(sfx_config.glass, self.dialog)
+	self.glass:SetWndPos(vector2():set(self.display:GetWndPos().x, self.display:GetWndPos().y))
+	if sfx_config.dirt then
+		self.dirt = self.xml:InitStatic(sfx_config.dirt, self.glass)
+	end
 	Printer:Debug(LOG.ADD, CAT.UI,"SFXVideoTerminal: [%s][%s] initialized", sfx_config.name, sfx_config.group)
 	self.config = sfx_config
 end
@@ -938,7 +946,7 @@ function SFXVideoTerminal:__on_started()
 	Printer:Debug(LOG.WARN, CAT.UI,"SFXVideoTerminal: [%s][%s] On started", self.config.name, self.config.group)
 	self.display:Show(true)
 	-- add glass overlay
-	self.glass = self.xml:InitStatic(self.config.glass, self.display)
+	-- self.glass = self.xml:InitStatic(self.config.glass, self.display)
 	-- FX: scanlines on glass
 	local scanlines = get_fx_config(FX.SCANLINES, self.config.group)
 	scanlines.dialog = self.glass
@@ -954,10 +962,10 @@ function SFXVideoTerminal:__on_started()
 	scanlines.init_on_start = true
 	npcd_ui_fx.add_fx(scanlines)
 	self.fx.scanlines = scanlines
-	-- add dirt overlay
-	if self.config.dirt then
-		self.dirt = self.xml:InitStatic(self.config.dirt, self.glass)
-	end
+	-- -- add dirt overlay
+	-- if self.config.dirt then
+	-- 	self.dirt = self.xml:InitStatic(self.config.dirt, self.glass)
+	-- end
 	npcd_ui_fx.resume_fx(self.fx.showing_content.id)
 end
 
@@ -1048,12 +1056,12 @@ function SFXVideoTerminal:SwitchOff()
 		self.header:Show(false)
 	end
 	if self.glass then
-		self.glass:Show(false)
-		self.glass = nil
+		-- self.glass:Show(false)
+		-- self.glass = nil
 	end
 	if self.dirt then
-		self.dirt:Show(false)
-		self.dirt = nil
+		-- self.dirt:Show(false)
+		-- self.dirt = nil
 	end
 end
 

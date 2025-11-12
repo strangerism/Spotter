@@ -110,9 +110,11 @@
 		<texture id="ui_npcd_pda_scroller_item_ability_button_t" x="1135" y="875" width="337" height="48" />		
 
 		<!-- stats icons -->
-		<texture id="ui_npcd_hud_stat_cooldown" x="1012" y="603" width="50" height="50" />
+		<texture id="ui_npcd_hud_stat_cooldown" x="1070" y="827" width="50" height="50" />
+		<texture id="ui_npcd_hud_stat_cooldown2" x="1070" y="760" width="50" height="50" />		
 		<texture id="ui_npcd_hud_stat_duration" x="1013" y="707" width="50" height="50" />
 		<texture id="ui_npcd_hud_stat_damage" x="1075" y="654" width="50" height="50" />
+		<texture id="ui_npcd_hud_stat_damage2" x="1073" y="709" width="50" height="50" />
 		<texture id="ui_npcd_hud_stat_chance" x="1016" y="653" width="50" height="50" />
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">

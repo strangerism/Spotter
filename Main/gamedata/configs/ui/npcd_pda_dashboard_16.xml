@@ -214,7 +214,7 @@
 			<terminal_display x="31" y="26" width="347" height="147" stretch="1">
 				<texture a="180">ui_npcd_pda_npc_detail_info_display_bg</texture>
 				<terminal_glass x="0" y="0" width="347" height="147" stretch="1">
-					<texture a="100">ui_npcd_pda_npc_detail_info_display_glass</texture>
+					<texture a="80">ui_npcd_pda_npc_detail_info_display_glass</texture>
 					<terminal_dirt x="0" y="0" width="347" height="147" stretch="1">
 						<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
 					</terminal_dirt>			

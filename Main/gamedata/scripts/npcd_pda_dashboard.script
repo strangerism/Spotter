@@ -481,7 +481,6 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info = {}
     local info = xml:InitStatic("npc_panel:info", npc_panel)
     self.npc_panel.info.dialog = info
-    -- self.npc_panel.info.dialog:Show(true)
 
     local info_terminal = npcd_ui_fx.get_sfx_config(npcd_ui_fx.SFX.VIDEO_TERMINAL, "npc_info_terminal")
     info_terminal.name = "NPC Info Terminal"
@@ -957,6 +956,7 @@ function npcd_dashboard_tab:InitNPCPanel(npc_id)
     self.npc_panel.info.terminal:SwitchOn()
     self.npc_panel.specs.terminal:SwitchOn()
     self.npc_panel.init = true
+    self.npc_panel.info.rank:Show(true)
 end
 
 function npcd_dashboard_tab:UpdateNPCPanel(npc_id)
@@ -969,14 +969,20 @@ function npcd_dashboard_tab:UpdateNPCPanel(npc_id)
 end
 
 function npcd_dashboard_tab:ClearNPCPanel()
-    Printer:Debug(LOG.REMOVE, CAT.UI, "Destroying NPC Panel Info")
-    self.npc_panel.dialog:Show(false)
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing NPC Panel Info")
     self.npc_panel.init = false
     self.npc_panel.npc_id = nil
     self.npc_panel.info.terminal:SwitchOff()
     self:ClearInfoTerminalDisplay()
     self.npc_panel.specs.terminal:SwitchOff()
     self:ClearSpecsTerminalDisplay()
+    self.npc_panel.info.rank:Show(false)
+end
+
+function npcd_dashboard_tab:RemoveNPCPanel()
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Removing NPC Panel Info")
+    self.npc_panel.dialog:Show(false)
+    return self:ClearNPCPanel()
 end
 
 -- function npc_panel_info_showing_fx_stop()
@@ -1198,7 +1204,11 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
     -- show item scroller for profiles and perks apps
     if app_name == APP.PROFILES or app_name == APP.PERKS then
         self:ClearNPCPanel()
-        -- self.npc_panel.dialog:Show(true)
+        self:UpdateItemScroller(app_name, menu_name)
+        -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
+    end
+    if app_name == APP.PERKS then
+        self:RemoveNPCPanel()
         self:UpdateItemScroller(app_name, menu_name)
         -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
     end
