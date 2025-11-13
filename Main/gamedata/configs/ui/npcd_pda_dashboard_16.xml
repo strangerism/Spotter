@@ -379,18 +379,23 @@
 		<background x="0" y="0" width="300" height="460" stretch="1">
 			<texture>ui_npcd_pda_hint_wnd_40k</texture>			
 		</background>		
-		<text x="16" y="20" width="280" height="440" always_show_scroll="0" fit_to_height="1" complex_mode="1">
+		<title x="0" y="28" width="300" height="25">
+			<text align="c" vert_align="b" font="letterica25" color="ui_black"></text>
+		</title>
+		<header x="43" y="50" width="300" height="30">
+			<frame x="4" y="4" width="26" height="26" stretch="1">
+				<texture a="100">ui_npcd_pda_icon_black_frame</texture>
+			</frame>			
+			<icon x="5" y="5" width="25" height="25" stretch="1">
+			</icon>	
+			<name x="35" y="5" width="200" height="30">
+				<text align="l" vert_align="b" font="letterica25" color="ui_black"></text>
+			</name>
+		</header>						
+		<text x="16" y="80" width="280" height="440" always_show_scroll="0" fit_to_height="1" complex_mode="1">
 			<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
 		</text>			
 	</hint_wnd>
-	<!-- <hint_wnd x="0" y="0" width="446" height="170">
-	    <background x="0" y="0" width="446" height="170">
-		    <texture>ui_inGame2_hint_wnd_main_window</texture>
-	    </background>
-	    <text x="16" y="20" width="402" height="130" always_show_scroll="0" fit_to_height="1" complex_mode="1">
-			<font font="letterica16" r="170" g="170" b="170" align="l" vert_align="t"/>
-		</text>
-	</hint_wnd>	 -->
 <!-- 
 	<npc_panel x="320" y="210" width="666" height="288" stretch="1">
 		<info_frame x="0" y="0" width="666" height="288" stretch="1">

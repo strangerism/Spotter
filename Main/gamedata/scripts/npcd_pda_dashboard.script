@@ -195,8 +195,12 @@ function npcd_dashboard_tab:InitControls()
 
     -- Hint Window
 	self.hint_wnd = xml:InitFrame("hint_wnd:background",self)
-    -- self.hint_wnd:InitTexture("ui_npcd_pda_hint_wnd_bg")
 	self.hint_wnd:SetAutoDelete(false)
+    self.hint_title = xml:InitTextWnd("hint_wnd:title",self.hint_wnd)
+    self.hint_header = xml:InitStatic("hint_wnd:header",self.hint_wnd)
+    self.hint_icon = xml:InitStatic("hint_wnd:header:frame",self.hint_header)
+    self.hint_icon = xml:InitStatic("hint_wnd:header:icon",self.hint_header)
+    self.hint_name = xml:InitTextWnd("hint_wnd:header:name",self.hint_header)
 	self.hint_wnd_text = xml:InitTextWnd("hint_wnd:text",self.hint_wnd)
 	self.hint_wnd:Show(false)
 	self.tg_hint         = nil
@@ -853,12 +857,16 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     scroll.row[index].button = xml:Init3tButton("npc_panel:specs:ability", nil)
     scroll:AddWindow(scroll.row[index].button, true)
     local row_data = {
-        name = gc(feat and feat.name) or "NULL",
-        description = gc(feat and feat.description) or "NULL",
-        icon = feat and feat.icon or "ui_npcd_hud_default_icon",
-        type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
-        mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
-        source = perk and perk.icon or "ui_npcd_hud_default_icon",
+        feat_name = gc(feat and feat.name) or "NULL",
+        feat_description = gc(feat and feat.description) or "NULL",
+        feat_icon = feat and feat.icon or "ui_npcd_hud_default_icon",
+        feat_type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
+        feat_mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
+
+        perk_name = gc(perk and perk.name) or "NULL",
+        perk_icon = perk and perk.icon or "ui_npcd_hud_default_icon",
+        perk_type = gc(perk and "ui_mcm_lst_" .. perk.type) or "NULL",
+        perk_description = gc(perk and perk.description) or "NULL",
         rank = rank_desc or "NULL",
         feat_id = feat and feat.id or "NULL",
         perk_id = perk and perk.id or "NULL",
@@ -866,23 +874,30 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     i = 0
     local stat_group = xml:InitFrame("npc_panel:specs:ability:stat_group", scroll.row[index].button)
     self:__CreateStatGroup(feat.stats[rank], stat_group)
-    scroll.row[index].button:TextControl():SetText("+++   " .. row_data.name .. "   +++")
+    scroll.row[index].button:TextControl():SetText("+++   " .. row_data.feat_name .. "   +++")
+
     local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
-    icon:InitTexture(row_data.icon)
+    icon:InitTexture(row_data.feat_icon)
     scroll.row[index].feat_icon = icon
+
     local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
-    type:SetText(row_data.type)
+    type:SetText(row_data.feat_type)
     type:SetFont(GetFontSmall())
+
     local mode = xml:InitTextWnd("npc_panel:specs:ability:mode", scroll.row[index].button)
-    mode:SetText(row_data.mode)
+    mode:SetText(row_data.feat_mode)
     mode:SetFont(GetFontSmall())
+    
     local source = xml:InitStatic("npc_panel:specs:ability:source", scroll.row[index].button)
-    source:InitTexture(row_data.source)
+    source:InitTexture(row_data.perk_icon)
     scroll.row[index].perk_icon = source
+
     local rank = xml:InitTextWnd("npc_panel:specs:ability:rank", scroll.row[index].button)
     rank:SetText(row_data.rank)
     rank:SetFont(GetFontMedium())
+    
     scroll.row[index].data = row_data
+
     -- register button callback
     self:Register(scroll.row[index].button, "npc_ability_button_" .. index)
     self:AddCallback("npc_ability_button_" .. index, ui_events.BUTTON_CLICKED, function ()
@@ -1216,6 +1231,7 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
     -- show item scroller for profiles and perks apps
     if app_name == APP.PROFILES or app_name == APP.PERKS then
         self:ClearNPCPanel()
+        self.npc_panel.dialog:Show(true)
         self:UpdateItemScroller(app_name, menu_name)
         -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
     end
@@ -1338,7 +1354,7 @@ function npcd_dashboard_tab:SetHint(text, pos)
 
 	local w = self.hint_wnd:GetWidth()
 	w = w >= 150 and w or 150
-	local h = self.hint_wnd_text:GetHeight()+84
+	local h = self.hint_wnd_text:GetHeight()+ 84 + self.hint_wnd_text:GetWndPos().y
 	h = h >= 111 and h or 111
 	self.hint_wnd:SetWndSize(vector2():set(w,h))
     Printer:Debug(LOG.INFO, CAT.UI, "Setting Hint Size - Width: " .. w .. " Height: " .. h)
@@ -1346,8 +1362,8 @@ function npcd_dashboard_tab:SetHint(text, pos)
 	pos.y = pos.y - self.hint_wnd:GetHeight()
 	pos.x = pos.x - self.hint_wnd:GetWidth()
 	self.hint_wnd:SetWndPos(pos)
-	
-	FitInRect(self.hint_wnd,Frect():set(0,0,1024,768),0,100)
+	local panel = UI_APP[APP.PROFILES].dialog
+	FitInRect(self.hint_wnd,Frect():set(panel.x,panel.y,panel:GetWidth(),panel:GetHeight()),0,100)
 end
 
 function npcd_dashboard_tab:GetAbilitiesHintElements()
@@ -1366,13 +1382,26 @@ function npcd_dashboard_tab:Update()
     local show_hint = true
 	-- Hint
 	for _, v in pairs(self:GetAbilitiesHintElements()) do
+        -- Printer:DebugTable("Ability Hint Element", v)
 		if show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
-			local str = v.data and "\\n \\n" .. v.data.description
-			if str then
-				self:SetHint( str )
-			end
+            if v.data then
+                self.hint_title:SetText( gc(v.data.feat_type) .. " Feat" )
+                self.hint_icon:InitTexture( v.data.feat_icon )
+                self.hint_name:SetText( v.data.feat_name )
+                self:SetHint( "\\n \\n" .. v.data.feat_description )
+            end
 			return
 		end
+
+		if show_hint and v and v.perk_icon and v.perk_icon:IsCursorOverWindow() then
+            if v.data then
+                self.hint_title:SetText( gc(v.data.perk_type) .. " Perk" )
+                self.hint_icon:InitTexture( v.data.perk_icon )
+                self.hint_name:SetText( v.data.perk_name )
+                self:SetHint( "\\n \\n" .. v.data.perk_description )
+            end
+			return
+		end        
 	end
 	self:SetHint(false)
 end
