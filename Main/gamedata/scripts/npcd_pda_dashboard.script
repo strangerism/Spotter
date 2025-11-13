@@ -1336,7 +1336,7 @@ function npcd_dashboard_tab:EnableAppButtons(enable)
     end
 end
 
-function npcd_dashboard_tab:SetHint(text, pos)
+function npcd_dashboard_tab:SetHint(text, frame_to_fit, pos)
 
 	if (not text) then
 		self.tg_hint = time_global()
@@ -1362,8 +1362,10 @@ function npcd_dashboard_tab:SetHint(text, pos)
 	pos.y = pos.y - self.hint_wnd:GetHeight()
 	pos.x = pos.x - self.hint_wnd:GetWidth()
 	self.hint_wnd:SetWndPos(pos)
-	local panel = UI_APP[APP.PROFILES].dialog
-	FitInRect(self.hint_wnd,Frect():set(panel.x,panel.y,panel:GetWidth(),panel:GetHeight()),0,100)
+    if not frame_to_fit then
+        frame_to_fit = self
+    end
+	FitInRect(self.hint_wnd,Frect():set(frame_to_fit.x,frame_to_fit.y,frame_to_fit:GetWidth(),frame_to_fit:GetHeight()),0,100)
 end
 
 function npcd_dashboard_tab:GetAbilitiesHintElements()
@@ -1388,7 +1390,7 @@ function npcd_dashboard_tab:Update()
                 self.hint_title:SetText( gc(v.data.feat_type) .. " Feat" )
                 self.hint_icon:InitTexture( v.data.feat_icon )
                 self.hint_name:SetText( v.data.feat_name )
-                self:SetHint( "\\n \\n" .. v.data.feat_description )
+                self:SetHint( "\\n \\n" .. v.data.feat_description , UI_APP[APP.PROFILES].dialog)
             end
 			return
 		end
@@ -1398,7 +1400,7 @@ function npcd_dashboard_tab:Update()
                 self.hint_title:SetText( gc(v.data.perk_type) .. " Perk" )
                 self.hint_icon:InitTexture( v.data.perk_icon )
                 self.hint_name:SetText( v.data.perk_name )
-                self:SetHint( "\\n \\n" .. v.data.perk_description )
+                self:SetHint( "\\n \\n" .. v.data.perk_description, UI_APP[APP.PROFILES].dialog)
             end
 			return
 		end        
