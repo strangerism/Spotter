@@ -118,20 +118,38 @@
 		<texture id="ui_npcd_hud_stat_chance" x="1016" y="653" width="50" height="50" />
 
 		<!-- tooltips and infobox -->
-		<texture id="ui_npcd_pda_hint_wnd_bg" x="0" y="1747" width="232" height="111" />
-		<texture id="ui_npcd_pda_hint_wnd_40k" x="3047" y="1541" width="778" height="682" />
-	    <!-- <texture id="ui_npcd_pda_hint_wnd_bg_lt"    x="0" y="1747" width="95" height="60" />
-	    <texture id="ui_npcd_pda_hint_wnd_bg_t"     x="95" y="1747" width="42" height="60" />
-	    <texture id="ui_npcd_pda_hint_wnd_bg_rt"    x="137" y="1747" width="95" height="60" />
 
-	    <texture id="ui_npcd_pda_hint_wnd_bg_l"     x="0" y="1807" width="95" height="30" />
-	    <texture id="ui_npcd_pda_hint_wnd_bg_back"  x="95" y="1807" width="42" height="30" />
-	    <texture id="ui_npcd_pda_hint_wnd_bg_r"     x="137" y="1807" width="95" height="30" />
+		<!-- <texture id="ui_npcd_pda_hint_wnd_40k" x="3047" y="1541" width="778" height="682" /> -->	
 
-	    <texture id="ui_npcd_pda_hint_wnd_bg_lb"    x="0" y="1837" width="95" height="21" />
-	    <texture id="ui_npcd_pda_hint_wnd_bg_b"     x="95" y="1837" width="42" height="21" />
-	    <texture id="ui_npcd_pda_hint_wnd_bg_rb"    x="137" y="1837" width="95" height="21" />		 -->
+	    <!-- <texture id="ui_npcd_pda_hint_wnd_40k_lt"    x="3047" y="1541" width="300" height="250" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_t"     x="3347" y="1541" width="178" height="250" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_rt"    x="3525" y="1541" width="300" height="250" />
+
+	    <texture id="ui_npcd_pda_hint_wnd_40k_l"     x="3047" y="1791" width="300" height="182" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_back"  x="3347" y="1791" width="178" height="182" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_r"     x="3525" y="1791" width="300" height="182" />
+
+	    <texture id="ui_npcd_pda_hint_wnd_40k_lb"    x="3047" y="1973" width="300" height="250" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_b"     x="3347" y="1973" width="178" height="250" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_rb"    x="3525" y="1973" width="300" height="250" />	 -->
+
+
 	</file>	
+	<file name="ui\npcd\ui_npcd_hint">
+	    <!-- <texture id="ui_npcd_pda_hint_wnd_40k" x="3047" y="1541" width="778" height="682" /> -->	
+		
+		<texture id="ui_npcd_pda_hint_wnd_40k_lt"    x="0" y="0" width="300" height="250" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_t"     x="300" y="0" width="178" height="250" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_rt"    x="478" y="0" width="300" height="250" />
+
+	    <texture id="ui_npcd_pda_hint_wnd_40k_l"     x="0" y="250" width="300" height="182" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_back"  x="300" y="250" width="178" height="182" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_r"     x="478" y="250" width="300" height="182" />
+
+	    <texture id="ui_npcd_pda_hint_wnd_40k_lb"    x="0" y="432" width="300" height="250" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_b"     x="300" y="432" width="178" height="250" />
+	    <texture id="ui_npcd_pda_hint_wnd_40k_rb"    x="478" y="432" width="300" height="250" />		
+	</file>
 	<file name="ui\npcd\ui_npcd_icons">
 		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />
 		<texture id="pda_npcd_app_h" x="178" y="48" width="121" height="121" />

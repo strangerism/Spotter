@@ -375,11 +375,11 @@
 			</stat_group>
 		</specs>	
 	</npc_panel>
-	<hint_wnd x="0" y="0" width="232" height="360" stretch="1">
-		<background x="0" y="0" width="232" height="360" stretch="1">
+	<hint_wnd x="0" y="0" width="300" height="460" stretch="1">
+		<background x="0" y="0" width="300" height="460" stretch="1">
 			<texture>ui_npcd_pda_hint_wnd_40k</texture>			
 		</background>		
-		<text x="16" y="20" width="200" height="360" always_show_scroll="0" fit_to_height="1" complex_mode="1">
+		<text x="16" y="20" width="280" height="440" always_show_scroll="0" fit_to_height="1" complex_mode="1">
 			<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
 		</text>			
 	</hint_wnd>

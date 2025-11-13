@@ -194,7 +194,7 @@ function npcd_dashboard_tab:InitControls()
     self.footer = xml:InitStatic("footer", self)
 
     -- Hint Window
-	self.hint_wnd = xml:InitStatic("hint_wnd:background",self)
+	self.hint_wnd = xml:InitFrame("hint_wnd:background",self)
     -- self.hint_wnd:InitTexture("ui_npcd_pda_hint_wnd_bg")
 	self.hint_wnd:SetAutoDelete(false)
 	self.hint_wnd_text = xml:InitTextWnd("hint_wnd:text",self.hint_wnd)
@@ -1367,7 +1367,7 @@ function npcd_dashboard_tab:Update()
 	-- Hint
 	for _, v in pairs(self:GetAbilitiesHintElements()) do
 		if show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
-			local str = v.data and v.data.name .. "\\n \\n" .. v.data.type .. "\\n \\n" .. v.data.rank .. "\\n \\n" .. v.data.mode.. "\\n \\n" .. v.data.description
+			local str = v.data and "\\n \\n" .. v.data.description
 			if str then
 				self:SetHint( str )
 			end
