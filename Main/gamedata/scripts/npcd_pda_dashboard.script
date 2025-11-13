@@ -193,6 +193,15 @@ function npcd_dashboard_tab:InitControls()
     -- Footer
     self.footer = xml:InitStatic("footer", self)
 
+    -- Hint Window
+	self.hint_wnd = xml:InitStatic("hint_wnd:background",self)
+    -- self.hint_wnd:InitTexture("ui_npcd_pda_hint_wnd_bg")
+	self.hint_wnd:SetAutoDelete(false)
+	self.hint_wnd_text = xml:InitTextWnd("hint_wnd:text",self.hint_wnd)
+	self.hint_wnd:Show(false)
+	self.tg_hint         = nil
+	self.tg_hint_step    = 1000 --[ms]
+
 end
 
 -- destroy UI
@@ -281,9 +290,6 @@ function npcd_dashboard_tab:InitAppsBar()
     npcd_ui_fx.resume_fx(self.apps_bar_scanline.id)
 end
 
-function npcd_dashboard_tab:UpdateAppsBar()
-    -- self.apps_bar:SetWndPos(vector2():set(self.apps_bar:GetWndPos().x, self.apps_bar:GetWndPos().y))
-end
 
 --------------------------------
 --- Item Scroller
@@ -848,11 +854,14 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     scroll:AddWindow(scroll.row[index].button, true)
     local row_data = {
         name = gc(feat and feat.name) or "NULL",
+        description = gc(feat and feat.description) or "NULL",
         icon = feat and feat.icon or "ui_npcd_hud_default_icon",
         type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
         mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
         source = perk and perk.icon or "ui_npcd_hud_default_icon",
         rank = rank_desc or "NULL",
+        feat_id = feat and feat.id or "NULL",
+        perk_id = perk and perk.id or "NULL",
     }
     i = 0
     local stat_group = xml:InitFrame("npc_panel:specs:ability:stat_group", scroll.row[index].button)
@@ -860,6 +869,7 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     scroll.row[index].button:TextControl():SetText("+++   " .. row_data.name .. "   +++")
     local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
     icon:InitTexture(row_data.icon)
+    scroll.row[index].feat_icon = icon
     local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
     type:SetText(row_data.type)
     type:SetFont(GetFontSmall())
@@ -867,10 +877,12 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     mode:SetText(row_data.mode)
     mode:SetFont(GetFontSmall())
     local source = xml:InitStatic("npc_panel:specs:ability:source", scroll.row[index].button)
-    source:InitTexture(row_data.source)             
+    source:InitTexture(row_data.source)
+    scroll.row[index].perk_icon = source
     local rank = xml:InitTextWnd("npc_panel:specs:ability:rank", scroll.row[index].button)
     rank:SetText(row_data.rank)
     rank:SetFont(GetFontMedium())
+    scroll.row[index].data = row_data
     -- register button callback
     self:Register(scroll.row[index].button, "npc_ability_button_" .. index)
     self:AddCallback("npc_ability_button_" .. index, ui_events.BUTTON_CLICKED, function ()
@@ -1142,7 +1154,7 @@ function npcd_dashboard_tab:ActivateAppPanel(app_name)
         self:ActivateAppMenu(app_name, UI_APP[app_name].default_menu or APP_MENU[app_name][1])
     end
     -- show new active dialog
-    self:UpdateAppsBar()
+
     if self.app_panel then
         self.app_panel:Show(true)
     end
@@ -1308,11 +1320,61 @@ function npcd_dashboard_tab:EnableAppButtons(enable)
     end
 end
 
+function npcd_dashboard_tab:SetHint(text, pos)
 
+	if (not text) then
+		self.tg_hint = time_global()
+		self.hint_wnd:Show(false)
+		return
+	end
+	
+	if (time_global() < self.tg_hint + self.tg_hint_step) then
+		return
+	end
+	
+	self.hint_wnd:Show(true)
+	self.hint_wnd_text:SetText(text)
+	self.hint_wnd_text:AdjustHeightToText()
+
+	local w = self.hint_wnd:GetWidth()
+	w = w >= 150 and w or 150
+	local h = self.hint_wnd_text:GetHeight()+84
+	h = h >= 111 and h or 111
+	self.hint_wnd:SetWndSize(vector2():set(w,h))
+    Printer:Debug(LOG.INFO, CAT.UI, "Setting Hint Size - Width: " .. w .. " Height: " .. h)
+	pos = pos or GetCursorPosition()
+	pos.y = pos.y - self.hint_wnd:GetHeight()
+	pos.x = pos.x - self.hint_wnd:GetWidth()
+	self.hint_wnd:SetWndPos(pos)
+	
+	FitInRect(self.hint_wnd,Frect():set(0,0,1024,768),0,100)
+end
+
+function npcd_dashboard_tab:GetAbilitiesHintElements()
+    if not self.npc_panel.init then
+        return {}
+    end
+    return self.npc_panel and self.npc_panel.specs and self.npc_panel.specs.content.scroll.row or {}
+end
+
+--------------------------------
 -- Main Update Loop
+--------------------------------
 function npcd_dashboard_tab:Update()
     CUIScriptWnd.Update(self)
     -- Update the dashboard contents here if needed.
+    local show_hint = true
+	-- Hint
+	for _, v in pairs(self:GetAbilitiesHintElements()) do
+		if show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
+			local str = v.data and v.data.name .. "\\n \\n" .. v.data.type .. "\\n \\n" .. v.data.rank .. "\\n \\n" .. v.data.mode.. "\\n \\n" .. v.data.description
+			if str then
+				self:SetHint( str )
+			end
+			return
+		end
+	end
+	self:SetHint(false)
 end
 
 function get_menu_items(app_name, menu_name)

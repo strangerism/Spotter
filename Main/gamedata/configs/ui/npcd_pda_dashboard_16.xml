@@ -270,59 +270,6 @@
 				<text align="l" font="letterica18" color="ui_black">rank</text>
 			</rank_cap>				
 		</info>	
-<!-- 
-		<info_frame x="0" y="0" width="433" height="187" stretch="1">
-			<texture a="255">ui_npcd_pda_npc_detail_panel_frame</texture>
-		</info_frame>
-		<info_bg x="31" y="26" width="347" height="147" stretch="1">
-			<texture a="180">ui_npcd_pda_npc_detail_info_display_bg</texture>
-		</info_bg>
-		<info_glass x="33" y="28" width="347" height="147" stretch="1">
-			<texture a="100">ui_npcd_pda_npc_detail_info_display_glass</texture>
-		</info_glass>
-		<info_dirt x="33" y="28" width="347" height="147" stretch="1">
-			<texture a="100">ui_npcd_pda_npc_detail_panel_dirt</texture>
-		</info_dirt>
-		<info_portrait_frame x="45" y="45" width="150" height="187">
-			<portrait x="0" y="0" width="109" height="76" stretch="1">
-				<texture></texture>
-			</portrait>
-			<name x="2" y="93" width="100" height="16">
-				<text align="l" font="letterica18" color="pda_green"/>
-			</name>
-			<community x="2" y="110" width="100" height="14">
-				<text align="l" font="letterica16" color="ui_3"/>
-			</community>
-		</info_portrait_frame>
-		<info_char_frame x="155" y="22" width="210" height="150">
-			<vseparator x="3" y="20" width="1" height="125" stretch="1">
-				<texture a="100">ui_npcd_codec_750_scanline</texture>
-			</vseparator> 	
-			<top_line x="08" y="15" width="210" height="2" stretch="1">
-				<texture a="150">ui_npcd_pda_npc_detail_info_header</texture>
-			</top_line>			
-			<char_bg x="08" y="15" width="210" height="16" stretch="1">
-				<texture a="50">ui_npcd_pda_scroller_item_green_button_d</texture>
-			</char_bg>				
-			<char_header x="08" y="18" width="210" height="16">
-				<text align="c" font="letterica18" color="pda_green">Characteristics</text>
-			</char_header>		
-			<bottom_line x="08" y="145" width="210" height="1" stretch="1">
-				<texture a="150">ui_npcd_codec_750_scanline</texture>
-			</bottom_line>
-			<char_group>	
-				<ico x="08" y="20" width="16" height="16" stretch="1">
-					<texture a="150"></texture>
-				</ico>				
-				<label x="28" y="25" width="60" height="16">
-					<text align="l" font="letterica18" color="pda_green"></text>
-				</label>		
-				<value x="75" y="25" width="30" height="16">
-					<text align="r" font="letterica18" color="pda_green"></text>
-				</value>
-			</char_group>								
-		</info_char_frame>
-		 -->
 		<specs x="0" y="188" width="433" height="250" stretch="1">
 			<specs_frame x="0" y="0" width="433" height="250" stretch="1">
 				<texture a="255">ui_npcd_pda_npc_detail_info_spec_frame</texture>
@@ -399,16 +346,6 @@
 					<text align="c" vert_align="b" font="letterica18" color="ui_white"></text>
 				</mode>	
 				<stat_group x="135" y="16" width="120" height="40" stretch="1">
-					<!-- <stat x="0" y="0" width="30" height="40" stretch="1">
-						<vline x="0" y="5" width="1" height="20" stretch="1">
-							<texture a="100">ui_npcd_codec_750_scanline</texture>
-						</vline>		
-						<icon x="10" y="5" width="12" height="12" stretch="1">
-						</icon>
-						<value x="0" y="20" width="30" height="10">
-							<text align="c" vert_align="b" font="letterica16" color="pda_green"></text>
-						</value>			
-					</stat>				 -->
 				</stat_group>
 				<h_source x="270" y="5" width="30" height="16">
 					<text align="c" font="letterica18" color="pda_green">Source</text>
@@ -436,9 +373,24 @@
 					</value>			
 				</stat>				
 			</stat_group>
-		</specs>			
+		</specs>	
 	</npc_panel>
-
+	<hint_wnd x="0" y="0" width="232" height="360" stretch="1">
+		<background x="0" y="0" width="232" height="360" stretch="1">
+			<texture>ui_npcd_pda_hint_wnd_40k</texture>			
+		</background>		
+		<text x="16" y="20" width="200" height="360" always_show_scroll="0" fit_to_height="1" complex_mode="1">
+			<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
+		</text>			
+	</hint_wnd>
+	<!-- <hint_wnd x="0" y="0" width="446" height="170">
+	    <background x="0" y="0" width="446" height="170">
+		    <texture>ui_inGame2_hint_wnd_main_window</texture>
+	    </background>
+	    <text x="16" y="20" width="402" height="130" always_show_scroll="0" fit_to_height="1" complex_mode="1">
+			<font font="letterica16" r="170" g="170" b="170" align="l" vert_align="t"/>
+		</text>
+	</hint_wnd>	 -->
 <!-- 
 	<npc_panel x="320" y="210" width="666" height="288" stretch="1">
 		<info_frame x="0" y="0" width="666" height="288" stretch="1">

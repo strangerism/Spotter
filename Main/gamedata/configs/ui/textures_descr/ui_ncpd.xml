@@ -116,6 +116,21 @@
 		<texture id="ui_npcd_hud_stat_damage" x="1075" y="654" width="50" height="50" />
 		<texture id="ui_npcd_hud_stat_damage2" x="1073" y="709" width="50" height="50" />
 		<texture id="ui_npcd_hud_stat_chance" x="1016" y="653" width="50" height="50" />
+
+		<!-- tooltips and infobox -->
+		<texture id="ui_npcd_pda_hint_wnd_bg" x="0" y="1747" width="232" height="111" />
+		<texture id="ui_npcd_pda_hint_wnd_40k" x="3047" y="1541" width="778" height="682" />
+	    <!-- <texture id="ui_npcd_pda_hint_wnd_bg_lt"    x="0" y="1747" width="95" height="60" />
+	    <texture id="ui_npcd_pda_hint_wnd_bg_t"     x="95" y="1747" width="42" height="60" />
+	    <texture id="ui_npcd_pda_hint_wnd_bg_rt"    x="137" y="1747" width="95" height="60" />
+
+	    <texture id="ui_npcd_pda_hint_wnd_bg_l"     x="0" y="1807" width="95" height="30" />
+	    <texture id="ui_npcd_pda_hint_wnd_bg_back"  x="95" y="1807" width="42" height="30" />
+	    <texture id="ui_npcd_pda_hint_wnd_bg_r"     x="137" y="1807" width="95" height="30" />
+
+	    <texture id="ui_npcd_pda_hint_wnd_bg_lb"    x="0" y="1837" width="95" height="21" />
+	    <texture id="ui_npcd_pda_hint_wnd_bg_b"     x="95" y="1837" width="42" height="21" />
+	    <texture id="ui_npcd_pda_hint_wnd_bg_rb"    x="137" y="1837" width="95" height="21" />		 -->
 	</file>	
 	<file name="ui\npcd\ui_npcd_icons">
 		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />
