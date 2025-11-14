@@ -544,8 +544,8 @@ function on_stop_flickering(runner_name)
 		-- execute custom random cooldown functor
 		local cooldown = execute_func(unpack(config.random_cooldown))
 		if cooldown and type(cooldown) == "number" then
-			Printer:Debug(LOG.INFO, CAT.UI_ACTION," flickering cooldown for %s set to %s", runner_name, cooldown)
-			config.cooldown_value = time_global() + cooldown
+			Printer:Debug(LOG.INFO, CAT.UI," flickering cooldown for %s set to %s", runner_name, cooldown)
+			config.cooldown_value = cooldown
 		end
 	end
 	-- signal successful execution of stop functor
@@ -597,12 +597,15 @@ function run_flickering_manager(runner_name)
 		elseif managed.config.cooldown_value == 0 and not npe_execution.IsRunnerRunning(managed.runner_name) then
 			-- start caller scanlines loop by chance			
 			local flicker_chance = get_flicker_chance()
+			Printer:Debug(LOG.INFO, CAT.UI_ACTION," flickering chance for %s is %s (current level %s)", managed.runner_name, flicker_chance, current_level)
 			if flicker_chance > 70 then
 				Printer:Debug(LOG.START, CAT.UI_ACTION," starting flickering loop for %s with chance %s", managed.runner_name, flicker_chance)
 				npe_execution.Resume(managed.runner_name)
 				current_level = current_level + 1
 			end
 		else
+			-- comparing cooldown with global time
+			Printer:Debug(LOG.INFO, CAT.UI_ACTION," checking flickering cooldown for %s: %s > %s", managed.runner_name, time_global(), managed.config.cooldown_value)
 			if time_global() > managed.config.cooldown_value then
 				managed.config.cooldown_value = 0
 			end
@@ -719,7 +722,7 @@ function run_hide(runner_name)
 	local new_height = config.height - (config.cursor * 2)
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, new_y))
 	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), new_height))
-	Printer:Debug(LOG.INFO, CAT.UI," hiding dialog %s at y:%s height:%s", runner_name, new_y, new_height)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," hiding dialog %s at y:%s height:%s", runner_name, new_y, new_height)
 end
 
 function on_start_hide(runner_name)
@@ -728,7 +731,7 @@ function on_start_hide(runner_name)
 	local config = fx_job.config
 	if not config.dialog then return end
 	config.fx_ui = config.dialog
-	Printer:Debug(LOG.START, CAT.UI," starting hide_dialog %s", runner_name)
+	Printer:Debug(LOG.START, CAT.UI_ACTION," starting hide_dialog %s", runner_name)
 	-- save original y position
 	config.original_y = config.fx_ui:GetWndPos().y
 	-- save original height
@@ -741,7 +744,7 @@ function on_start_hide(runner_name)
 end
 
 function on_stop_hide(runner_name)
-	Printer:Debug(LOG.STOP, CAT.UI," stopping hide_dialog %s", runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI_ACTION," stopping hide_dialog %s", runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	local config = fx_job.config

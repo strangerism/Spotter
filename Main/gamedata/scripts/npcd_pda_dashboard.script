@@ -370,7 +370,7 @@ function npcd_dashboard_tab:InitItemScroller()
     flickering.dialog = self.menu_scroller.ui.glass
     flickering.random_duration = {"npcd_pda_dashboard", "items_scroller_glitch_duration"}
     flickering.random_cooldown = {"npcd_pda_dashboard", "items_scroller_glitch_cooldown"}
-    npcd_ui_fx.add_fx(flickering)
+    npcd_ui_fx.add_fx(flickering, "menu_scroller_flickering")
     self.menu_scroller.fx.flickering = flickering
     npcd_ui_fx.add_fx_to_manager(flickering.id, self.flickering_manager.id)
 
@@ -440,7 +440,7 @@ function items_scroller_glitch_duration()
 end
 
 function items_scroller_glitch_cooldown()
-    local cooldown = math.random(50, 200) * 100
+    local cooldown = math.random(50, 100) * 100
     -- Printer:Debug(LOG.INFO, CAT.UI, "Items Scroller Glitch Cooldown set to " .. cooldown .. " ms")
     -- Printer:Debug(LOG.INFO, CAT.UI, "Items Scroller Glitch will be ready at " .. (time_global() + cooldown) .. " ms")
     return time_global() + cooldown
@@ -543,7 +543,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     flickering.max_intensity = 0.9
     flickering.random_duration = {"npcd_pda_dashboard", "items_scroller_glitch_duration"}
     flickering.random_cooldown = {"npcd_pda_dashboard", "items_scroller_glitch_cooldown"}
-    npcd_ui_fx.add_fx(flickering)
+    npcd_ui_fx.add_fx(flickering, "npc_panel_info_portrait_flickering")
     self.npc_panel.info.content.fx.portrait_flickering = flickering
     npcd_ui_fx.add_fx_to_manager(flickering.id, self.npc_panel.info.content.fx.flickering_manager.id)
 
@@ -1432,7 +1432,7 @@ function npcd_dashboard_tab:Update()
                 self:SetHint( "\\n \\n" .. v.data.perk_description, UI_APP[APP.PROFILES].dialog)
             end
 			return
-		end        
+		end
 	end
     UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
 	self:SetHint(false)
