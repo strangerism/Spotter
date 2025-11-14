@@ -295,7 +295,10 @@ function add_fx_to_manager(fx_id, manager_id)
 	if not Managed[manager_type] then
 		Managed[manager_type] = {}
 	end
-	Managed[manager_type][fx_id] = fx_id
+	if not Managed[manager_type][manager_id] then
+		Managed[manager_type][manager_id] = {}
+	end
+	Managed[manager_type][manager_id][fx_id] = fx_id
 end
 
 function remove_fx_from_manager(fx_id, manager_id)
@@ -303,7 +306,8 @@ function remove_fx_from_manager(fx_id, manager_id)
 	local manager = FX_JOBS[manager_id].config
 	local manager_type = manager.manager_type
 	if not Managed[manager_type] then return end
-	Managed[manager_type][fx_id] = nil
+	if not Managed[manager_type][manager_id] then return end
+	Managed[manager_type][manager_id][fx_id] = nil
 end
 
 function purge_fx_manager(manager_id)
@@ -311,7 +315,8 @@ function purge_fx_manager(manager_id)
 	local manager = FX_JOBS[manager_id].config
 	local manager_type = manager.manager_type
 	if not Managed[manager_type] then return end
-	Managed[manager_type] = {}
+	if not Managed[manager_type][manager_id] then return end
+	Managed[manager_type][manager_id] = {}
 end
 
 -- FX HANDLERS UTILITIES
@@ -584,7 +589,7 @@ function run_flickering_manager(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	Printer:Debug(LOG.RUN, CAT.UI_ACTION," running flickering manager %s", runner_name)
-	for _, managed_id in pairs(	Managed[FX.FLICKERING]) do
+	for _, managed_id in pairs(	Managed[FX.FLICKERING][runner_name]) do
 		local managed = FX_JOBS[managed_id] and FX_JOBS[managed_id]
 		if not managed then return false end
 		-- Printer:DebugTable("Flickering Manager checking managed fx:", managed)
@@ -619,7 +624,7 @@ function on_stop_flickering_manager(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.dialog then return end
-	for _, managed_id in pairs(	Managed[FX.FLICKERING]) do
+	for _, managed_id in pairs(	Managed[FX.FLICKERING][runner_name]) do
 		local managed = FX_JOBS[managed_id]
 		if not managed then return false end
 		-- stop caller flickering loop
@@ -632,7 +637,7 @@ function on_start_flickering_manager(runner_name)
 	local fx_job = FX_JOBS[runner_name]
 	if not fx_job then return false end
 	Printer:Debug(LOG.START, CAT.UI_ACTION," starting flickering manager %s", runner_name)
-	for _, managed_id in pairs(	Managed[FX.FLICKERING]) do
+	for _, managed_id in pairs(	Managed[FX.FLICKERING][runner_name]) do
 		local managed = FX_JOBS[managed_id]
 		Printer:TraceTable("Initializing managed flickering fx:", managed)
 		if not managed then return false end
