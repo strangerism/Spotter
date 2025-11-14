@@ -375,26 +375,31 @@
 			</stat_group>
 		</specs>	
 	</npc_panel>
-	<hint_wnd x="0" y="0" width="300" height="460" stretch="1">
-		<background x="0" y="0" width="300" height="460" stretch="1">
+	<hint_wnd x="0" y="0" width="280" height="360" stretch="1">
+		<background x="0" y="0" width="280" height="360" stretch="1">
 			<texture>ui_npcd_pda_hint_wnd_40k</texture>			
 		</background>		
-		<title x="0" y="28" width="300" height="25">
-			<text align="c" vert_align="b" font="letterica25" color="ui_black"></text>
-		</title>
-		<header x="43" y="50" width="300" height="30">
-			<frame x="4" y="4" width="26" height="26" stretch="1">
-				<texture a="100">ui_npcd_pda_icon_black_frame</texture>
-			</frame>			
-			<icon x="5" y="5" width="25" height="25" stretch="1">
+		<header x="20" y="30" width="240" height="60" stretch="1">
+			<texture a="255">ui_npcd_pda_hint_wnd_header_bg</texture>
+			<title x="0" y="0" width="240" height="25">
+				<text align="c" vert_align="b" font="letterica25" color="ui_black"></text>
+			</title>			
+			<icon_frame x="3" y="26" width="30" height="30" stretch="1">
+				<texture a="100">ui_npcd_pda_hint_wnd_icon_frame</texture>
+			</icon_frame>			
+			<icon x="5" y="28" width="25" height="25" stretch="1">
 			</icon>	
-			<name x="35" y="5" width="200" height="30">
+			<name x="35" y="28" width="160" height="30">
 				<text align="l" vert_align="b" font="letterica25" color="ui_black"></text>
 			</name>
 		</header>						
-		<text x="16" y="80" width="280" height="440" always_show_scroll="0" fit_to_height="1" complex_mode="1">
+		<text x="16" y="80" width="248" height="340" always_show_scroll="0" fit_to_height="1" complex_mode="1">
 			<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
-		</text>			
+		</text>	
+		<footer x="16" y="0" width="248" height="18">
+			<text align="c" vert_align="b" font="letterica18" color="ui_black">Press mouse 2 to expand</text>
+		</footer>
+				
 	</hint_wnd>
 <!-- 
 	<npc_panel x="320" y="210" width="666" height="288" stretch="1">

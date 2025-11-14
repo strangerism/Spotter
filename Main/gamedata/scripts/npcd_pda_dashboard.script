@@ -196,12 +196,14 @@ function npcd_dashboard_tab:InitControls()
     -- Hint Window
 	self.hint_wnd = xml:InitFrame("hint_wnd:background",self)
 	self.hint_wnd:SetAutoDelete(false)
-    self.hint_title = xml:InitTextWnd("hint_wnd:title",self.hint_wnd)
     self.hint_header = xml:InitStatic("hint_wnd:header",self.hint_wnd)
-    self.hint_icon = xml:InitStatic("hint_wnd:header:frame",self.hint_header)
+    -- self.hint_header:InitTexture("hint_wnd:header:background",self.hint_header)
+    self.hint_title = xml:InitTextWnd("hint_wnd:header:title",self.hint_header)
+    self.hint_icon_frame = xml:InitStatic("hint_wnd:header:icon_frame",self.hint_header)
     self.hint_icon = xml:InitStatic("hint_wnd:header:icon",self.hint_header)
     self.hint_name = xml:InitTextWnd("hint_wnd:header:name",self.hint_header)
 	self.hint_wnd_text = xml:InitTextWnd("hint_wnd:text",self.hint_wnd)
+    self.hint_wnd_footer = xml:InitTextWnd("hint_wnd:footer",self.hint_wnd)
 	self.hint_wnd:Show(false)
 	self.tg_hint         = nil
 	self.tg_hint_step    = 1000 --[ms]
@@ -748,7 +750,7 @@ end
 
 function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
     Printer:Debug(LOG.RUN, CAT.UI, "Updating Specs Terminal Display - Spec: %s NPC ID: %s", spec_name, npc_id)
-
+    self.npc_panel.specs.active_spec = spec_name
     --- setup when no params are passed (init callback from terminal)
     if spec_name == nil or npc_id == nil then
         spec_name = TERMINAL_TABS_UTIL.get_default_tab().name
@@ -874,6 +876,7 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     i = 0
     local stat_group = xml:InitFrame("npc_panel:specs:ability:stat_group", scroll.row[index].button)
     self:__CreateStatGroup(feat.stats[rank], stat_group)
+    
     scroll.row[index].button:TextControl():SetText("+++   " .. row_data.feat_name .. "   +++")
 
     local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
@@ -898,10 +901,11 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     
     scroll.row[index].data = row_data
 
-    -- register button callback
-    self:Register(scroll.row[index].button, "npc_ability_button_" .. index)
-    self:AddCallback("npc_ability_button_" .. index, ui_events.BUTTON_CLICKED, function ()
-        Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.name)
+    -- -- register button callback
+    local id = "npc_ability_button_" .. index -- .. "_" .. math.random(1000,9999)
+    self:Register(scroll.row[index].button, id)
+    self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.feat_name)
     end, self)
 end
 
@@ -915,34 +919,53 @@ function npcd_dashboard_tab:__CreateFeatRow(npc_id, feat, scroll, index)
     scroll.row[index].button = xml:Init3tButton("npc_panel:specs:ability", nil)
     scroll:AddWindow(scroll.row[index].button, true)
     local row_data = {
-        name = gc(feat and feat.name) or "NULL",
-        icon = feat and feat.icon or "ui_npcd_hud_default_icon",
-        type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
-        mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
-        source = perk and perk.icon or "ui_npcd_hud_default_icon",
+        feat_name = gc(feat and feat.name) or "NULL",
+        feat_description = gc(feat and feat.description) or "NULL",
+        feat_icon = feat and feat.icon or "ui_npcd_hud_default_icon",
+        feat_type = gc(feat and "ui_mcm_lst_" .. feat.type) or "NULL",
+        feat_mode = gc(feat and "ui_mcm_lst_" .. feat.mode) or "NULL",
+
+        perk_name = gc(perk and perk.name) or "NULL",
+        perk_icon = perk and perk.icon or "ui_npcd_hud_default_icon",
+        perk_type = gc(perk and "ui_mcm_lst_" .. perk.type) or "NULL",
+        perk_description = gc(perk and perk.description) or "NULL",
         rank = rank_desc or "NULL",
+        feat_id = feat and feat.id or "NULL",
+        perk_id = perk and perk.id or "NULL",
     }
     i = 0
     local stat_group = xml:InitFrame("npc_panel:specs:ability:stat_group", scroll.row[index].button)
     self:__CreateStatGroup(feat.stats, stat_group)
-    scroll.row[index].button:TextControl():SetText("+++   " .. row_data.name .. "   +++")
+    
+    scroll.row[index].button:TextControl():SetText("+++   " .. row_data.feat_name .. "   +++")
+    
     local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
-    icon:InitTexture(row_data.icon)
+    icon:InitTexture(row_data.feat_icon)
+    scroll.row[index].feat_icon = icon
+
     local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
-    type:SetText(row_data.type)
+    type:SetText(row_data.feat_type)
     type:SetFont(GetFontSmall())
+    
     local mode = xml:InitTextWnd("npc_panel:specs:ability:mode", scroll.row[index].button)
-    mode:SetText(row_data.mode)
+    mode:SetText(row_data.feat_mode)
     mode:SetFont(GetFontSmall())
+    
     local source = xml:InitStatic("npc_panel:specs:ability:source", scroll.row[index].button)
-    source:InitTexture(row_data.source)             
+    source:InitTexture(row_data.perk_icon)
+    scroll.row[index].perk_icon = source
+
     local rank = xml:InitTextWnd("npc_panel:specs:ability:rank", scroll.row[index].button)
     rank:SetText(row_data.rank)
     rank:SetFont(GetFontMedium())
-    -- register button callback
-    self:Register(scroll.row[index].button, "npc_ability_button_" .. index)
-    self:AddCallback("npc_ability_button_" .. index, ui_events.BUTTON_CLICKED, function ()
-        Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.name)
+
+    scroll.row[index].data = row_data
+
+    -- -- register button callback
+    local id = "npc_ability_button_" .. index -- .. "_" .. math.random(1000,9999)
+    self:Register(scroll.row[index].button, id)
+    self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.feat_name)
     end, self)
 end
 
@@ -1351,17 +1374,21 @@ function npcd_dashboard_tab:SetHint(text, frame_to_fit, pos)
 	self.hint_wnd:Show(true)
 	self.hint_wnd_text:SetText(text)
 	self.hint_wnd_text:AdjustHeightToText()
+    -- self.hint_wnd_text:AdjustWidthToText()
+   self.hint_wnd_footer:SetWndPos(vector2():set( self.hint_wnd_footer:GetWndPos().x, self.hint_wnd_text:GetHeight() + self.hint_wnd_text:GetWndPos().y + 5))
+    -- Adjust hint window size based on text size
 
 	local w = self.hint_wnd:GetWidth()
 	w = w >= 150 and w or 150
 	local h = self.hint_wnd_text:GetHeight()+ 84 + self.hint_wnd_text:GetWndPos().y
 	h = h >= 111 and h or 111
 	self.hint_wnd:SetWndSize(vector2():set(w,h))
-    Printer:Debug(LOG.INFO, CAT.UI, "Setting Hint Size - Width: " .. w .. " Height: " .. h)
+    -- Printer:Debug(LOG.INFO, CAT.UI, "Setting Hint Size - Width: " .. w .. " Height: " .. h)
 	pos = pos or GetCursorPosition()
 	pos.y = pos.y - self.hint_wnd:GetHeight()
 	pos.x = pos.x - self.hint_wnd:GetWidth()
 	self.hint_wnd:SetWndPos(pos)
+
     if not frame_to_fit then
         frame_to_fit = self
     end
@@ -1383,14 +1410,18 @@ function npcd_dashboard_tab:Update()
     -- Update the dashboard contents here if needed.
     local show_hint = true
 	-- Hint
+    -- Printer:DebugTable(string.format("%s Hint Elements", self.npc_panel.specs.active_spec), self:GetAbilitiesHintElements())
 	for _, v in pairs(self:GetAbilitiesHintElements()) do
-        -- Printer:DebugTable("Ability Hint Element", v)
 		if show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
             if v.data then
                 self.hint_title:SetText( gc(v.data.feat_type) .. " Feat" )
                 self.hint_icon:InitTexture( v.data.feat_icon )
                 self.hint_name:SetText( v.data.feat_name )
                 self:SetHint( "\\n \\n" .. v.data.feat_description , UI_APP[APP.PROFILES].dialog)
+                self.hint_feat_id = v.data.feat_id
+                if self.hint_feat_id then
+                    RegisterScriptCallback("on_key_press",on_key_press_feat_hint)
+                end
             end
 			return
 		end
@@ -1405,6 +1436,7 @@ function npcd_dashboard_tab:Update()
 			return
 		end        
 	end
+    UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
 	self:SetHint(false)
 end
 
@@ -1461,6 +1493,22 @@ function on_key_release(key)
         end
     end
 end
+
+function on_key_press_feat_hint(key)
+    if key == DIK_keys.MOUSE_2 then
+        local ui = npcd_pda_dashboard.get_ui()
+        if not ui then
+            return
+        end
+        if not ui.hint_feat_id then
+            return
+        end
+        Printer:Debug(LOG.INFO, CAT.UI, "Showing Feat Detailed Info - Feat ID: %s",ui.hint_feat_id)
+        UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
+        ui.hint_feat_id = nil
+    end
+end
+
 
 function on_game_start()
     if mac_mcm then
