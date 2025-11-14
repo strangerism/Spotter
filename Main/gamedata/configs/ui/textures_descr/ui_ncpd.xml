@@ -135,10 +135,14 @@
 	    <texture id="ui_npcd_pda_hint_wnd_40k_b"     x="306" y="512" width="170" height="170" />
 	    <texture id="ui_npcd_pda_hint_wnd_40k_rb"    x="548" y="512" width="230" height="170" />	
 
-		<!-- hint header -->
+		<!-- hint and details -->
 		<texture id="ui_npcd_pda_hint_wnd_header_bg"    x="786" y="0" width="558" height="106" />
 
 		<texture id="ui_npcd_pda_hint_wnd_icon_frame"    x="1350" y="0" width="69" height="68" />
+		<texture id="ui_npcd_pda_hint_wnd_icon_wireframe"    x="1424" y="0" width="69" height="68" />
+		<texture id="ui_npcd_pda_hint_wnd_details_section_header"    x="786" y="114" width="673" height="59" />
+		<texture id="ui_npcd_pda_hint_wnd_details_attribute"    x="786" y="184" width="714" height="81" />
+
 	</file>
 	<file name="ui\npcd\ui_npcd_icons">
 		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />

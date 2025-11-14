@@ -330,8 +330,11 @@
 					<t color ="ui_white"/>
 					<e r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
-				</text_color>			
-				<icon x="10" y="10" width="30" height="30" stretch="1">
+				</text_color>
+				<icon_frame x="10" y="10" width="30" height="30" stretch="1">
+					<texture a="100">ui_npcd_pda_hint_wnd_icon_wireframe</texture>
+				</icon_frame>								
+				<icon x="12" y="12" width="25" height="25" stretch="1">
 				</icon>
 				<h_type x="50" y="5" width="30" height="16">
 					<text align="c" font="letterica18" color="pda_green">Type</text>
@@ -349,8 +352,11 @@
 				</stat_group>
 				<h_source x="270" y="5" width="30" height="16">
 					<text align="c" font="letterica18" color="pda_green">Source</text>
-				</h_source>				
-				<source x="270" y="10" width="30" height="30" stretch="1">
+				</h_source>		
+				<source_frame x="270" y="10" width="30" height="30" stretch="1">
+					<texture a="100">ui_npcd_pda_hint_wnd_icon_wireframe</texture>
+				</source_frame>						
+				<source x="272" y="12" width="25" height="25" stretch="1">
 				</source>
 				<h_rank x="305" y="5" width="30" height="16">
 					<text align="c" font="letterica18" color="pda_green">Rank</text>
@@ -390,7 +396,7 @@
 			<icon x="5" y="28" width="25" height="25" stretch="1">
 			</icon>	
 			<name x="35" y="28" width="160" height="30">
-				<text align="l" vert_align="b" font="letterica25" color="ui_black"></text>
+				<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
 			</name>
 		</header>						
 		<text x="16" y="80" width="248" height="340" always_show_scroll="0" fit_to_height="1" complex_mode="1">

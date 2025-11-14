@@ -514,7 +514,6 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.content.fx = {}
     self.npc_panel.info.content.fx.flickering_manager = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING_MANAGER)
     npcd_ui_fx.add_fx(self.npc_panel.info.content.fx.flickering_manager)
-    npcd_ui_fx.resume_fx(self.npc_panel.info.content.fx.flickering_manager.id)
 
     -- Id Card
     -- ------------------------------
@@ -877,6 +876,7 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     
     scroll.row[index].button:TextControl():SetText("+++   " .. row_data.feat_name .. "   +++")
 
+    local icon_frame = xml:InitStatic("npc_panel:specs:ability:icon_frame", scroll.row[index].button)
     local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
     icon:InitTexture(row_data.feat_icon)
     scroll.row[index].feat_icon = icon
@@ -889,6 +889,7 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     mode:SetText(row_data.feat_mode)
     mode:SetFont(GetFontSmall())
     
+    local source_frame = xml:InitStatic("npc_panel:specs:ability:source_frame", scroll.row[index].button)
     local source = xml:InitStatic("npc_panel:specs:ability:source", scroll.row[index].button)
     source:InitTexture(row_data.perk_icon)
     scroll.row[index].perk_icon = source
@@ -937,6 +938,7 @@ function npcd_dashboard_tab:__CreateFeatRow(npc_id, feat, scroll, index)
     
     scroll.row[index].button:TextControl():SetText("+++   " .. row_data.feat_name .. "   +++")
     
+    local icon_frame = xml:InitStatic("npc_panel:specs:ability:icon_frame", scroll.row[index].button)
     local icon = xml:InitStatic("npc_panel:specs:ability:icon", scroll.row[index].button)
     icon:InitTexture(row_data.feat_icon)
     scroll.row[index].feat_icon = icon
@@ -949,6 +951,7 @@ function npcd_dashboard_tab:__CreateFeatRow(npc_id, feat, scroll, index)
     mode:SetText(row_data.feat_mode)
     mode:SetFont(GetFontSmall())
     
+    local source_frame = xml:InitStatic("npc_panel:specs:ability:source_frame", scroll.row[index].button)
     local source = xml:InitStatic("npc_panel:specs:ability:source", scroll.row[index].button)
     source:InitTexture(row_data.perk_icon)
     scroll.row[index].perk_icon = source
@@ -1002,6 +1005,7 @@ function npcd_dashboard_tab:InitNPCPanel(npc_id)
     self.npc_panel.npc_id = npc_id
     self.npc_panel.dialog:Show(true)
     self.npc_panel.info.terminal:SwitchOn()
+    npcd_ui_fx.resume_fx(self.npc_panel.info.content.fx.flickering_manager.id)
     self.npc_panel.specs.terminal:SwitchOn()
     self.npc_panel.init = true
     self.npc_panel.info.rank:Show(true)
@@ -1021,6 +1025,7 @@ function npcd_dashboard_tab:ClearNPCPanel()
     self.npc_panel.init = false
     self.npc_panel.npc_id = nil
     self.npc_panel.info.terminal:SwitchOff()
+    npcd_ui_fx.stop_fx(self.npc_panel.info.content.fx.flickering_manager.id)
     self:ClearInfoTerminalDisplay()
     self.npc_panel.specs.terminal:SwitchOff()
     self:ClearSpecsTerminalDisplay()
