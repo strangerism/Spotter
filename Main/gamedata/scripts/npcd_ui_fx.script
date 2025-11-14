@@ -11,18 +11,6 @@ end
 RegisterScriptCallback("npcd_on_log_update", get_printer)
 
 Runner ={	
-    hiding = {
-        name = "hiding",
-        module = "npe_dialog_codec",
-		group_name = "codec_ui",
-		execution = npe_execution.TYPE.CONDITIONAL,
-		stop_condition = { "npe_dialog_codec", "portrait_hiding_completed", "caller" },
-        start_timer = 0.6,
-        loop_timer = 0.0,      
-        functor = { "npe_dialog_codec", "hide_portrait", "caller" },
-		start = { "npe_dialog_codec", "on_start_hide_portrait", "caller" },
-		stop = { "npe_dialog_codec", "on_stop_hide_portrait", "caller" },
-    },
 	scanlines = {
 		name = "scanlines",
 		module = "npcd_ui_fx",
@@ -68,6 +56,18 @@ Runner ={
 		start = { "npcd_ui_fx", "on_start_show" },
 		stop = { "npcd_ui_fx", "on_stop_show" },
     },
+    hiding = {
+        name = "hiding",
+        module = "npcd_ui_fx",
+		group_name = "npcd_ui_fx",
+		execution = npe_execution.TYPE.CONDITIONAL,
+		stop_condition = { "npcd_ui_fx", "hiding_completed"},
+        start_timer = 0.15,
+        loop_timer = 0.0,
+        functor = { "npcd_ui_fx", "run_hide" },
+		start = { "npcd_ui_fx", "on_start_hide" },
+		stop = { "npcd_ui_fx", "on_stop_hide" },
+    },
 	translate = {
 		name = "translate",
 		module = "npcd_ui_fx",
@@ -92,8 +92,6 @@ FX = {
 }
 
 local FX_CONFIG = {
-	[FX.HIDING] = {
-	},
 	[FX.SCANLINES] = {
 		type = FX.SCANLINES,
 		dialog = nil,
@@ -148,6 +146,16 @@ local FX_CONFIG = {
 		y = 0,
 		height = 0,
 		on_showing_complete = nil,
+	},
+	[FX.HIDING] = {
+		type = FX.HIDING,
+		dialog = nil,
+		start = nil,
+		speed = nil,
+		cursor = 0,
+		y = 0,
+		height = 0,
+		on_hiding_complete = nil,
 	},
 	[FX.TRANSLATE] = { -- translate the dialog from its initial position along the specified orientation and direction
 		type = FX.TRANSLATE,
@@ -699,6 +707,64 @@ function showing_completed(runner_name)
 	end
 end
 
+-- FX: HIDING
+function run_hide(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.fx_ui then return end
+
+	config.cursor = config.cursor + 6
+	local new_y = config.y + config.cursor
+	local new_height = config.height - (config.cursor * 2)
+	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, new_y))
+	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), new_height))
+	Printer:Debug(LOG.INFO, CAT.UI," hiding dialog %s at y:%s height:%s", runner_name, new_y, new_height)
+end
+
+function on_start_hide(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.dialog then return end
+	config.fx_ui = config.dialog
+	Printer:Debug(LOG.START, CAT.UI," starting hide_dialog %s", runner_name)
+	-- save original y position
+	config.original_y = config.fx_ui:GetWndPos().y
+	-- save original height
+	config.height = config.fx_ui:GetHeight()
+	-- reset cursor
+	config.cursor = 0
+	-- set y postion to original
+	config.y = config.fx_ui:GetWndPos().y
+	return true
+end
+
+function on_stop_hide(runner_name)
+	Printer:Debug(LOG.STOP, CAT.UI," stopping hide_dialog %s", runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.fx_ui then return end
+	-- hide the dialog
+	config.fx_ui:Show(false)
+	-- restore original position and size
+	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.original_y))
+	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), config.height))
+end
+
+function hiding_completed(runner_name)
+	local fx_job = FX_JOBS[runner_name]
+	if not fx_job then return false end
+	local config = fx_job.config
+	if not config.fx_ui then return end
+	if config.fx_ui:GetHeight() <= 0 then
+		return true
+	else
+		return false
+	end
+end
+
 -- FX: TRANSLATE
 
 function translate_completed(runner_name)
@@ -832,6 +898,14 @@ function SFXVideoTerminal:__init(sfx_config)
 	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_started", sfx_config.id}
 	add_fx(showing, sfx_config.group)
 	self.fx.showing_display = showing
+
+	-- FX: hiding display
+	local hiding = get_fx_config(FX.HIDING, sfx_config.group)
+	hiding.dialog = self.display
+	hiding.speed = 0
+	-- hiding.on_hiding_complete = {"npcd_ui_fx", "sfx_video_terminal_on_stopped", sfx_config.id}
+	add_fx(hiding, sfx_config.group)
+	self.fx.hiding_display = hiding
 
 	-- FX: showing content
 	showing = get_fx_config(FX.SHOWING, sfx_config.group)
@@ -1049,12 +1123,13 @@ function SFXVideoTerminal:SwitchOn()
 end
 
 function SFXVideoTerminal:SwitchOff()
-	self.display:Show(false)
+	Printer:Debug(LOG.RUN, CAT.UI,"SFXVideoTerminal: [%s][%s] switch off", self.config.name, self.config.group)
 	if self.fx.scanlines then
 		npcd_ui_fx.remove_fx(self.fx.scanlines.id)
 	end
 	npcd_ui_fx.stop_fx(self.fx.flickering.id)
 	self.content:Show(false)
+	npcd_ui_fx.resume_fx(self.fx.hiding_display.id)
 	if self.header then
 		self.header:Show(false)
 	end
