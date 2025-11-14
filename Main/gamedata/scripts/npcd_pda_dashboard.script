@@ -500,7 +500,6 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     info_terminal.xml_init = "npcd_pda_dashboard.xml"
     info_terminal.parent = info
     info_terminal.display = "npc_panel:info:terminal_display"
-    info_terminal.parent_dialog = self
 
     --------------------------------
     -- Content
@@ -616,7 +615,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 
     -- instantiate the terminal
     -- ------------------------------
-    self.npc_panel.info.terminal = npcd_ui_fx.SFXVideoTerminal_Create(info_terminal)
+    self.npc_panel.info.terminal = npcd_ui_fx.SFXVideoTerminal_Create(info_terminal, self)
     
     self.npc_panel.info.dialog:Show(true)
 
@@ -637,7 +636,6 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     specs_terminal.xml_init = "npcd_pda_dashboard.xml"
     specs_terminal.parent = specs
     specs_terminal.display = "npc_panel:specs:terminal_display"
-    specs_terminal.parent_dialog = self
 
     -- tabs
     -- ------------------------------
@@ -689,7 +687,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 
     -- instantiate the terminal
     -- ------------------------------
-    self.npc_panel.specs.terminal = npcd_ui_fx.SFXVideoTerminal_Create(specs_terminal)
+    self.npc_panel.specs.terminal = npcd_ui_fx.SFXVideoTerminal_Create(specs_terminal, self)
     
     -- self.npc_panel.info.dialog:Show(false)
 end

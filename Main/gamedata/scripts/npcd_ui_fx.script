@@ -785,6 +785,8 @@ local SFX_CONFIG = {
 		glass = nil,
 		dirt = nil,
 		fx = nil,
+		turn_on_speed = 0.001,
+		turn_off_speed = 0.001,
 	},
 }
 
@@ -826,7 +828,7 @@ function SFXVideoTerminal:__init(sfx_config)
 	-- FX: showing display
 	local showing = get_fx_config(FX.SHOWING, sfx_config.group)
 	showing.dialog = self.display
-	showing.speed = 0.005
+	showing.speed = sfx_config.turn_on_speed
 	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_started", sfx_config.id}
 	add_fx(showing, sfx_config.group)
 	self.fx.showing_display = showing
@@ -1022,10 +1024,11 @@ end
 -- 	end
 -- end
 
-function SFXVideoTerminal_Create(sfx_config)
+function SFXVideoTerminal_Create(sfx_config, parent_dialog)
 	Printer:Debug(LOG.START, CAT.UI,"Creating SFXVideoTerminal [%s][%s]", sfx_config.name, sfx_config.group)
 	local sfx_id = sfx_config.type .. "_" .. (name or "") .. "_".. tostring(math.random(10000, 99999))
 	sfx_config.id = sfx_id
+	sfx_config.parent_dialog = parent_dialog
 	local video_terminal = SFXVideoTerminal(sfx_config)
 	SFX_INSTANCES[sfx_id] = video_terminal
 	return video_terminal
