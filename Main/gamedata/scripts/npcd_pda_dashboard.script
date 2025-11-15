@@ -207,7 +207,7 @@ function npcd_dashboard_tab:InitControls()
 	self.hint_wnd:Show(false)
 	self.tg_hint         = nil
 	self.tg_hint_step    = 1000 --[ms]
-
+    self:InitDetailsWindow()
 end
 
 -- destroy UI
@@ -867,7 +867,7 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
         perk_type = gc(perk and "ui_mcm_lst_" .. perk.type) or "NULL",
         perk_description = gc(perk and perk.description) or "NULL",
         rank = rank_desc or "NULL",
-        feat_id = feat and feat.id or "NULL",
+        feat_uid = feat and feat.uid or "NULL",
         perk_id = perk and perk.id or "NULL",
     }
     i = 0
@@ -929,7 +929,7 @@ function npcd_dashboard_tab:__CreateFeatRow(npc_id, feat, scroll, index)
         perk_type = gc(perk and "ui_mcm_lst_" .. perk.type) or "NULL",
         perk_description = gc(perk and perk.description) or "NULL",
         rank = rank_desc or "NULL",
-        feat_id = feat and feat.id or "NULL",
+        feat_uid = feat and feat.uid or "NULL",
         perk_id = perk and perk.id or "NULL",
     }
     i = 0
@@ -1038,30 +1038,192 @@ function npcd_dashboard_tab:RemoveNPCPanel()
     return self:ClearNPCPanel()
 end
 
--- function npc_panel_info_showing_fx_stop()
---     Printer:Debug(LOG.STOP, CAT.UI, "NPC Panel Info Showing FX Stopped")
---     local ui = get_ui()
---     if ui and not ui.npc_panel.init then
---         Printer:Debug(LOG.RUN, CAT.UI, "Initializing all the remaining NPC Panel Info FXs")
---         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.portrait_showing.id)
---         -- npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.flickering.id)
---         ui.npc_panel.info.fx.flickering.force = 100 -- 0.5 seconds
---         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.scanline.id)
---         npcd_ui_fx.resume_fx(ui.npc_panel.info.fx.wide_scanline.id)
---         -- ui.npc_panel.info.background:Show(true)
---         ui.npc_panel.info.char_frame:Show(true)
---         ui.npc_panel.init = true
---     end
--- end
+--------------------------------
+--- Details Window
+--- ----------------------------
+UI_DETAILS = {
+    dialog = nil,
+    background = nil,
+    header = nil,
+    attributes = nil,
+    description = nil,
+    close_button = nil,
+}
+function npcd_dashboard_tab:InitDetailsWindow()
+    -- Details Window
+    UI_DETAILS.dialog = xml:InitStatic("details_wnd", self)
+    UI_DETAILS.background = xml:InitFrame("details_wnd:background", UI_DETAILS.dialog)
+    UI_DETAILS.scroll = xml:InitScrollView("details_wnd:scroll", UI_DETAILS.dialog)
 
--- function npc_panel_info_specs_showing_fx_stop()
---     Printer:Debug(LOG.STOP, CAT.UI, "NPC Panel Info Specs Showing FX Stopped")
---     local ui = get_ui()
---     npcd_ui_fx.resume_fx(ui.npc_panel.specs.fx.scanline.id)
---     ui.npc_panel.specs.fx.flickering.flickering_duration = 40
---     npcd_ui_fx.resume_fx(ui.npc_panel.specs.fx.flickering.id)
+
+    -- UI_DETAILS.section = xml:InitStatic("details_wnd:section", UI_DETAILS.dialog)
+    -- UI_DETAILS.stats = {}
+    -- UI_DETAILS.stats.dialog = xml:InitStatic("details_wnd:section:stats", UI_DETAILS.section)
+    -- UI_DETAILS.stats.list = {}
+    -- -- UI_DETAILS.content = xml:InitStatic("details_wnd:content", UI_DETAILS.dialog)
+    UI_DETAILS.close_button = xml:Init3tButton("details_wnd:close_button", UI_DETAILS.dialog)
+    UI_DETAILS.close_button:TextControl():SetFont(GetFontMedium())
+    UI_DETAILS.close_button:TextControl():SetText(gc("ui_npcd_details_close_button"))
+    self:Register(UI_DETAILS.close_button, "details_window_close_button")
+    self:AddCallback("details_window_close_button", ui_events.BUTTON_CLICKED, function ()
+        self:On_Details_Window_Close_Button_Clicked()
+    end, self)
+    UI_DETAILS.dialog:Show(false)
+end
+
+function npcd_dashboard_tab:On_Details_Window_Close_Button_Clicked()
+    Printer:Debug(LOG.START, CAT.UI, "Details Window Close Button Clicked")
+    UI_DETAILS.dialog:Show(false)
+end
+
+DETAIL_WINDOW_TYPE = {
+    ABILITY = "ability",
+    FEAT = "feat",
+}
+DETAIL_WINDOW_ATTRIBUTE = {
+    FEAT_TYPE = { 
+        id = "feat_type",
+        str = "ui_mcm_st_npcd_feat_type",
+        icon = "ui_npcd_hud_default_icon",
+    },
+    FEAT_MODE = {
+        id = "feat_mode",
+        str = "ui_mcm_st_npcd_feat_mode",
+        icon = "ui_npcd_hud_default_icon",
+    },
+    FEAT_SOURCE = {
+        id = "feat_source",
+        str = "ui_mcm_st_npcd_feat_source",
+        icon = "ui_npcd_hud_default_icon",
+    },
+    FEAT_TARGET = {
+        id = "feat_target",
+        str = "ui_mcm_st_npcd_feat_target",
+        icon = "ui_npcd_hud_default_icon",
+    },
+}
+function npcd_dashboard_tab:CreateDetailsAttribute(icon_texture, name_text, value_text)
+    local attr = xml:InitStatic("details_wnd:attribute", nil)
     
--- end
+    local icon = xml:InitStatic("details_wnd:attribute:icon", attr)
+    icon:InitTexture(icon_texture)
+    
+    local name = xml:InitTextWnd("details_wnd:attribute:name", attr)
+    name:SetText(name_text)
+    
+    local value = xml:InitTextWnd("details_wnd:attribute:value", attr)
+    value:SetText(value_text)
+
+    return attr
+end
+
+function npcd_dashboard_tab:CreateDetailsStat(icon_texture, name_text, value_text)
+    local attr = xml:InitStatic("details_wnd:stat", nil)
+    
+    local icon = xml:InitStatic("details_wnd:stat:icon", attr)
+    icon:InitTexture(icon_texture)
+    
+    local name = xml:InitTextWnd("details_wnd:stat:name", attr)
+    name:SetText(name_text)
+    
+    local value = xml:InitTextWnd("details_wnd:stat:value", attr)
+    value:SetText(value_text)
+
+    return attr
+end
+
+function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
+    Printer:Debug(LOG.START, CAT.UI, "Showing Details Window - Type: " .. type .. " ID: " .. id)
+    
+    if type == DETAIL_WINDOW_TYPE.FEAT then
+        local feat = npcd.get_ability_feat(id)
+        
+        if feat then
+            -- update the scroll content
+            UI_DETAILS.scroll:Clear()
+
+            -- update header
+            local header = xml:InitStatic("details_wnd:header", nil)
+            local icon_frame = xml:InitStatic("details_wnd:header:icon_frame", header)
+            local icon = xml:InitStatic("details_wnd:header:icon_frame:icon", icon_frame)
+            icon:InitTexture(feat.icon)
+            local name = xml:InitTextWnd("details_wnd:header:name", header)
+            name:SetText(gc(feat.name))
+            local resource = xml:InitTextWnd("details_wnd:header:resource", header)
+            resource:SetText(gc("ui_npcd_details_ability_resource") .. " " .. gc("ui_npcd_details_ability_cost_unit_stamina"))
+            UI_DETAILS.scroll:AddWindow(header, true)
+    
+            -- update attributes
+            local feat_type = self:CreateDetailsAttribute(
+                "ui_npcd_hud_default_icon",
+                gc("ui_mcm_st_npcd_feat_type"),
+                gc("ui_mcm_lst_" .. feat.type)
+            )
+            UI_DETAILS.scroll:AddWindow(feat_type, true)
+
+            local feat_mode = self:CreateDetailsAttribute(
+                "ui_npcd_hud_default_icon",
+                gc("ui_mcm_st_npcd_feat_mode"),
+                gc("ui_mcm_lst_" .. feat.mode)
+            )
+            UI_DETAILS.scroll:AddWindow(feat_mode, true)
+
+            -- self:CreateDetailsAttribute(
+            --     DETAIL_WINDOW_ATTRIBUTE.FEAT_SOURCE.id,
+            --     90,
+            --     "ui_npcd_hud_default_icon",
+            --     gc("ui_mcm_st_npcd_feat_source"),
+            --     gc("ui_mcm_lst_" .. feat.source)
+            -- )
+
+            local feat_target = self:CreateDetailsAttribute(
+                "ui_npcd_hud_default_icon",
+                gc("ui_mcm_st_npcd_feat_target"),
+                gc("ui_mcm_lst_" .. feat.target)
+            )
+            UI_DETAILS.scroll:AddWindow(feat_target, true)
+
+            -- update description
+            UI_DETAILS.description = xml:InitTextWnd("details_wnd:description", nil)
+            UI_DETAILS.description:SetText(gc(feat.description))
+            UI_DETAILS.description:AdjustHeightToText()
+            UI_DETAILS.scroll:AddWindow(UI_DETAILS.description, true)
+
+            -- stats header
+            if feat.stats then
+                Printer:DebugTable("FEAT STATS", feat.stats)
+                UI_DETAILS.stats = feat.stats[UI_DETAILS.rank or 1]
+                local stats_header = xml:InitStatic("details_wnd:section", nil)
+                local title = xml:InitTextWnd("details_wnd:section:title", stats_header)
+                title:SetText(gc("ui_npcd_details_ability_stats"))
+                title:SetFont(GetFontMedium())
+                UI_DETAILS.scroll:AddWindow(stats_header, true)
+                for stat_name, stat_value in pairs(UI_DETAILS.stats or {}) do
+                    if npcd.FEAT_STAT[stat_name] then
+                        local stat_attr = self:CreateDetailsStat(
+                            npcd.FEAT_STAT[stat_name].icon,
+                            gc(npcd.FEAT_STAT[stat_name].desc),
+                            tostring(stat_value)
+                        )
+                        UI_DETAILS.scroll:AddWindow(stat_attr, true)
+                    end
+                end
+            end
+
+
+
+            -- reposition close button
+            UI_DETAILS.close_button:SetWndPos(vector2():set(UI_DETAILS.close_button:GetWndPos().x, UI_DETAILS.scroll:GetWndPos().y + UI_DETAILS.scroll:GetHeight() + 10))
+
+        end
+    end
+    UI_DETAILS.dialog:Show(true)
+end
+
+function npcd_dashboard_tab:ShowFeatDetailsWindow(feat_id)
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing Details Window")
+    self:UpdateDetailsWindow(feat_id, DETAIL_WINDOW_TYPE.FEAT)
+end
 
 --------------------------------
 --- Apps Menu
@@ -1421,8 +1583,8 @@ function npcd_dashboard_tab:Update()
                 self.hint_icon:InitTexture( v.data.feat_icon )
                 self.hint_name:SetText( v.data.feat_name )
                 self:SetHint( "\\n \\n" .. v.data.feat_description , UI_APP[APP.PROFILES].dialog)
-                self.hint_feat_id = v.data.feat_id
-                if self.hint_feat_id then
+                self.hint_feat_uid = v.data.feat_uid
+                if self.hint_feat_uid then
                     RegisterScriptCallback("on_key_press",on_key_press_feat_hint)
                 end
             end
@@ -1503,14 +1665,46 @@ function on_key_press_feat_hint(key)
         if not ui then
             return
         end
-        if not ui.hint_feat_id then
+        if not ui.hint_feat_uid then
             return
         end
-        Printer:Debug(LOG.INFO, CAT.UI, "Showing Feat Detailed Info - Feat ID: %s",ui.hint_feat_id)
+        Printer:Debug(LOG.INFO, CAT.UI, "Showing Feat Detailed Info - Feat ID: %s",ui.hint_feat_uid)
+        ui:ShowFeatDetailsWindow(ui.hint_feat_uid)
         UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
-        ui.hint_feat_id = nil
+        ui.hint_feat_uid = nil
     end
 end
+
+-- function npcd_dashboard_tab:OnKeyboard(dik, keyboard_action)
+-- 	local res = CUIScriptWnd.OnKeyboard(self,dik,keyboard_action)
+-- 	if (res == false) then
+-- 		local bind = dik_to_bind(dik)
+-- 		if keyboard_action == ui_events.WINDOW_KEY_PRESSED then
+		
+-- 			if dik == DIK_keys.DIK_ESCAPE then
+-- 				-- if self.k_binder then
+-- 				-- 	self.k_binder(-1)
+-- 				-- else
+-- 				-- 	self:OnButton_Cancel()
+-- 				-- end
+-- 			elseif self.k_binder and display_key(dik) and not blockedkeys[dik] then
+-- 				self.k_binder(dik)
+-- 			end
+-- 		end
+-- 		if keyboard_action == ui_events.WINDOW_KEY_RELEASED then
+-- 			-- if dik == DIK_keys.MOUSE_2 then
+-- 			-- 	if self.mod_search:IsCursorOverWindow() then
+-- 			-- 		self.mod_search:SetText("")
+-- 			-- 		self.mod_search:CaptureFocus(true)
+-- 			-- 	end
+-- 			-- end
+-- 		end
+-- 	end
+-- 	if self.k_binder and ((time_continual() - self.k_timer)  > 500) then --clear k_binder on any other input after half a second.
+-- 		self.k_binder()
+-- 	end
+-- 	return res
+-- end
 
 
 function on_game_start()

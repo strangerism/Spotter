@@ -21,7 +21,7 @@ local feats_index = {}
 MAX_SECONDARY_PERKS = 2
 MAX_MAIN_PERKS = 2
 
-CATEGORY = {
+PERK_CATEGORY = {
 	WARFARE = "st_npcd_perk_category_warfare",
 }
 
@@ -29,6 +29,32 @@ PERK_TYPE = {
 	ARCHETYPE = "st_npcd_perk_type_archetype",
 	MAIN = "st_npcd_perk_type_main",
 	SECONDARY = "st_npcd_perk_type_secondary"
+}
+
+FEAT_CATEGORY = {
+	COMBAT = "st_npcd_feat_category_combat",
+	SUPPORT = "st_npcd_feat_category_support",
+	UTILITY = "st_npcd_feat_category_utility",
+	DEFENSE = "st_npcd_feat_category_defense",
+}
+
+FEAT_CATEGORY_UI = {
+	[FEAT_CATEGORY.COMBAT] = {
+		name = "st_npcd_feat_category_combat",
+		icon = "ui_npcd_hud_category_combat",
+	},
+	[FEAT_CATEGORY.SUPPORT] = {
+		name = "st_npcd_feat_category_support",
+		icon = "ui_npcd_hud_category_support",
+	},
+	[FEAT_CATEGORY.UTILITY] = {
+		name = "st_npcd_feat_category_utility",
+		icon = "ui_npcd_hud_category_utility",
+	},
+	[FEAT_CATEGORY.DEFENSE] = {
+		name = "st_npcd_feat_category_defense",
+		icon = "ui_npcd_hud_category_defense",
+	},
 }
 
 FEAT_TYPE = {
@@ -67,6 +93,42 @@ FEAT_MODE = {
 
 	-- custom mode for special implementations
 	CUSTOM = "st_npcd_feat_mode_custom"
+}
+
+FEAT_TARGET = {
+	SELF = "st_npcd_feat_target_self",
+	ALLY = "st_npcd_feat_target_ally",
+	SELF_ALLY = "st_npcd_feat_target_self_ally",
+	ENEMY = "st_npcd_feat_target_enemy",
+	AREA = "st_npcd_feat_target_area",
+	SQUAD = "st_npcd_feat_target_squad",
+}
+
+FEAT_TARGET_UI = {
+	[FEAT_TARGET.SELF] = {
+		name = "st_npcd_feat_target_self",
+		icon = "ui_npcd_hud_target_self",
+	},
+	[FEAT_TARGET.ALLY] = {
+		name = "st_npcd_feat_target_ally",
+		icon = "ui_npcd_hud_target_ally",
+	},
+	[FEAT_TARGET.SELF_ALLY] = {
+		name = "st_npcd_feat_target_self_ally",
+		icon = "ui_npcd_hud_target_self_ally",
+	},
+	[FEAT_TARGET.ENEMY] = {
+		name = "st_npcd_feat_target_enemy",
+		icon = "ui_npcd_hud_target_enemy",
+	},
+	[FEAT_TARGET.AREA] = {
+		name = "st_npcd_feat_target_area",
+		icon = "ui_npcd_hud_target_area",
+	},
+	[FEAT_TARGET.SQUAD] = {
+		name = "st_npcd_feat_target_squad",
+		icon = "ui_npcd_hud_target_squad",
+	},
 }
 
 STANCE_TYPE = {

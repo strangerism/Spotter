@@ -142,6 +142,14 @@
 		<texture id="ui_npcd_pda_hint_wnd_icon_wireframe"    x="1424" y="0" width="69" height="68" />
 		<texture id="ui_npcd_pda_hint_wnd_details_section_header"    x="786" y="114" width="673" height="59" />
 		<texture id="ui_npcd_pda_hint_wnd_details_attribute"    x="786" y="184" width="714" height="81" />
+		<texture id="ui_npcd_pda_hint_wnd_details_stat"    x="786" y="276" width="690" height="50" />
+
+		<!-- close button -->
+
+		<texture id="ui_npcd_pda_hint_wnd_close_button_d" x="787" y="345" width="472" height="72" />
+		<texture id="ui_npcd_pda_hint_wnd_close_button_e" x="787" y="428" width="472" height="72" />
+		<texture id="ui_npcd_pda_hint_wnd_close_button_h" x="787" y="500" width="472" height="72" />
+		<texture id="ui_npcd_pda_hint_wnd_close_button_t" x="787" y="428" width="472" height="72" />		
 
 	</file>
 	<file name="ui\npcd\ui_npcd_icons">

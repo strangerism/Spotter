@@ -407,6 +407,75 @@
 		</footer>
 				
 	</hint_wnd>
+
+	<details_wnd x="320" y="210" width="440" height="430" stretch="1">
+		<background x="0" y="0" width="440" height="430" stretch="1">
+			<texture>ui_npcd_pda_hint_wnd_40k</texture>			
+		</background>
+		<scroll x="20" y="30" width="410" height="300" right_ident="0" left_ident="0" top_indent="10" bottom_indent="5" vert_interval="5" always_show_scroll="1"/>		
+		<header x="0" y="0" width="390" height="30" stretch="1">
+			<texture a="255">ui_npcd_pda_hint_wnd_details_attribute</texture>
+			<title x="0" y="0" width="390" height="25">
+				<text align="c" vert_align="b" font="letterica25" color="ui_black"></text>
+			</title>			
+			<icon_frame x="3" y="0" width="30" height="30" stretch="1">
+				<texture a="100">ui_npcd_pda_hint_wnd_icon_frame</texture>
+				<icon x="2" y="2" width="25" height="25" stretch="1">
+				</icon>					
+			</icon_frame>			
+			<name x="35" y="0" width="160" height="30">
+				<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
+			</name>
+			<resource x="35" y="8" width="160" height="30">
+				<text align="l" vert_align="b" font="letterica16" color="ui_black"></text>
+			</resource>			
+		</header>
+		<attribute x="0" y="0" width="390" height="30" stretch="1">
+			<texture a="255">ui_npcd_pda_hint_wnd_details_attribute</texture>
+			<icon x="2" y="2" width="25" height="25" stretch="1">
+			</icon>								
+			<name x="35" y="2" width="160" height="30">
+				<text align="l" vert_align="b" font="letterica18" color="ui_black"></text>
+			</name>
+			<value x="35" y="2" width="160" height="30">
+				<text align="r" vert_align="b" font="letterica18" color="ui_black"></text>
+			</value>				
+		</attribute>
+		<description x="0" y="0" width="390" height="200" always_show_scroll="0" fit_to_height="1" complex_mode="1">
+			<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
+		</description>
+		<section x="0" y="0" width="390" height="35" stretch="1">
+			<texture a="255">ui_npcd_pda_hint_wnd_details_section_header</texture>
+			<title x="0" y="5" width="390" height="30">
+				<text align="c" vert_align="b" font="letterica18" color="ui_black"></text>
+			</title>			
+		</section>
+		<stat x="0" y="0" width="390" height="30" stretch="1">
+			<texture a="255">ui_npcd_pda_hint_wnd_details_stat</texture>			
+			<icon x="2" y="2" width="25" height="25" stretch="1">
+			</icon>								
+			<name x="0" y="2" width="390" height="30">
+				<text align="c" vert_align="t" font="letterica18" color="ui_black"></text>
+			</name>
+			<value x="0" y="2" width="380" height="30">
+				<text align="r" vert_align="b" font="letterica18" color="ui_black"></text>
+			</value>		
+		</stat>	
+		<capstone x="10" y="0" width="390" height="40" stretch="1">
+			<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
+		</capstone>
+		<close_button x="140" y="0" width="160" height="30" stretch="1">
+			<text align="c" vert_align="c" x="0" y="0" font="letterica18"></text>
+			<texture>ui_npcd_pda_hint_wnd_close_button</texture>
+			<text_color>
+				<e r="200" g="200" b="200"/>
+				<t color ="ui_white"/>
+				<e r="200" g="200" b="200"/>
+				<h r="255" g="255" b="255"/>
+			</text_color>			
+		</close_button>		
+	</details_wnd>
+
 <!-- 
 	<npc_panel x="320" y="210" width="666" height="288" stretch="1">
 		<info_frame x="0" y="0" width="666" height="288" stretch="1">

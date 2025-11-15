@@ -181,7 +181,20 @@
 	</string>
 	<string id="ui_mcm_lst_st_npcd_feat_type_mutation">
 		<text>Mutation</text>
-	</string>			
+	</string>	
+	<!-- Feat Category -->
+	<string id="ui_mcm_lst_st_npcd_feat_category_combat">
+		<text>Combat</text>
+	</string>	
+	<string id="ui_mcm_lst_st_npcd_feat_category_support">
+		<text>Support</text>
+	</string>
+	<string id="ui_mcm_lst_st_npcd_feat_category_utility">
+		<text>Utility</text>
+	</string>
+	<string id="ui_mcm_lst_st_npcd_feat_category_defense">
+		<text>Defense</text>
+	</string>		
 	<!-- Feat Mode -->
 	<string id="ui_mcm_lst_st_npcd_feat_mode_auto">
 		<text>Auto</text>
@@ -205,6 +218,44 @@
 
 	<string id="ui_mcm_lst_st_npcd_feat_mode_custom">
 		<text>Custom</text>
+	</string>
+
+	<!-- Feat Target -->
+	<string id="ui_mcm_st_npcd_feat_target">
+		<text>Target</text>
+	</string>	
+	<string id="ui_mcm_lst_st_npcd_feat_target_self">
+		<text>Self</text>
+	</string>
+	<string id="ui_mcm_lst_st_npcd_feat_target_ally">
+		<text>Ally</text>
+	</string>
+	<string id="ui_mcm_lst_st_npcd_feat_target_self_ally">
+		<text>Self and Ally</text>
+	</string>			
+	<string id="ui_mcm_lst_st_npcd_feat_target_enemy">
+		<text>Enemy</text>
+	</string>
+	<string id="ui_mcm_lst_st_npcd_feat_target_area">
+		<text>Area</text>
+	</string>
+	<string id="ui_mcm_lst_st_npcd_feat_target_squad">
+		<text>Squad</text>
+	</string>
+
+<!-- Feat Stat -->
+
+	<string id="st_npcd_feat_stat_cooldown_desc">
+		<text>Cooldown</text>
+	</string>
+	<string id="st_npcd_feat_stat_duration_desc">
+		<text>Duration</text>
+	</string>
+	<string id="st_npcd_feat_stat_chance_desc">
+		<text>Chance</text>
+	</string>
+	<string id="st_npcd_feat_stat_damage_desc">
+		<text>Damage</text>
 	</string>
 
 	<string id="ui_mcm_st_npcd_feat_keybind">
@@ -318,5 +369,29 @@
 	</string>
 	<string id="st_npcd_specs_tab_equipment">
 		<text>Equipment</text>
-	</string>					
+	</string>
+
+<!-- hint details			 -->
+	<string id="ui_npcd_details_ability_cost">
+		<text>Cost:</text>
+	</string>
+	<string id="ui_npcd_details_ability_resource">
+		<text>Resource use:</text>
+	</string>
+	<string id="ui_npcd_details_ability_cost_unit_stamina">
+		<text>stamina</text>
+	</string>	
+	<string id="ui_npcd_details_ability_cost_unit_psy">
+		<text>psy</text>
+	</string>	
+	<string id="ui_npcd_details_ability_cost_unit_blood">
+		<text>blood</text>
+	</string>
+	<string id="ui_npcd_details_close_button">
+		<text>Close</text>
+	</string>	
+	<string id="ui_npcd_details_ability_stats">
+		<text>Stats</text>
+	</string>				
+		
 </string_table>
