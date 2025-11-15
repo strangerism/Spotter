@@ -392,6 +392,9 @@
 	</string>	
 	<string id="ui_npcd_details_ability_stats">
 		<text>Stats</text>
-	</string>				
+	</string>			
+	<string id="ui_npcd_details_ability_rank">
+		<text>Rank</text>
+	</string>			
 		
 </string_table>

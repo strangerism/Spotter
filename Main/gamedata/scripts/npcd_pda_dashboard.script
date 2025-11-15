@@ -194,6 +194,7 @@ function npcd_dashboard_tab:InitControls()
     self.footer = xml:InitStatic("footer", self)
 
     -- Hint Window
+    self.show_hint = true
 	self.hint_wnd = xml:InitFrame("hint_wnd:background",self)
 	self.hint_wnd:SetAutoDelete(false)
     self.hint_header = xml:InitStatic("hint_wnd:header",self.hint_wnd)
@@ -1074,6 +1075,8 @@ end
 function npcd_dashboard_tab:On_Details_Window_Close_Button_Clicked()
     Printer:Debug(LOG.START, CAT.UI, "Details Window Close Button Clicked")
     UI_DETAILS.dialog:Show(false)
+    self.show_hint = true
+    UI_DETAILS.rank = nil
 end
 
 DETAIL_WINDOW_TYPE = {
@@ -1128,12 +1131,32 @@ function npcd_dashboard_tab:CreateDetailsStat(icon_texture, name_text, value_tex
     
     local value = xml:InitTextWnd("details_wnd:stat:value", attr)
     value:SetText(value_text)
-
+    attr.value = value
     return attr
+end
+
+function npcd_dashboard_tab:UpdateFeatStats(feat_id)
+    Printer:Debug(LOG.START, CAT.UI, "Updating Details Window Feat Stats - Rank: " .. tostring(UI_DETAILS.rank or 1))
+    local feat = npcd.get_ability_feat(feat_id)
+    if feat then
+        for stat_name, stat_el in pairs(UI_DETAILS.stats or {}) do
+            local ranked_stats = feat.stats[UI_DETAILS.rank]
+            stat_el.value:SetText(tostring(ranked_stats[stat_name] or "0"))
+        end
+        UI_DETAILS.rank_ui:SetText(gc("ui_npcd_details_ability_rank") .. " [" .. tostring(UI_DETAILS.rank) .. "]")
+        local perk_rank = npcdu.get_perk_rank(self.npc_panel and self.npc_panel.npc_id or 0, feat.perk_id) or 1
+        Printer:Debug(LOG.INFO, CAT.UI, "Details Window Feat Stats - Perk Rank: " .. tostring(perk_rank))
+        if UI_DETAILS.rank == perk_rank then
+            UI_DETAILS.rank_ui:SetTextColor(GetARGB(255, 255, 0, 0)) -- RED
+        else
+            UI_DETAILS.rank_ui:SetTextColor(GetARGB(255, 100, 100, 100)) -- gray
+        end
+    end
 end
 
 function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
     Printer:Debug(LOG.START, CAT.UI, "Showing Details Window - Type: " .. type .. " ID: " .. id)
+    self.show_hint = false
     
     if type == DETAIL_WINDOW_TYPE.FEAT then
         local feat = npcd.get_ability_feat(id)
@@ -1192,13 +1215,14 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
             -- stats header
             if feat.stats then
                 Printer:DebugTable("FEAT STATS", feat.stats)
-                UI_DETAILS.stats = feat.stats[UI_DETAILS.rank or 1]
+                local ranked_stats = feat.stats[UI_DETAILS.rank or 1]
                 local stats_header = xml:InitStatic("details_wnd:section", nil)
                 local title = xml:InitTextWnd("details_wnd:section:title", stats_header)
                 title:SetText(gc("ui_npcd_details_ability_stats"))
                 title:SetFont(GetFontMedium())
                 UI_DETAILS.scroll:AddWindow(stats_header, true)
-                for stat_name, stat_value in pairs(UI_DETAILS.stats or {}) do
+                UI_DETAILS.stats = {}
+                for stat_name, stat_value in pairs(ranked_stats or {}) do
                     if npcd.FEAT_STAT[stat_name] then
                         local stat_attr = self:CreateDetailsStat(
                             npcd.FEAT_STAT[stat_name].icon,
@@ -1206,11 +1230,44 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
                             tostring(stat_value)
                         )
                         UI_DETAILS.scroll:AddWindow(stat_attr, true)
+                        UI_DETAILS.stats[stat_name] = stat_attr
                     end
                 end
+                -- stat paging
+                local stat_page = xml:InitStatic("details_wnd:stat_page", nil)
+
+                UI_DETAILS.rank = npcdu.get_perk_rank(self.npc_panel and self.npc_panel.npc_id or 0, feat.perk_id)
+                UI_DETAILS.rank_ui = xml:InitTextWnd("details_wnd:stat_page:rank", stat_page)
+                UI_DETAILS.rank_ui:SetText(gc("ui_npcd_details_ability_rank") .. " [" .. tostring(UI_DETAILS.rank) .. "]")
+                UI_DETAILS.rank_ui:SetTextColor(GetARGB(255, 255, 0, 0)) -- RED
+
+                local prev_button = xml:Init3tButton("details_wnd:stat_page:prev_button", stat_page)
+                local next_button = xml:Init3tButton("details_wnd:stat_page:next_button", stat_page)
+                local cb_id = math.random(1000,9999)
+                self:Register(prev_button, "details_window_stat_prev_button".. cb_id)
+                self:Register(next_button, "details_window_stat_next_button".. cb_id)
+                self:AddCallback("details_window_stat_prev_button".. cb_id, ui_events.BUTTON_CLICKED, function ()
+                    Printer:Debug(LOG.INFO, CAT.UI, "Details Window Stat Prev Button Clicked")
+                    if UI_DETAILS.rank > 1 then
+                        UI_DETAILS.rank = UI_DETAILS.rank - 1
+                        self:UpdateFeatStats(id)
+                    end
+                    prev_button:Enable(UI_DETAILS.rank > 1)
+                    next_button:Enable(UI_DETAILS.rank < #feat.stats)
+                end, self)
+                self:AddCallback("details_window_stat_next_button".. cb_id, ui_events.BUTTON_CLICKED, function ()
+                    Printer:Debug(LOG.INFO, CAT.UI, "Details Window Stat Next Button Clicked")
+                    if UI_DETAILS.rank < #feat.stats then
+                        UI_DETAILS.rank = UI_DETAILS.rank + 1
+                        self:UpdateFeatStats(id)
+                    end
+                    prev_button:Enable(UI_DETAILS.rank > 1)
+                    next_button:Enable(UI_DETAILS.rank < #feat.stats)
+                end, self)
+                prev_button:Enable(UI_DETAILS.rank > 1)
+                next_button:Enable(UI_DETAILS.rank < #feat.stats)                
+                UI_DETAILS.scroll:AddWindow(stat_page, true)
             end
-
-
 
             -- reposition close button
             UI_DETAILS.close_button:SetWndPos(vector2():set(UI_DETAILS.close_button:GetWndPos().x, UI_DETAILS.scroll:GetWndPos().y + UI_DETAILS.scroll:GetHeight() + 10))
@@ -1573,11 +1630,11 @@ end
 function npcd_dashboard_tab:Update()
     CUIScriptWnd.Update(self)
     -- Update the dashboard contents here if needed.
-    local show_hint = true
+
 	-- Hint
     -- Printer:DebugTable(string.format("%s Hint Elements", self.npc_panel.specs.active_spec), self:GetAbilitiesHintElements())
 	for _, v in pairs(self:GetAbilitiesHintElements()) do
-		if show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
+		if self.show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
             if v.data then
                 self.hint_title:SetText( gc(v.data.feat_type) .. " Feat" )
                 self.hint_icon:InitTexture( v.data.feat_icon )
@@ -1591,7 +1648,7 @@ function npcd_dashboard_tab:Update()
 			return
 		end
 
-		if show_hint and v and v.perk_icon and v.perk_icon:IsCursorOverWindow() then
+		if self.show_hint and v and v.perk_icon and v.perk_icon:IsCursorOverWindow() then
             if v.data then
                 self.hint_title:SetText( gc(v.data.perk_type) .. " Perk" )
                 self.hint_icon:InitTexture( v.data.perk_icon )
