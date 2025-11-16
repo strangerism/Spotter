@@ -193,6 +193,8 @@ function npcd_dashboard_tab:InitControls()
     -- Footer
     self.footer = xml:InitStatic("footer", self)
 
+    self:InitDetailsWindow()
+
     -- Hint Window
     self.show_hint = true
 	self.hint_wnd = xml:InitFrame("hint_wnd:background",self)
@@ -209,7 +211,7 @@ function npcd_dashboard_tab:InitControls()
 
 	self.tg_hint         = nil
 	self.tg_hint_step    = 1000 --[ms]
-    self:InitDetailsWindow()
+    
 end
 
 -- destroy UI
@@ -1069,7 +1071,6 @@ function npcd_dashboard_tab:InitDetailsWindow()
 	UI_DETAILS.hint_wnd = xml:InitFrame("hint_wnd:background",UI_DETAILS.dialog)
 	UI_DETAILS.hint_wnd:SetAutoDelete(false)
     UI_DETAILS.hint_header = xml:InitStatic("hint_wnd:header",UI_DETAILS.hint_wnd)
-    -- UI_DETAILS.hint_header:InitTexture("hint_wnd:header:background",UI_DETAILS.hint_header)
     UI_DETAILS.hint_title = xml:InitTextWnd("hint_wnd:header:title",UI_DETAILS.hint_header)
     UI_DETAILS.hint_icon_frame = xml:InitStatic("hint_wnd:header:icon_frame",UI_DETAILS.hint_header)
     UI_DETAILS.hint_icon = xml:InitStatic("hint_wnd:header:icon",UI_DETAILS.hint_header)
@@ -1206,14 +1207,6 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
                 gc("ui_mcm_lst_" .. feat.mode)
             )
             UI_DETAILS.scroll:AddWindow(feat_mode, true)
-
-            -- self:CreateDetailsAttribute(
-            --     DETAIL_WINDOW_ATTRIBUTE.FEAT_SOURCE.id,
-            --     90,
-            --     "ui_npcd_hud_default_icon",
-            --     gc("ui_mcm_st_npcd_feat_source"),
-            --     gc("ui_mcm_lst_" .. feat.source)
-            -- )
 
             local feat_target = self:CreateDetailsAttribute(
                 "ui_npcd_hud_default_icon",
@@ -1623,40 +1616,6 @@ function npcd_dashboard_tab:EnableAppButtons(enable)
     end
 end
 
-function npcd_dashboard_tab:SetDetailsHint(text, frame_to_fit, pos)
-
-	if (not text) then
-		self.tg_hint = time_global()
-		UI_DETAILS.hint_wnd:Show(false)
-		return
-	end
-	
-	if (time_global() < self.tg_hint + self.tg_hint_step) then
-		return
-	end
-	
-	UI_DETAILS.hint_wnd:Show(true)
-	UI_DETAILS.hint_wnd_text:SetText(text)
-	UI_DETAILS.hint_wnd_text:AdjustHeightToText()
-
-    UI_DETAILS.hint_wnd_footer:SetWndPos(vector2():set( UI_DETAILS.hint_wnd_footer:GetWndPos().x, UI_DETAILS.hint_wnd_text:GetHeight() + UI_DETAILS.hint_wnd_text:GetWndPos().y + 5))
-    -- Adjust hint window size based on text size
-	local w = UI_DETAILS.hint_wnd:GetWidth()
-	w = w >= 150 and w or 150
-	local h = UI_DETAILS.hint_wnd_text:GetHeight()+ 84 + UI_DETAILS.hint_wnd_text:GetWndPos().y
-	h = h >= 111 and h or 111
-	UI_DETAILS.hint_wnd:SetWndSize(vector2():set(w,h))
-
-	pos = pos or GetCursorPosition()
-	pos.y = pos.y - UI_DETAILS.hint_wnd:GetHeight() - frame_to_fit:GetWndPos().y
-	pos.x = pos.x - UI_DETAILS.hint_wnd:GetWidth() - frame_to_fit:GetWndPos().x
-	UI_DETAILS.hint_wnd:SetWndPos(pos)
-    if not frame_to_fit then
-        frame_to_fit = self
-    end
-    FitInRect(UI_DETAILS.hint_wnd,Frect():set(frame_to_fit.x,frame_to_fit.y,frame_to_fit:GetWidth(),frame_to_fit:GetHeight()),0,100)
-end
-
 function npcd_dashboard_tab:SetHint(text, frame_to_fit, pos)
 
 	if (not text) then
@@ -1740,7 +1699,7 @@ function npcd_dashboard_tab:Update()
                     UI_DETAILS.hint_title:SetText( gc("ui_mcm_lst_" .. perk.type) .. " Perk" )
                     UI_DETAILS.hint_icon:InitTexture( perk.icon )
                     UI_DETAILS.hint_name:SetText( gc(perk.name) )
-                    self:SetDetailsHint( "\\n \\n" .. gc(perk.description), UI_DETAILS.dialog)
+                    self:SetHint( "\\n \\n" .. gc(perk.description), UI_DETAILS.dialog)
                 end
                 return
             end
@@ -1748,7 +1707,6 @@ function npcd_dashboard_tab:Update()
     end
 
     UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
-	self:SetDetailsHint(false)
     self:SetHint(false)
 end
 
