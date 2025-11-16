@@ -203,6 +203,7 @@ function add_fx(fx_config, name)
 	new_runner.name = fx_id
 	new_runner.start_timer = fx_config.start or new_runner.start_timer
 	new_runner.loop_timer = fx_config.speed or new_runner.loop_timer
+	new_runner.start_timer = fx_config.start_timer or new_runner.start_timer
 	new_runner.stop = fx_config.stop or new_runner.stop
 	FX_JOBS[fx_id] = {
 		runner_name = fx_id,
@@ -861,6 +862,7 @@ local SFX_CONFIG = {
 		fx = nil,
 		turn_on_speed = 0.001,
 		turn_off_speed = 0.001,
+		start_timer = 0.15, -- turn on start_timer
 	},
 }
 
@@ -903,6 +905,7 @@ function SFXVideoTerminal:__init(sfx_config)
 	local showing = get_fx_config(FX.SHOWING, sfx_config.group)
 	showing.dialog = self.display
 	showing.speed = sfx_config.turn_on_speed
+	showing.start_timer = sfx_config.start_timer
 	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_started", sfx_config.id}
 	add_fx(showing, sfx_config.group)
 	self.fx.showing_display = showing
