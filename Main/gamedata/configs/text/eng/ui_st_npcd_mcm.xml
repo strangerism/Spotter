@@ -372,11 +372,14 @@
 	</string>
 
 <!-- hint details			 -->
+	<string id="ui_npcd_details_ability_header">
+		<text>Feat</text>
+	</string>
 	<string id="ui_npcd_details_ability_cost">
-		<text>Cost:</text>
+		<text>Cost</text>
 	</string>
 	<string id="ui_npcd_details_ability_resource">
-		<text>Resource use:</text>
+		<text>Resource</text>
 	</string>
 	<string id="ui_npcd_details_ability_cost_unit_stamina">
 		<text>stamina</text>
@@ -392,7 +395,13 @@
 	</string>	
 	<string id="ui_npcd_details_ability_stats">
 		<text>Stats</text>
-	</string>			
+	</string>		
+	<string id="ui_npcd_details_ability_capstone">
+		<text>Capstone</text>
+	</string>
+	<string id="ui_npcd_details_ability_source">
+		<text>Source</text>
+	</string>	
 	<string id="ui_npcd_details_ability_rank">
 		<text>Rank</text>
 	</string>			

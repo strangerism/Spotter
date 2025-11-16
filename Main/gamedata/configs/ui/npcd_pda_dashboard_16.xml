@@ -387,8 +387,8 @@
 		</background>		
 		<header x="20" y="30" width="240" height="60" stretch="1">
 			<texture a="255">ui_npcd_pda_hint_wnd_header_bg</texture>
-			<title x="0" y="0" width="240" height="25">
-				<text align="c" vert_align="b" font="letterica25" color="ui_black"></text>
+			<title x="3" y="0" width="240" height="25">
+				<text align="l" vert_align="b" font="letterica25" color="ui_black"></text>
 			</title>			
 			<icon_frame x="3" y="26" width="30" height="30" stretch="1">
 				<texture a="100">ui_npcd_pda_hint_wnd_icon_frame</texture>
@@ -413,24 +413,27 @@
 			<texture>ui_npcd_pda_hint_wnd_40k</texture>			
 		</background>
 		<scroll x="20" y="30" width="310" height="300" right_ident="0" left_ident="0" top_indent="10" bottom_indent="5" vert_interval="5" always_show_scroll="1"/>		
-		<header x="0" y="0" width="290" height="30" stretch="1">
-			<texture a="255">ui_npcd_pda_hint_wnd_details_attribute</texture>
-			<title x="0" y="0" width="290" height="25">
-				<text align="c" vert_align="b" font="letterica25" color="ui_black"></text>
+		<header x="0" y="0" width="290" height="60" stretch="1">
+			<texture a="255">ui_npcd_pda_hint_wnd_header_bg</texture>
+			<title x="3" y="0" width="290" height="25">
+				<text align="l" vert_align="b" font="letterica25" color="ui_black"></text>
 			</title>			
-			<icon_frame x="3" y="0" width="30" height="30" stretch="1">
+			<icon_frame x="3" y="30" width="30" height="30" stretch="1">
 				<texture a="100">ui_npcd_pda_hint_wnd_icon_frame</texture>
 				<icon x="2" y="2" width="25" height="25" stretch="1">
 				</icon>					
 			</icon_frame>			
-			<name x="35" y="0" width="160" height="30">
+			<name x="35" y="30" width="160" height="30">
 				<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
 			</name>
-			<resource x="35" y="8" width="160" height="30">
+			<resource_label x="35" y="38" width="45" height="30">
+				<text align="l" vert_align="b" font="letterica16" color="ui_gray"></text>
+			</resource_label>		
+			<resource_type x="87" y="38" width="80" height="30">
 				<text align="l" vert_align="b" font="letterica16" color="ui_black"></text>
-			</resource>			
+			</resource_type>				
 		</header>
-		<attribute x="0" y="0" width="290" height="30" stretch="1">
+		<attribute x="0" y="0" width="270" height="30" stretch="1">
 			<texture a="255">ui_npcd_pda_hint_wnd_details_attribute</texture>
 			<icon x="2" y="2" width="25" height="25" stretch="1">
 			</icon>								
@@ -441,7 +444,7 @@
 				<text align="r" vert_align="b" font="letterica18" color="ui_black"></text>
 			</value>				
 		</attribute>
-		<description x="0" y="0" width="290" height="200" always_show_scroll="0" fit_to_height="1" complex_mode="1">
+		<description x="0" y="0" width="280" height="200" always_show_scroll="0" fit_to_height="1" complex_mode="1">
 			<text align="l" vert_align="t" font="letterica18" color="ui_black"></text>
 		</description>
 		<section x="0" y="0" width="290" height="35" stretch="1">
@@ -461,14 +464,14 @@
 				<text align="r" vert_align="b" font="letterica18" color="ui_black"></text>
 			</value>		
 		</stat>	
-		<stat_page x="10" y="0" width="290" height="40" stretch="1">
-			<prev_button x="2" y="0" width="30" height="30" stretch="1">
+		<stat_page x="10" y="0" width="280" height="40" stretch="1">
+			<prev_button x="2" y="3" width="25" height="25" stretch="1">
 				<texture>ui_pda2_bt_sq_prev</texture>		
 			</prev_button>			
-			<rank x="0" y="2" width="290" height="30">
+			<rank x="0" y="2" width="280" height="30">
 				<text align="c" vert_align="b" font="letterica18" color="ui_black"></text>
 			</rank>
-			<next_button x="258" y="0" width="30" height="30" stretch="1">
+			<next_button x="263" y="3" width="25" height="25" stretch="1">
 				<texture>ui_pda2_bt_sq_next</texture>		
 			</next_button>			
 		</stat_page>		

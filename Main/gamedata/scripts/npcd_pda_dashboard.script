@@ -206,6 +206,7 @@ function npcd_dashboard_tab:InitControls()
 	self.hint_wnd_text = xml:InitTextWnd("hint_wnd:text",self.hint_wnd)
     self.hint_wnd_footer = xml:InitTextWnd("hint_wnd:footer",self.hint_wnd)
 	self.hint_wnd:Show(false)
+
 	self.tg_hint         = nil
 	self.tg_hint_step    = 1000 --[ms]
     self:InitDetailsWindow()
@@ -1055,13 +1056,6 @@ function npcd_dashboard_tab:InitDetailsWindow()
     UI_DETAILS.dialog = xml:InitStatic("details_wnd", self)
     UI_DETAILS.background = xml:InitFrame("details_wnd:background", UI_DETAILS.dialog)
     UI_DETAILS.scroll = xml:InitScrollView("details_wnd:scroll", UI_DETAILS.dialog)
-
-
-    -- UI_DETAILS.section = xml:InitStatic("details_wnd:section", UI_DETAILS.dialog)
-    -- UI_DETAILS.stats = {}
-    -- UI_DETAILS.stats.dialog = xml:InitStatic("details_wnd:section:stats", UI_DETAILS.section)
-    -- UI_DETAILS.stats.list = {}
-    -- -- UI_DETAILS.content = xml:InitStatic("details_wnd:content", UI_DETAILS.dialog)
     UI_DETAILS.close_button = xml:Init3tButton("details_wnd:close_button", UI_DETAILS.dialog)
     UI_DETAILS.close_button:TextControl():SetFont(GetFontMedium())
     UI_DETAILS.close_button:TextControl():SetText(gc("ui_npcd_details_close_button"))
@@ -1070,6 +1064,20 @@ function npcd_dashboard_tab:InitDetailsWindow()
         self:On_Details_Window_Close_Button_Clicked()
     end, self)
     UI_DETAILS.dialog:Show(false)
+
+    -- Hint Details Window
+	UI_DETAILS.hint_wnd = xml:InitFrame("hint_wnd:background",UI_DETAILS.dialog)
+	UI_DETAILS.hint_wnd:SetAutoDelete(false)
+    UI_DETAILS.hint_header = xml:InitStatic("hint_wnd:header",UI_DETAILS.hint_wnd)
+    -- UI_DETAILS.hint_header:InitTexture("hint_wnd:header:background",UI_DETAILS.hint_header)
+    UI_DETAILS.hint_title = xml:InitTextWnd("hint_wnd:header:title",UI_DETAILS.hint_header)
+    UI_DETAILS.hint_icon_frame = xml:InitStatic("hint_wnd:header:icon_frame",UI_DETAILS.hint_header)
+    UI_DETAILS.hint_icon = xml:InitStatic("hint_wnd:header:icon",UI_DETAILS.hint_header)
+    UI_DETAILS.hint_name = xml:InitTextWnd("hint_wnd:header:name",UI_DETAILS.hint_header)
+	UI_DETAILS.hint_wnd_text = xml:InitTextWnd("hint_wnd:text",UI_DETAILS.hint_wnd)
+    UI_DETAILS.hint_wnd_footer = xml:InitTextWnd("hint_wnd:footer",UI_DETAILS.hint_wnd)
+	UI_DETAILS.hint_wnd:Show(false)
+
 end
 
 function npcd_dashboard_tab:On_Details_Window_Close_Button_Clicked()
@@ -1135,6 +1143,10 @@ function npcd_dashboard_tab:CreateDetailsStat(icon_texture, name_text, value_tex
     return attr
 end
 
+local color_grey = GetARGB(255, 100, 100, 100)
+local color_red = GetARGB(255, 255, 0, 0)
+local color_black = GetARGB(255, 0, 0, 0)
+
 function npcd_dashboard_tab:UpdateFeatStats(feat_id)
     Printer:Debug(LOG.START, CAT.UI, "Updating Details Window Feat Stats - Rank: " .. tostring(UI_DETAILS.rank or 1))
     local feat = npcd.get_ability_feat(feat_id)
@@ -1147,9 +1159,9 @@ function npcd_dashboard_tab:UpdateFeatStats(feat_id)
         local perk_rank = npcdu.get_perk_rank(self.npc_panel and self.npc_panel.npc_id or 0, feat.perk_id) or 1
         Printer:Debug(LOG.INFO, CAT.UI, "Details Window Feat Stats - Perk Rank: " .. tostring(perk_rank))
         if UI_DETAILS.rank == perk_rank then
-            UI_DETAILS.rank_ui:SetTextColor(GetARGB(255, 255, 0, 0)) -- RED
+            UI_DETAILS.rank_ui:SetTextColor(color_black)
         else
-            UI_DETAILS.rank_ui:SetTextColor(GetARGB(255, 100, 100, 100)) -- gray
+            UI_DETAILS.rank_ui:SetTextColor(color_grey)
         end
     end
 end
@@ -1157,7 +1169,7 @@ end
 function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
     Printer:Debug(LOG.START, CAT.UI, "Showing Details Window - Type: " .. type .. " ID: " .. id)
     self.show_hint = false
-    
+    UI_DETAILS.hints = {}
     if type == DETAIL_WINDOW_TYPE.FEAT then
         local feat = npcd.get_ability_feat(id)
         
@@ -1167,13 +1179,17 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
 
             -- update header
             local header = xml:InitStatic("details_wnd:header", nil)
+            local title = xml:InitTextWnd("details_wnd:header:title", header)
+            title:SetText(gc("ui_npcd_details_ability_header"))           
             local icon_frame = xml:InitStatic("details_wnd:header:icon_frame", header)
             local icon = xml:InitStatic("details_wnd:header:icon_frame:icon", icon_frame)
             icon:InitTexture(feat.icon)
             local name = xml:InitTextWnd("details_wnd:header:name", header)
             name:SetText(gc(feat.name))
-            local resource = xml:InitTextWnd("details_wnd:header:resource", header)
-            resource:SetText(gc("ui_npcd_details_ability_resource") .. " " .. gc("ui_npcd_details_ability_cost_unit_stamina"))
+            local resource = xml:InitTextWnd("details_wnd:header:resource_label", header)
+            resource:SetText(gc("ui_npcd_details_ability_resource") .. "  ---  ")
+            local type = xml:InitTextWnd("details_wnd:header:resource_type", header)
+            type:SetText( gc("ui_npcd_details_ability_cost_unit_stamina"))
             UI_DETAILS.scroll:AddWindow(header, true)
     
             -- update attributes
@@ -1213,7 +1229,7 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
             UI_DETAILS.scroll:AddWindow(UI_DETAILS.description, true)
 
             -- stats header
-            if feat.stats then
+            if feat.stats and npcdu.tablelength(feat.stats[1]) > 0 then
                 Printer:DebugTable("FEAT STATS", feat.stats)
                 local ranked_stats = feat.stats[UI_DETAILS.rank or 1]
                 local stats_header = xml:InitStatic("details_wnd:section", nil)
@@ -1239,7 +1255,7 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
                 UI_DETAILS.rank = npcdu.get_perk_rank(self.npc_panel and self.npc_panel.npc_id or 0, feat.perk_id)
                 UI_DETAILS.rank_ui = xml:InitTextWnd("details_wnd:stat_page:rank", stat_page)
                 UI_DETAILS.rank_ui:SetText(gc("ui_npcd_details_ability_rank") .. " [" .. tostring(UI_DETAILS.rank) .. "]")
-                UI_DETAILS.rank_ui:SetTextColor(GetARGB(255, 255, 0, 0)) -- RED
+                UI_DETAILS.rank_ui:SetTextColor(color_black)
 
                 local prev_button = xml:Init3tButton("details_wnd:stat_page:prev_button", stat_page)
                 local next_button = xml:Init3tButton("details_wnd:stat_page:next_button", stat_page)
@@ -1265,8 +1281,34 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, type)
                     next_button:Enable(UI_DETAILS.rank < #feat.stats)
                 end, self)
                 prev_button:Enable(UI_DETAILS.rank > 1)
-                next_button:Enable(UI_DETAILS.rank < #feat.stats)                
+                next_button:Enable(UI_DETAILS.rank < #feat.stats)
                 UI_DETAILS.scroll:AddWindow(stat_page, true)
+                Printer:DebugTable("FEAT", feat)
+
+                if feat.capstone then
+                    local capstone_header = xml:InitStatic("details_wnd:section", nil)
+                    local capstone_title = xml:InitTextWnd("details_wnd:section:title", capstone_header)
+                    capstone_title:SetText(gc("ui_npcd_details_ability_capstone"))
+                    capstone_title:SetFont(GetFontMedium())
+                    UI_DETAILS.scroll:AddWindow(capstone_header, true)
+                    -- update capstone description
+                    local capstone = xml:InitTextWnd("details_wnd:description", nil)
+                    capstone:SetText(gc(feat.capstone))
+                    capstone:AdjustHeightToText()
+                    UI_DETAILS.scroll:AddWindow(capstone, true)
+                end
+                local source_header = xml:InitStatic("details_wnd:section", nil)
+                local source_title = xml:InitTextWnd("details_wnd:section:title", source_header)
+                source_title:SetText(gc("ui_npcd_details_ability_source"))
+                source_title:SetFont(GetFontMedium())
+                UI_DETAILS.scroll:AddWindow(source_header, true)
+
+                local perk = npcd.get_perk(feat.perk_id)
+                local icon_frame = xml:InitStatic("details_wnd:header:icon_frame", nil)
+                local source_icon = xml:InitStatic("details_wnd:header:icon_frame:icon", icon_frame)
+                source_icon:InitTexture(perk.icon)
+                UI_DETAILS.hints[perk.id] = source_icon
+                UI_DETAILS.scroll:AddWindow(icon_frame, true)
             end
 
             -- reposition close button
@@ -1581,6 +1623,40 @@ function npcd_dashboard_tab:EnableAppButtons(enable)
     end
 end
 
+function npcd_dashboard_tab:SetDetailsHint(text, frame_to_fit, pos)
+
+	if (not text) then
+		self.tg_hint = time_global()
+		UI_DETAILS.hint_wnd:Show(false)
+		return
+	end
+	
+	if (time_global() < self.tg_hint + self.tg_hint_step) then
+		return
+	end
+	
+	UI_DETAILS.hint_wnd:Show(true)
+	UI_DETAILS.hint_wnd_text:SetText(text)
+	UI_DETAILS.hint_wnd_text:AdjustHeightToText()
+
+    UI_DETAILS.hint_wnd_footer:SetWndPos(vector2():set( UI_DETAILS.hint_wnd_footer:GetWndPos().x, UI_DETAILS.hint_wnd_text:GetHeight() + UI_DETAILS.hint_wnd_text:GetWndPos().y + 5))
+    -- Adjust hint window size based on text size
+	local w = UI_DETAILS.hint_wnd:GetWidth()
+	w = w >= 150 and w or 150
+	local h = UI_DETAILS.hint_wnd_text:GetHeight()+ 84 + UI_DETAILS.hint_wnd_text:GetWndPos().y
+	h = h >= 111 and h or 111
+	UI_DETAILS.hint_wnd:SetWndSize(vector2():set(w,h))
+
+	pos = pos or GetCursorPosition()
+	pos.y = pos.y - UI_DETAILS.hint_wnd:GetHeight() - frame_to_fit:GetWndPos().y
+	pos.x = pos.x - UI_DETAILS.hint_wnd:GetWidth() - frame_to_fit:GetWndPos().x
+	UI_DETAILS.hint_wnd:SetWndPos(pos)
+    if not frame_to_fit then
+        frame_to_fit = self
+    end
+    FitInRect(UI_DETAILS.hint_wnd,Frect():set(frame_to_fit.x,frame_to_fit.y,frame_to_fit:GetWidth(),frame_to_fit:GetHeight()),0,100)
+end
+
 function npcd_dashboard_tab:SetHint(text, frame_to_fit, pos)
 
 	if (not text) then
@@ -1596,7 +1672,6 @@ function npcd_dashboard_tab:SetHint(text, frame_to_fit, pos)
 	self.hint_wnd:Show(true)
 	self.hint_wnd_text:SetText(text)
 	self.hint_wnd_text:AdjustHeightToText()
-    -- self.hint_wnd_text:AdjustWidthToText()
    self.hint_wnd_footer:SetWndPos(vector2():set( self.hint_wnd_footer:GetWndPos().x, self.hint_wnd_text:GetHeight() + self.hint_wnd_text:GetWndPos().y + 5))
     -- Adjust hint window size based on text size
 
@@ -1605,12 +1680,11 @@ function npcd_dashboard_tab:SetHint(text, frame_to_fit, pos)
 	local h = self.hint_wnd_text:GetHeight()+ 84 + self.hint_wnd_text:GetWndPos().y
 	h = h >= 111 and h or 111
 	self.hint_wnd:SetWndSize(vector2():set(w,h))
-    -- Printer:Debug(LOG.INFO, CAT.UI, "Setting Hint Size - Width: " .. w .. " Height: " .. h)
+
 	pos = pos or GetCursorPosition()
 	pos.y = pos.y - self.hint_wnd:GetHeight()
 	pos.x = pos.x - self.hint_wnd:GetWidth()
 	self.hint_wnd:SetWndPos(pos)
-
     if not frame_to_fit then
         frame_to_fit = self
     end
@@ -1658,8 +1732,24 @@ function npcd_dashboard_tab:Update()
 			return
 		end
 	end
+    if UI_DETAILS.dialog:IsShown() then
+        for perk_id, icon in pairs(UI_DETAILS.hints or {}) do
+            if icon and icon:IsCursorOverWindow() then
+                local perk = npcd.get_perk(perk_id)
+                if perk then
+                    UI_DETAILS.hint_title:SetText( gc("ui_mcm_lst_" .. perk.type) .. " Perk" )
+                    UI_DETAILS.hint_icon:InitTexture( perk.icon )
+                    UI_DETAILS.hint_name:SetText( gc(perk.name) )
+                    self:SetDetailsHint( "\\n \\n" .. gc(perk.description), UI_DETAILS.dialog)
+                end
+                return
+            end
+        end
+    end
+
     UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
-	self:SetHint(false)
+	self:SetDetailsHint(false)
+    self:SetHint(false)
 end
 
 function get_menu_items(app_name, menu_name)
