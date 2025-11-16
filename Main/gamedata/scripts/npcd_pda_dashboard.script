@@ -885,6 +885,18 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
 
 end
 
+function npcd_dashboard_tab:__GetStatSuffix(stat_name)
+
+    local suffix = ""
+    if stat_name == npcd.FEAT_SETTING.STAT.CHANCE then
+        suffix = " %"
+    end
+    if stat_name == npcd.FEAT_SETTING.STAT.DURATION or stat_name == npcd.FEAT_SETTING.STAT.COOLDOWN then
+        suffix = " s"
+    end
+    return suffix
+end
+
 function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
 
     local perk = npcd.get_perk(feat.perk_id)
@@ -1021,17 +1033,11 @@ function npcd_dashboard_tab:__CreateStatGroup(stats, stat_group)
 
             local icon = xml:InitStatic("npc_panel:specs:stat_group:stat:icon", stat)
             icon:SetWndPos(vector2():set(icon:GetWndPos().x, icon:GetWndPos().y))
-            icon:InitTexture(npcd.FEAT_STAT[stat_name].icon)
+            icon:InitTexture(npcd.FEAT_STAT[stat_name].icon_dm)
 
             local label = xml:InitTextWnd("npc_panel:specs:stat_group:stat:value", stat)
             label:SetWndPos(vector2():set(label:GetWndPos().x, label:GetWndPos().y))
-            local suffix = ""
-            if stat_name == npcd.FEAT_SETTING.STAT.CHANCE then
-                suffix = " %"
-            end
-            if stat_name == npcd.FEAT_SETTING.STAT.DURATION or stat_name == npcd.FEAT_SETTING.STAT.COOLDOWN then
-                suffix = " s"
-            end
+            local suffix = self:__GetStatSuffix(stat_name)
             label:SetText(tostring(stat_value) .. suffix)
 
             i = i + 1
@@ -1225,7 +1231,7 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
 
             -- stats section
             if feat.stats and npcdu.tablelength(feat.stats[1]) > 0 then
-                Printer:DebugTable("FEAT STATS", feat.stats)
+                -- Printer:DebugTable("FEAT STATS", feat.stats)
                 local ranked_stats = feat.stats[UI_DETAILS.rank or 1]
                 local stats_header = xml:InitStatic("details_wnd:section", nil)
                 local title = xml:InitTextWnd("details_wnd:section:title", stats_header)
@@ -1235,10 +1241,11 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
                 UI_DETAILS.stats = {}
                 for stat_name, stat_value in pairs(ranked_stats or {}) do
                     if npcd.FEAT_STAT[stat_name] then
+                        local suffix = self:__GetStatSuffix(stat_name)
                         local stat_attr = self:CreateDetailsStat(
                             npcd.FEAT_STAT[stat_name].icon,
                             gc(npcd.FEAT_STAT[stat_name].desc),
-                            tostring(stat_value)
+                            tostring(stat_value) .. suffix
                         )
                         UI_DETAILS.scroll:AddWindow(stat_attr, true)
                         UI_DETAILS.stats[stat_name] = stat_attr
@@ -1246,8 +1253,8 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
                 end
                 -- stat paging
                 local stat_page = xml:InitStatic("details_wnd:stat_page", nil)
-
-                UI_DETAILS.rank = npcdu.get_perk_rank(self.npc_panel and self.npc_panel.npc_id or 0, feat.perk_id)
+                local perk_rank = npcdu.get_perk_rank(self.npc_panel and self.npc_panel.npc_id or 0, feat.perk_id) or 1
+                UI_DETAILS.rank = perk_rank
                 UI_DETAILS.rank_ui = xml:InitTextWnd("details_wnd:stat_page:rank", stat_page)
                 UI_DETAILS.rank_ui:SetText(gc("ui_npcd_details_ability_rank") .. " [" .. tostring(UI_DETAILS.rank) .. "]")
                 UI_DETAILS.rank_ui:SetTextColor(color_black)
@@ -1259,11 +1266,11 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
                 self:Register(next_button, "details_window_stat_next_button".. cb_id)
                 self:AddCallback("details_window_stat_prev_button".. cb_id, ui_events.BUTTON_CLICKED, function ()
                     Printer:Debug(LOG.INFO, CAT.UI, "Details Window Stat Prev Button Clicked")
-                    if UI_DETAILS.rank > 1 then
+                    if UI_DETAILS.rank > perk_rank then
                         UI_DETAILS.rank = UI_DETAILS.rank - 1
                         self:UpdateFeatStats(id)
                     end
-                    prev_button:Enable(UI_DETAILS.rank > 1)
+                    prev_button:Enable(UI_DETAILS.rank > perk_rank)
                     next_button:Enable(UI_DETAILS.rank < #feat.stats)
                 end, self)
                 self:AddCallback("details_window_stat_next_button".. cb_id, ui_events.BUTTON_CLICKED, function ()
@@ -1272,13 +1279,13 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
                         UI_DETAILS.rank = UI_DETAILS.rank + 1
                         self:UpdateFeatStats(id)
                     end
-                    prev_button:Enable(UI_DETAILS.rank > 1)
+                    prev_button:Enable(UI_DETAILS.rank > perk_rank)
                     next_button:Enable(UI_DETAILS.rank < #feat.stats)
                 end, self)
-                prev_button:Enable(UI_DETAILS.rank > 1)
+                prev_button:Enable(UI_DETAILS.rank > perk_rank)
                 next_button:Enable(UI_DETAILS.rank < #feat.stats)
                 UI_DETAILS.scroll:AddWindow(stat_page, true)
-                Printer:DebugTable("FEAT", feat)
+                -- Printer:DebugTable("FEAT", feat)
 
                 -- capstone section
                 if feat.capstone then
