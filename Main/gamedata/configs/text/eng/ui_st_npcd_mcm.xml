@@ -236,12 +236,37 @@
 	<string id="ui_mcm_lst_st_npcd_feat_target_enemy">
 		<text>Enemy</text>
 	</string>
+	<string id="ui_mcm_lst_st_npcd_feat_target_monster">
+		<text>Monster</text>
+	</string>	
 	<string id="ui_mcm_lst_st_npcd_feat_target_area">
 		<text>Area</text>
 	</string>
 	<string id="ui_mcm_lst_st_npcd_feat_target_squad">
 		<text>Squad</text>
 	</string>
+
+	<string id="st_npcd_feat_target_self_desc">
+		<text>the Actor</text>
+	</string>		
+	<string id="st_npcd_feat_target_ally_desc">
+		<text>the NPC that activates the ability</text>
+	</string>	
+	<string id="st_npcd_feat_target_self_ally_desc">
+		<text>both the Actor and the NPC</text>
+	</string>			
+	<string id="st_npcd_feat_target_enemy_desc">
+		<text>one or more enemies</text>
+	</string>	
+	<string id="st_npcd_feat_target_monster_desc">
+		<text>one or more mutants</text>
+	</string>	
+	<string id="st_npcd_feat_target_area_desc">
+		<text>an area of effect centered on the NPC/Actor</text>
+	</string>	
+	<string id="st_npcd_feat_target_squad_desc">
+		<text>the entire Squad</text>
+	</string>	
 
 <!-- Feat Stat -->
 
@@ -404,6 +429,5 @@
 	</string>	
 	<string id="ui_npcd_details_ability_rank">
 		<text>Rank</text>
-	</string>			
-		
+	</string>	
 </string_table>

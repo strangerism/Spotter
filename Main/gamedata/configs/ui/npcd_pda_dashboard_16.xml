@@ -435,13 +435,13 @@
 		</header>
 		<attribute x="0" y="0" width="270" height="30" stretch="1">
 			<texture a="255">ui_npcd_pda_hint_wnd_details_attribute</texture>
-			<icon x="2" y="2" width="25" height="25" stretch="1">
-			</icon>								
-			<name x="35" y="2" width="160" height="30">
+			<name x="2" y="2" width="50" height="30">
 				<text align="l" vert_align="b" font="letterica18" color="ui_black"></text>
-			</name>
-			<value x="35" y="2" width="160" height="30">
-				<text align="r" vert_align="b" font="letterica18" color="ui_black"></text>
+			</name>			
+			<icon x="55" y="2" width="25" height="25" stretch="1">
+			</icon>								
+			<value x="80" y="2" width="160" height="30">
+				<text align="l" vert_align="b" font="letterica18" color="ui_black"></text>
 			</value>				
 		</attribute>
 		<description x="0" y="0" width="290" height="200" always_show_scroll="0" fit_to_height="1" complex_mode="1">

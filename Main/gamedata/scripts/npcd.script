@@ -81,6 +81,34 @@ FEAT_TYPE = {
 	MUTATION = "st_npcd_feat_type_mutation",
 }
 
+FEAT_TYPE_UI = {
+	[FEAT_TYPE.ACTIVE] = {
+		name = "st_npcd_feat_type_active",
+		icon = "ui_npcd_pda_hint_wnd_feat_type_active",
+		desc = "st_npcd_feat_type_active_desc",
+	},
+	[FEAT_TYPE.PASSIVE] = {
+		name = "st_npcd_feat_type_passive",
+		icon = "ui_npcd_pda_hint_wnd_feat_type_passive",
+		desc = "st_npcd_feat_type_passive_desc",
+	},
+	[FEAT_TYPE.BOON] = {
+		name = "st_npcd_feat_type_boon",
+		icon = "ui_npcd_pda_hint_wnd_feat_type_boon",
+		desc = "st_npcd_feat_type_boon_desc",
+	},
+	[FEAT_TYPE.TRAIT] = {
+		name = "st_npcd_feat_type_trait",
+		icon = "ui_npcd_pda_hint_wnd_feat_type_trait",
+		desc = "st_npcd_feat_type_trait_desc",
+	},
+	[FEAT_TYPE.MUTATION] = {
+		name = "st_npcd_feat_type_mutation",
+		icon = "ui_npcd_pda_hint_wnd_feat_type_mutation",
+		desc = "st_npcd_feat_type_mutation_desc",
+	},
+}
+
 FEAT_MODE = {
 	-- modes supported by active feats
 	AUTO = "st_npcd_feat_mode_auto",
@@ -95,11 +123,45 @@ FEAT_MODE = {
 	CUSTOM = "st_npcd_feat_mode_custom"
 }
 
+FEAT_MODE_UI = {
+	[FEAT_MODE.AUTO] = {
+		name = "st_npcd_feat_mode_auto",
+		icon = "ui_npcd_pda_hint_wnd_feat_mode_auto",
+		desc = "st_npcd_feat_mode_auto_desc",
+	},
+	[FEAT_MODE.MANUAL] = {
+		name = "st_npcd_feat_mode_manual",
+		icon = "ui_npcd_pda_hint_wnd_feat_mode_manual",
+		desc = "st_npcd_feat_mode_manual_desc",
+	},
+	[FEAT_MODE.MODAL] = {
+		name = "st_npcd_feat_mode_modal",
+		icon = "ui_npcd_pda_hint_wnd_feat_mode_modal",
+		desc = "st_npcd_feat_mode_modal_desc",
+	},
+	[FEAT_MODE.STANCE] = {
+		name = "st_npcd_feat_mode_stance",
+		icon = "ui_npcd_pda_hint_wnd_feat_mode_stance",
+		desc = "st_npcd_feat_mode_stance_desc",
+	},
+	[FEAT_MODE.EVENT] = {
+		name = "st_npcd_feat_mode_event",
+		icon = "ui_npcd_pda_hint_wnd_feat_mode_event",
+		desc = "st_npcd_feat_mode_event_desc",
+	},
+	[FEAT_MODE.CUSTOM] = {
+		name = "st_npcd_feat_mode_custom",
+		icon = "ui_npcd_pda_hint_wnd_feat_mode_custom",
+		desc = "st_npcd_feat_mode_custom_desc",
+	},
+}
+
 FEAT_TARGET = {
 	SELF = "st_npcd_feat_target_self",
 	ALLY = "st_npcd_feat_target_ally",
 	SELF_ALLY = "st_npcd_feat_target_self_ally",
 	ENEMY = "st_npcd_feat_target_enemy",
+	MONSTER = "st_npcd_feat_target_monster",
 	AREA = "st_npcd_feat_target_area",
 	SQUAD = "st_npcd_feat_target_squad",
 }
@@ -107,27 +169,38 @@ FEAT_TARGET = {
 FEAT_TARGET_UI = {
 	[FEAT_TARGET.SELF] = {
 		name = "st_npcd_feat_target_self",
-		icon = "ui_npcd_hud_target_self",
+		icon = "ui_npcd_pda_hint_wnd_target_self",
+		desc = "st_npcd_feat_target_self_desc",
 	},
 	[FEAT_TARGET.ALLY] = {
 		name = "st_npcd_feat_target_ally",
-		icon = "ui_npcd_hud_target_ally",
+		icon = "ui_npcd_pda_hint_wnd_target_ally",
+		desc = "st_npcd_feat_target_ally_desc",
 	},
 	[FEAT_TARGET.SELF_ALLY] = {
 		name = "st_npcd_feat_target_self_ally",
-		icon = "ui_npcd_hud_target_self_ally",
+		icon = "ui_npcd_pda_hint_wnd_target_self_ally",
+		desc = "st_npcd_feat_target_self_ally_desc",
 	},
 	[FEAT_TARGET.ENEMY] = {
 		name = "st_npcd_feat_target_enemy",
-		icon = "ui_npcd_hud_target_enemy",
+		icon = "ui_npcd_pda_hint_wnd_target_enemy",
+		desc = "st_npcd_feat_target_enemy_desc",
+	},
+	[FEAT_TARGET.MONSTER] = {
+		name = "st_npcd_feat_target_monster",
+		icon = "ui_npcd_pda_hint_wnd_target_monster",
+		desc = "st_npcd_feat_target_monster_desc",
 	},
 	[FEAT_TARGET.AREA] = {
 		name = "st_npcd_feat_target_area",
-		icon = "ui_npcd_hud_target_area",
+		icon = nil,
+		desc = "st_npcd_feat_target_area_desc",
 	},
 	[FEAT_TARGET.SQUAD] = {
 		name = "st_npcd_feat_target_squad",
-		icon = "ui_npcd_hud_target_squad",
+		icon = "ui_npcd_pda_hint_wnd_target_squad",
+		desc = "st_npcd_feat_target_squad_desc",
 	},
 }
 

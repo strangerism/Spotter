@@ -784,6 +784,15 @@ function npcd_dashboard_tab:ClearSpecsTerminalDisplay()
     self.npc_panel.specs.content.scroll:Clear()
 end
 
+function npcd_dashboard_tab:__ClearScrollRows()
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing NPC Panel Specs Scroll Rows")
+    for _, row in pairs(self.npc_panel.specs.content.scroll.row or {}) do
+        row.button:Show(false)
+        row.button = nil
+    end
+    self.npc_panel.specs.content.scroll.row = {}
+end
+
 function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
     Printer:Debug(LOG.RUN, CAT.UI, "Updating Specs Terminal Display - Spec: %s NPC ID: %s", spec_name, npc_id)
     self.npc_panel.specs.active_spec = spec_name
@@ -816,6 +825,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
+        self:__ClearScrollRows()
         local npc_deck = npcd.get_npc(npc_id)
         -- Printer:DebugTable("NPC Abilities", npc_deck.Ability)
         if npc_deck then
@@ -848,11 +858,13 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
+        self:__ClearScrollRows()
         local npc_deck = npcd.get_npc(npc_id)
         if npc_deck then
             local index = 0
             for _, feat in pairs(npcd.get_npc_feats(npc_id) or {}) do
                 if feat.type ~= npcd.FEAT_TYPE.ACTIVE  then
+                    Printer:Debug(LOG.INFO, CAT.UI, "Creating Feat Row for Feat: " .. feat.name)
                     self:__CreateFeatRow(npc_id, feat, scroll, index)
                     index = index + 1
                 end
@@ -870,6 +882,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
+        self:__ClearScrollRows()
     end
 
     if spec_name == SPECS.EQUIPMENT then
@@ -881,8 +894,9 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
+        self:__ClearScrollRows()
     end
-
+    Printer:DebugTable("Specs Scroll Rows", self.npc_panel.specs.content.scroll.row)
 end
 
 function npcd_dashboard_tab:__GetStatSuffix(stat_name)
@@ -1125,11 +1139,11 @@ end
 function npcd_dashboard_tab:CreateDetailsAttribute(icon_texture, name_text, value_text)
     local attr = xml:InitStatic("details_wnd:attribute", nil)
     
-    local icon = xml:InitStatic("details_wnd:attribute:icon", attr)
-    icon:InitTexture(icon_texture)
-    
     local name = xml:InitTextWnd("details_wnd:attribute:name", attr)
     name:SetText(name_text)
+
+    local icon = xml:InitStatic("details_wnd:attribute:icon", attr)
+    icon:InitTexture(icon_texture)
     
     local value = xml:InitTextWnd("details_wnd:attribute:value", attr)
     value:SetText(value_text)
@@ -1203,21 +1217,21 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
     
             -- update attributes
             local feat_type = self:CreateDetailsAttribute(
-                "ui_npcd_hud_default_icon",
+                npcd.FEAT_TYPE_UI[feat.type].icon,
                 gc("ui_mcm_st_npcd_feat_type"),
                 gc("ui_mcm_lst_" .. feat.type)
             )
             UI_DETAILS.scroll:AddWindow(feat_type, true)
 
             local feat_mode = self:CreateDetailsAttribute(
-                "ui_npcd_hud_default_icon",
+                npcd.FEAT_MODE_UI[feat.mode].icon,
                 gc("ui_mcm_st_npcd_feat_mode"),
                 gc("ui_mcm_lst_" .. feat.mode)
             )
             UI_DETAILS.scroll:AddWindow(feat_mode, true)
 
             local feat_target = self:CreateDetailsAttribute(
-                "ui_npcd_hud_default_icon",
+                npcd.FEAT_TARGET_UI[feat.target].icon,
                 gc("ui_mcm_st_npcd_feat_target"),
                 gc("ui_mcm_lst_" .. feat.target)
             )
@@ -1679,10 +1693,11 @@ end
 function npcd_dashboard_tab:Update()
     CUIScriptWnd.Update(self)
     -- Update the dashboard contents here if needed.
-
+    Printer:Debug(LOG.FRAME, CAT.UI, "Updating PDA Dashboard UI Frame")
 	-- Hint
     -- Printer:DebugTable(string.format("%s Hint Elements", self.npc_panel.specs.active_spec), self:GetAbilitiesHintElements())
 	for _, v in pairs(self:GetAbilitiesHintElements()) do
+        Printer:Debug(LOG.DEBUG, CAT.UI, "Checking Hint Element: " .. tostring(v.data and v.data.feat_name or v.data and v.data.perk_name or "N/A"))
 		if self.show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
             if v.data then
                 self.hint_title:SetText( v.data.feat_type .. " Feat" )
