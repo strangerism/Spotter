@@ -31,6 +31,24 @@ PERK_TYPE = {
 	SECONDARY = "st_npcd_perk_type_secondary"
 }
 
+PERK_TYPE_UI = {
+	[PERK_TYPE.ARCHETYPE] = {
+		name = "st_npcd_perk_type_archetype",
+		icon = "ui_npcd_pda_hint_wnd_perk_type_archetype",
+		desc = "st_npcd_perk_type_archetype_desc",
+	},
+	[PERK_TYPE.MAIN] = {
+		name = "st_npcd_perk_type_main",
+		icon = "ui_npcd_pda_hint_wnd_perk_type_main",
+		desc = "st_npcd_perk_type_main_desc",
+	},
+	[PERK_TYPE.SECONDARY] = {
+		name = "st_npcd_perk_type_secondary",
+		icon = "ui_npcd_pda_hint_wnd_perk_type_secondary",
+		desc = "st_npcd_perk_type_secondary_desc",
+	},
+}
+
 FEAT_CATEGORY = {
 	COMBAT = "st_npcd_feat_category_combat",
 	SUPPORT = "st_npcd_feat_category_support",
@@ -41,19 +59,19 @@ FEAT_CATEGORY = {
 FEAT_CATEGORY_UI = {
 	[FEAT_CATEGORY.COMBAT] = {
 		name = "st_npcd_feat_category_combat",
-		icon = "ui_npcd_hud_category_combat",
+		icon = "ui_npcd_pda_hint_wnd_category_combat",
 	},
 	[FEAT_CATEGORY.SUPPORT] = {
 		name = "st_npcd_feat_category_support",
-		icon = "ui_npcd_hud_category_support",
+		icon = "ui_npcd_pda_hint_wnd_category_support",
 	},
 	[FEAT_CATEGORY.UTILITY] = {
 		name = "st_npcd_feat_category_utility",
-		icon = "ui_npcd_hud_category_utility",
+		icon = "ui_npcd_pda_hint_wnd_category_utility",
 	},
 	[FEAT_CATEGORY.DEFENSE] = {
 		name = "st_npcd_feat_category_defense",
-		icon = "ui_npcd_hud_category_defense",
+		icon = "ui_npcd_pda_hint_wnd_category_defense",
 	},
 }
 
@@ -194,7 +212,7 @@ FEAT_TARGET_UI = {
 	},
 	[FEAT_TARGET.AREA] = {
 		name = "st_npcd_feat_target_area",
-		icon = nil,
+		icon = "ui_npcd_pda_hint_wnd_target_area",
 		desc = "st_npcd_feat_target_area_desc",
 	},
 	[FEAT_TARGET.SQUAD] = {

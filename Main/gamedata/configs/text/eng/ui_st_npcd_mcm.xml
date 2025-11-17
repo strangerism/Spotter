@@ -146,6 +146,9 @@
 		\n- %c[orange]CUSTOM%c[white]: A custom activation mechanism defined by the perk's implementation.
 		</text>
 	</string>	
+	<string id="ui_mcm_st_npcd_feat_category">
+		<text>Category</text>
+	</string>	
 	<string id="ui_mcm_st_npcd_feat_enabled">
 		<text>Enabled</text>
 	</string>	
@@ -400,6 +403,9 @@
 	<string id="ui_npcd_details_ability_header">
 		<text>Feat</text>
 	</string>
+	<string id="ui_npcd_details_perk_header">
+		<text>Perk</text>
+	</string>	
 	<string id="ui_npcd_details_ability_cost">
 		<text>Cost</text>
 	</string>

@@ -896,7 +896,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         scroll:Clear()
         self:__ClearScrollRows()
     end
-    Printer:DebugTable("Specs Scroll Rows", self.npc_panel.specs.content.scroll.row)
+    -- Printer:DebugTable("Specs Scroll Rows", self.npc_panel.specs.content.scroll.row)
 end
 
 function npcd_dashboard_tab:__GetStatSuffix(stat_name)
@@ -1166,6 +1166,19 @@ function npcd_dashboard_tab:CreateDetailsStat(icon_texture, name_text, value_tex
     return attr
 end
 
+function npcd_dashboard_tab:CreateDetailsFeat(icon_texture, name_text)
+    local feat = xml:InitStatic("details_wnd:stat", nil)
+    
+    local icon = xml:InitStatic("details_wnd:stat:icon", feat)
+    icon:InitTexture(icon_texture)
+    feat.icon = icon
+
+    local name = xml:InitTextWnd("details_wnd:stat:name", feat)
+    name:SetText(name_text)
+
+    return feat
+end
+
 local color_grey = GetARGB(255, 100, 100, 100)
 local color_red = GetARGB(255, 255, 0, 0)
 local color_black = GetARGB(255, 0, 0, 0)
@@ -1227,6 +1240,13 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
                 npcd.FEAT_MODE_UI[feat.mode].icon,
                 gc("ui_mcm_st_npcd_feat_mode"),
                 gc("ui_mcm_lst_" .. feat.mode)
+            )
+            UI_DETAILS.scroll:AddWindow(feat_mode, true)
+
+            local feat_mode = self:CreateDetailsAttribute(
+                npcd.FEAT_CATEGORY_UI[feat.category].icon,
+                gc("ui_mcm_st_npcd_feat_category"),
+                gc("ui_mcm_lst_" .. feat.category)
             )
             UI_DETAILS.scroll:AddWindow(feat_mode, true)
 
@@ -1336,12 +1356,98 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
 
         end
     end
+
+    if hint_type == HINT_TYPE.PERK then
+
+        local perk = npcd.get_perk(id)
+
+        if perk then
+            UI_DETAILS.scroll:Clear()
+
+            -- update header
+            local header = xml:InitStatic("details_wnd:header", nil)
+            local title = xml:InitTextWnd("details_wnd:header:title", header)
+            title:SetText(gc("ui_npcd_details_perk_header"))
+            local icon_frame = xml:InitStatic("details_wnd:header:icon_frame", header)
+            local icon = xml:InitStatic("details_wnd:header:icon_frame:icon", icon_frame)
+            icon:InitTexture(perk.icon)
+            local name = xml:InitTextWnd("details_wnd:header:name", header)
+            name:SetText(gc(perk.name))
+            UI_DETAILS.scroll:AddWindow(header, true)
+
+            -- update attributes
+            local perk_type = self:CreateDetailsAttribute(
+                npcd.PERK_TYPE_UI[perk.type].icon,
+                gc("ui_mcm_st_npcd_perk_type"),
+                gc("ui_mcm_lst_" .. perk.type)
+            )
+            UI_DETAILS.scroll:AddWindow(perk_type, true)
+            
+            local perk_category = self:CreateDetailsAttribute(
+                "ui_npcd_hud_default_icon",
+                gc("ui_mcm_st_npcd_perk_category"),
+                gc("ui_mcm_lst_" .. perk.category)
+            )
+            UI_DETAILS.scroll:AddWindow(perk_category, true)
+
+            local perk_chance = self:CreateDetailsAttribute(
+                "ui_npcd_hud_stat_chance",
+                gc("ui_mcm_st_npcd_perk_chance"),
+                tostring(perk.roll_chance) .. " %"
+            )
+            UI_DETAILS.scroll:AddWindow(perk_chance, true)
+
+            -- update description
+            UI_DETAILS.description = xml:InitTextWnd("details_wnd:description", nil)
+            UI_DETAILS.description:SetText(gc(perk.description))
+            UI_DETAILS.description:AdjustHeightToText()
+            UI_DETAILS.scroll:AddWindow(UI_DETAILS.description, true)
+
+            -- feats section
+            local feats_header = xml:InitStatic("details_wnd:section", nil)
+            local title = xml:InitTextWnd("details_wnd:section:title", feats_header)
+            title:SetText(gc("pda_btn_npcd_menu_feats"))
+            title:SetFont(GetFontMedium())
+            UI_DETAILS.scroll:AddWindow(feats_header, true)
+
+            for _, feat in pairs(perk.feats or {}) do
+
+                local feat_ele = xml:InitStatic("details_wnd:feat", nil)
+
+                local icon_frame = xml:InitStatic("details_wnd:feat:icon_frame", feat_ele)
+                local icon = xml:InitStatic("details_wnd:feat:icon_frame:icon", icon_frame)
+                icon:InitTexture(feat.icon)
+
+                local name = xml:InitTextWnd("details_wnd:feat:name", feat_ele)
+                name:SetText(gc(feat.name))
+
+                -- local category = xml:InitStatic("details_wnd:feat:category", feat_ele)
+                local cat_icon = xml:InitStatic("details_wnd:feat:category", feat_ele)
+                cat_icon:InitTexture(npcd.FEAT_CATEGORY_UI[feat.category].icon)
+
+                local hint = { type = HINT_TYPE.FEAT, id = feat.uid, ele = icon }
+                table.insert(UI_DETAILS.hints, hint)
+
+                UI_DETAILS.scroll:AddWindow(feat_ele, true)
+            end
+
+            -- close button
+            UI_DETAILS.close_button:SetWndPos(vector2():set(UI_DETAILS.close_button:GetWndPos().x, UI_DETAILS.scroll:GetWndPos().y + UI_DETAILS.scroll:GetHeight() + 10))
+
+        end
+    end
+
     UI_DETAILS.dialog:Show(true)
 end
 
 function npcd_dashboard_tab:ShowFeatDetailsWindow(feat_id)
     Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing Details Window")
     self:UpdateDetailsWindow(feat_id, HINT_TYPE.FEAT)
+end
+
+function npcd_dashboard_tab:ShowPerkDetailsWindow(perk_id)
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing Details Window")
+    self:UpdateDetailsWindow(perk_id, HINT_TYPE.PERK)
 end
 
 --------------------------------
@@ -1693,7 +1799,6 @@ end
 function npcd_dashboard_tab:Update()
     CUIScriptWnd.Update(self)
     -- Update the dashboard contents here if needed.
-    Printer:Debug(LOG.FRAME, CAT.UI, "Updating PDA Dashboard UI Frame")
 	-- Hint
     -- Printer:DebugTable(string.format("%s Hint Elements", self.npc_panel.specs.active_spec), self:GetAbilitiesHintElements())
 	for _, v in pairs(self:GetAbilitiesHintElements()) do
@@ -1718,6 +1823,10 @@ function npcd_dashboard_tab:Update()
                 self.hint_icon:InitTexture( v.data.perk_icon )
                 self.hint_name:SetText( v.data.perk_name )
                 self:SetHint( "\\n \\n" .. v.data.perk_hint, UI_APP[APP.PROFILES].dialog)
+                self.hint_perk_uid = v.data.perk_id
+                if self.hint_perk_uid then
+                    RegisterScriptCallback("on_key_press",on_key_press_perk_hint)
+                end                
             end
 			return
 		end
@@ -1725,6 +1834,15 @@ function npcd_dashboard_tab:Update()
     if UI_DETAILS.dialog:IsShown() then
         for _, hint in ipairs(UI_DETAILS.hints or {}) do
             if hint.ele and hint.ele:IsCursorOverWindow() then
+                if hint.type == HINT_TYPE.FEAT then
+                    local feat = npcd.get_ability_feat(hint.id)
+                    if feat then
+                        self.hint_title:SetText( gc("ui_mcm_lst_" .. feat.type) .. " Feat" )
+                        self.hint_icon:InitTexture( feat.icon )
+                        self.hint_name:SetText( gc(feat.name) )
+                        self:SetHint( "\\n \\n" .. gc(feat.hint), UI_DETAILS.dialog)
+                    end
+                end                  
                 if hint.type == HINT_TYPE.PERK then
                     local perk = npcd.get_perk(hint.id)
                     if perk then
@@ -1733,13 +1851,13 @@ function npcd_dashboard_tab:Update()
                         self.hint_name:SetText( gc(perk.name) )
                         self:SetHint( "\\n \\n" .. gc(perk.hint), UI_DETAILS.dialog)
                     end
-                end
+                end              
                 return
             end
         end
     end
-
     UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
+    UnregisterScriptCallback("on_key_press",on_key_press_perk_hint)
     self:SetHint(false)
 end
 
@@ -1806,10 +1924,26 @@ function on_key_press_feat_hint(key)
         if not ui.hint_feat_uid then
             return
         end
+        UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
         Printer:Debug(LOG.INFO, CAT.UI, "Showing Feat Detailed Info - Feat ID: %s",ui.hint_feat_uid)
         ui:ShowFeatDetailsWindow(ui.hint_feat_uid)
-        UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
         ui.hint_feat_uid = nil
+    end
+end
+
+function on_key_press_perk_hint(key)
+    if key == DIK_keys.MOUSE_2 then
+        local ui = npcd_pda_dashboard.get_ui()
+        if not ui then
+            return
+        end
+        if not ui.hint_perk_uid then
+            return
+        end
+        UnregisterScriptCallback("on_key_press",on_key_press_perk_hint)
+        Printer:Debug(LOG.INFO, CAT.UI, "Showing Perk Detailed Info - Perk ID: %s",ui.hint_perk_uid)
+        ui:ShowPerkDetailsWindow(ui.hint_perk_uid)
+        ui.hint_perk_uid = nil
     end
 end
 

@@ -180,6 +180,17 @@
 		<texture id="ui_npcd_pda_hint_wnd_feat_mode_event" x="1446" y="365" width="70" height="70" />	
 		<texture id="ui_npcd_pda_hint_wnd_feat_mode_custom" x="1820" y="365" width="70" height="70" />				
 
+		<!-- feat category  -->
+		<texture id="ui_npcd_pda_hint_wnd_category_combat" x="1386" y="461" width="70" height="70" />
+		<texture id="ui_npcd_pda_hint_wnd_category_support" x="1457" y="461" width="70" height="70" />
+		<texture id="ui_npcd_pda_hint_wnd_category_utility" x="1527" y="461" width="70" height="70" />
+		<texture id="ui_npcd_pda_hint_wnd_category_defense" x="1597" y="461" width="70" height="70" />
+
+		<!-- perk type  -->
+		<texture id="ui_npcd_pda_hint_wnd_perk_type_archetype" x="1671" y="460" width="70" height="70" />
+		<texture id="ui_npcd_pda_hint_wnd_perk_type_main" x="1755" y="460" width="70" height="70" />
+		<texture id="ui_npcd_pda_hint_wnd_perk_type_secondary" x="1838" y="460" width="70" height="70" />
+
 	</file>
 	<file name="ui\npcd\ui_npcd_icons">
 		<texture id="pda_npcd_app_e" x="40" y="48" width="121" height="121" />
