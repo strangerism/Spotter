@@ -1344,12 +1344,17 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
             UI_DETAILS.scroll:AddWindow(source_header, true)
 
             local perk = npcd.get_perk(feat.perk_id)
-            local icon_frame = xml:InitStatic("details_wnd:header:icon_frame", nil)
-            local source_icon = xml:InitStatic("details_wnd:header:icon_frame:icon", icon_frame)
+            local source_ele = xml:InitStatic("details_wnd:source", nil)
+            local icon_frame = xml:InitStatic("details_wnd:source:icon_frame", source_ele)
+            local source_icon = xml:InitStatic("details_wnd:source:icon_frame:icon", icon_frame)
             source_icon:InitTexture(perk.icon)
             local hint = { type = HINT_TYPE.PERK, id = perk.id, ele = source_icon }
             table.insert(UI_DETAILS.hints, hint)
-            UI_DETAILS.scroll:AddWindow(icon_frame, true)
+
+            local perk_type = xml:InitStatic("details_wnd:source:category", source_ele)
+            perk_type:InitTexture(npcd.PERK_TYPE_UI[perk.type].icon)
+
+            UI_DETAILS.scroll:AddWindow(source_ele, true)
 
             -- close button
             UI_DETAILS.close_button:SetWndPos(vector2():set(UI_DETAILS.close_button:GetWndPos().x, UI_DETAILS.scroll:GetWndPos().y + UI_DETAILS.scroll:GetHeight() + 10))
@@ -1421,7 +1426,6 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
                 local name = xml:InitTextWnd("details_wnd:feat:name", feat_ele)
                 name:SetText(gc(feat.name))
 
-                -- local category = xml:InitStatic("details_wnd:feat:category", feat_ele)
                 local cat_icon = xml:InitStatic("details_wnd:feat:category", feat_ele)
                 cat_icon:InitTexture(npcd.FEAT_CATEGORY_UI[feat.category].icon)
 
@@ -1802,7 +1806,7 @@ function npcd_dashboard_tab:Update()
 	-- Hint
     -- Printer:DebugTable(string.format("%s Hint Elements", self.npc_panel.specs.active_spec), self:GetAbilitiesHintElements())
 	for _, v in pairs(self:GetAbilitiesHintElements()) do
-        Printer:Debug(LOG.DEBUG, CAT.UI, "Checking Hint Element: " .. tostring(v.data and v.data.feat_name or v.data and v.data.perk_name or "N/A"))
+        -- Printer:Debug(LOG.DEBUG, CAT.UI, "Checking Hint Element: " .. tostring(v.data and v.data.feat_name or v.data and v.data.perk_name or "N/A"))
 		if self.show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
             if v.data then
                 self.hint_title:SetText( v.data.feat_type .. " Feat" )
@@ -1826,7 +1830,7 @@ function npcd_dashboard_tab:Update()
                 self.hint_perk_uid = v.data.perk_id
                 if self.hint_perk_uid then
                     RegisterScriptCallback("on_key_press",on_key_press_perk_hint)
-                end                
+                end
             end
 			return
 		end
@@ -1841,6 +1845,10 @@ function npcd_dashboard_tab:Update()
                         self.hint_icon:InitTexture( feat.icon )
                         self.hint_name:SetText( gc(feat.name) )
                         self:SetHint( "\\n \\n" .. gc(feat.hint), UI_DETAILS.dialog)
+                        self.hint_feat_uid = hint.id
+                        if self.hint_feat_uid then
+                            RegisterScriptCallback("on_key_press",on_key_press_feat_hint)
+                        end
                     end
                 end                  
                 if hint.type == HINT_TYPE.PERK then
@@ -1850,6 +1858,10 @@ function npcd_dashboard_tab:Update()
                         self.hint_icon:InitTexture( perk.icon )
                         self.hint_name:SetText( gc(perk.name) )
                         self:SetHint( "\\n \\n" .. gc(perk.hint), UI_DETAILS.dialog)
+                        self.hint_perk_uid = hint.id
+                        if self.hint_perk_uid then
+                            RegisterScriptCallback("on_key_press",on_key_press_perk_hint)
+                        end
                     end
                 end              
                 return
@@ -1924,7 +1936,7 @@ function on_key_press_feat_hint(key)
         if not ui.hint_feat_uid then
             return
         end
-        UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
+        -- UnregisterScriptCallback("on_key_press",on_key_press_feat_hint)
         Printer:Debug(LOG.INFO, CAT.UI, "Showing Feat Detailed Info - Feat ID: %s",ui.hint_feat_uid)
         ui:ShowFeatDetailsWindow(ui.hint_feat_uid)
         ui.hint_feat_uid = nil
@@ -1940,7 +1952,7 @@ function on_key_press_perk_hint(key)
         if not ui.hint_perk_uid then
             return
         end
-        UnregisterScriptCallback("on_key_press",on_key_press_perk_hint)
+        -- UnregisterScriptCallback("on_key_press",on_key_press_perk_hint)
         Printer:Debug(LOG.INFO, CAT.UI, "Showing Perk Detailed Info - Perk ID: %s",ui.hint_perk_uid)
         ui:ShowPerkDetailsWindow(ui.hint_perk_uid)
         ui.hint_perk_uid = nil

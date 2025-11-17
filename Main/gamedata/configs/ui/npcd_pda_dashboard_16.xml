@@ -475,11 +475,21 @@
 				<text align="l" vert_align="b" font="letterica18" color="ui_black"></text>
 			</name>	
 			<category x="130" y="5" width="20" height="20" stretch="1">
-				<!-- <texture a="100">ui_npcd_pda_hint_wnd_icon_frame</texture>
-				<icon x="130" y="2" width="25" height="25" stretch="1">
-				</icon>					 -->
 			</category>					
 		</feat>		
+		<source x="0" y="0" width="290" height="30" stretch="1">
+			<texture a="255">ui_npcd_pda_hint_wnd_details_stat</texture>	
+			<icon_frame x="3" y="2" width="30" height="30" stretch="1">
+				<texture a="100">ui_npcd_pda_hint_wnd_icon_frame</texture>
+				<icon x="2" y="2" width="25" height="25" stretch="1">
+				</icon>					
+			</icon_frame>							
+			<name x="35" y="2" width="80" height="30">
+				<text align="l" vert_align="b" font="letterica18" color="ui_black"></text>
+			</name>	
+			<category x="130" y="5" width="20" height="20" stretch="1">
+			</category>					
+		</source>			
 		<stat_page x="10" y="0" width="280" height="40" stretch="1">
 			<prev_button x="2" y="3" width="25" height="25" stretch="1">
 				<texture>ui_pda2_bt_sq_prev</texture>		
