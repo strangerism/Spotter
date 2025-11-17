@@ -779,12 +779,19 @@ function npcd_dashboard_tab:OnTerminalTabClicked(tab_index, spec_name)
     self:UpdateSpecsTerminalDisplay(spec_name, self.npc_panel.npc_id)
 end
 
-function npcd_dashboard_tab:ClearSpecsTerminalDisplay()
+function npcd_dashboard_tab:__ClearSpecsTerminalDisplay()
     Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing NPC Panel Specs Display")
-    self.npc_panel.specs.content.scroll:Clear()
+    if not self.npc_panel.specs.content then return end
+    local scroll = self.npc_panel.specs.content.scroll
+    scroll:Show(false)
+    scroll:Clear()
+    self:__ClearSpecsTabScrollRows()
+    UI_DETAILS.dialog:Show(false)
+    self.show_hint = true
+    UI_DETAILS.rank = nil
 end
 
-function npcd_dashboard_tab:__ClearScrollRows()
+function npcd_dashboard_tab:__ClearSpecsTabScrollRows()
     Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing NPC Panel Specs Scroll Rows")
     for _, row in pairs(self.npc_panel.specs.content.scroll.row or {}) do
         row.button:Show(false)
@@ -825,7 +832,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
-        self:__ClearScrollRows()
+        self:__ClearSpecsTabScrollRows()
         local npc_deck = npcd.get_npc(npc_id)
         -- Printer:DebugTable("NPC Abilities", npc_deck.Ability)
         if npc_deck then
@@ -858,7 +865,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
-        self:__ClearScrollRows()
+        self:__ClearSpecsTabScrollRows()
         local npc_deck = npcd.get_npc(npc_id)
         if npc_deck then
             local index = 0
@@ -882,7 +889,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
-        self:__ClearScrollRows()
+        self:__ClearSpecsTabScrollRows()
     end
 
     if spec_name == SPECS.EQUIPMENT then
@@ -894,7 +901,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
-        self:__ClearScrollRows()
+        self:__ClearSpecsTabScrollRows()
     end
     -- Printer:DebugTable("Specs Scroll Rows", self.npc_panel.specs.content.scroll.row)
 end
@@ -1087,7 +1094,7 @@ function npcd_dashboard_tab:ClearNPCPanel()
     npcd_ui_fx.stop_fx(self.npc_panel.info.content.fx.flickering_manager.id)
     self:ClearInfoTerminalDisplay()
     self.npc_panel.specs.terminal:SwitchOff()
-    self:ClearSpecsTerminalDisplay()
+    self:__ClearSpecsTerminalDisplay()
     self.npc_panel.info.rank:Show(false)
 end
 
@@ -1646,7 +1653,7 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
     end
     UI_MENU[app_name][menu_name].active = true
     -- show item scroller for profiles and perks apps
-    if app_name == APP.PROFILES or app_name == APP.PERKS then
+    if app_name == APP.PROFILES then
         self:ClearNPCPanel()
         self.npc_panel.dialog:Show(true)
         self:UpdateItemScroller(app_name, menu_name)
