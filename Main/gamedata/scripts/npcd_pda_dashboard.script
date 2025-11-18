@@ -673,6 +673,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     specs_terminal.xml_init = "npcd_pda_dashboard.xml"
     specs_terminal.parent = specs
     specs_terminal.display = "npc_panel:specs:terminal_display"
+    specs_terminal.display_showing = 0 -- from bottom
     specs_terminal.start_timer = 0.45
 
     -- tabs
@@ -1108,12 +1109,40 @@ end
 --- Details Window
 --- ----------------------------
 
+function npcd_dashboard_tab:StartShowingFxDetailsWindow()
+    Printer:Debug(LOG.START, CAT.UI, "Starting Details Window Showing FX")
+    if UI_DETAILS.dialog:IsShown() then
+        Printer:Debug(LOG.WARN, CAT.UI, "Details Window is already shown, skipping FX")
+        return
+    end
+    UI_DETAILS.details_wnd:Show(true)
+    UI_DETAILS.background:Show(false)
+    UI_DETAILS.scroll:Show(false)
+    UI_DETAILS.close_button:Show(false)
+    npcd_ui_fx.resume_fx(UI_DETAILS.fx.showing.id)
+end
+
+function details_window_showing_complete()
+    Printer:Debug(LOG.COMPLETE, CAT.UI, "Details Window Showing FX Complete")
+    if npcd_pda_dashboard.UI_DETAILS then  
+        npcd_pda_dashboard.UI_DETAILS.scroll:Show(true)
+        npcd_pda_dashboard.UI_DETAILS.close_button:Show(true)
+    end
+
+    local ui = get_ui()
+    if ui then
+        -- hide specs terminal content
+        ui.npc_panel.specs.content.scroll:Show(false)
+    end
+end
+
 function npcd_dashboard_tab:InitDetailsWindow()
     -- Details Window
     UI_DETAILS.dialog = xml:InitStatic("details_wnd", self)
-    UI_DETAILS.background = xml:InitFrame("details_wnd:background", UI_DETAILS.dialog)
-    UI_DETAILS.scroll = xml:InitScrollView("details_wnd:scroll", UI_DETAILS.dialog)
-    UI_DETAILS.close_button = xml:Init3tButton("details_wnd:close_button", UI_DETAILS.dialog)
+    UI_DETAILS.details_wnd = xml:InitStatic("details_wnd:details_frame", UI_DETAILS.dialog)
+    UI_DETAILS.background = xml:InitFrame("details_wnd:background", UI_DETAILS.details_wnd)
+    UI_DETAILS.scroll = xml:InitScrollView("details_wnd:scroll", UI_DETAILS.details_wnd)
+    UI_DETAILS.close_button = xml:Init3tButton("details_wnd:close_button", UI_DETAILS.details_wnd)
     UI_DETAILS.close_button:TextControl():SetFont(GetFontMedium())
     UI_DETAILS.close_button:TextControl():SetText(gc("ui_npcd_details_close_button"))
     self:Register(UI_DETAILS.close_button, "details_window_close_button")
@@ -1121,6 +1150,16 @@ function npcd_dashboard_tab:InitDetailsWindow()
         self:On_Details_Window_Close_Button_Clicked()
     end, self)
     UI_DETAILS.dialog:Show(false)
+    -- FX: Showing on details window
+    local showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
+    showing.dialog = UI_DETAILS.background
+    showing.speed = 0
+    showing.starting_position = 2 -- from bottom
+    showing.show_on_position = 330
+    showing.on_showing_complete = {"npcd_pda_dashboard", "details_window_showing_complete"}
+    npcd_ui_fx.add_fx(showing)
+    UI_DETAILS.fx = {}
+    UI_DETAILS.fx.showing = showing
 
     -- Hint Details Window
 	UI_DETAILS.hint_wnd = xml:InitFrame("hint_wnd:background",UI_DETAILS.dialog)
@@ -1141,6 +1180,7 @@ function npcd_dashboard_tab:On_Details_Window_Close_Button_Clicked()
     UI_DETAILS.dialog:Show(false)
     self.show_hint = true
     UI_DETAILS.rank = nil
+    self.npc_panel.specs.content.scroll:Show(true)
 end
 
 function npcd_dashboard_tab:CreateDetailsAttribute(icon_texture, name_text, value_text)
@@ -1211,7 +1251,9 @@ end
 
 function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
     Printer:Debug(LOG.START, CAT.UI, "Showing Details Window - Type: " .. hint_type .. " ID: " .. id)
+    self:StartShowingFxDetailsWindow()
     self.show_hint = false
+     
     UI_DETAILS.hints = {}
     if hint_type == HINT_TYPE.FEAT then
         local feat = npcd.get_ability_feat(id)
@@ -1260,7 +1302,7 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
             local feat_target = self:CreateDetailsAttribute(
                 npcd.FEAT_TARGET_UI[feat.target].icon,
                 gc("ui_mcm_st_npcd_feat_target"),
-                gc("ui_mcm_lst_" .. feat.target)
+                gc(npcd.FEAT_TARGET_UI[feat.target].desc)
             )
             UI_DETAILS.scroll:AddWindow(feat_target, true)
 
@@ -1357,6 +1399,9 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
             source_icon:InitTexture(perk.icon)
             local hint = { type = HINT_TYPE.PERK, id = perk.id, ele = source_icon }
             table.insert(UI_DETAILS.hints, hint)
+
+            local name = xml:InitTextWnd("details_wnd:source:name", source_ele)
+            name:SetText(gc(perk.name))
 
             local perk_type = xml:InitStatic("details_wnd:source:category", source_ele)
             perk_type:InitTexture(npcd.PERK_TYPE_UI[perk.type].icon)

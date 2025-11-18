@@ -409,6 +409,8 @@
 	</hint_wnd>
 
 	<details_wnd x="342" y="220" width="380" height="456" stretch="1">
+		<details_frame x="0" y="0" width="380" height="456" stretch="1">
+		</details_frame>
 		<background x="0" y="0" width="370" height="456" stretch="1">
 			<texture>ui_npcd_pda_hint_wnd_40k</texture>			
 		</background>
@@ -438,9 +440,9 @@
 			<name x="2" y="2" width="50" height="30">
 				<text align="l" vert_align="b" font="letterica18" color="ui_black"></text>
 			</name>			
-			<icon x="55" y="2" width="25" height="25" stretch="1">
+			<icon x="65" y="2" width="25" height="25" stretch="1">
 			</icon>								
-			<value x="82" y="2" width="160" height="30">
+			<value x="92" y="2" width="160" height="30">
 				<text align="l" vert_align="b" font="letterica18" color="ui_black"></text>
 			</value>				
 		</attribute>
