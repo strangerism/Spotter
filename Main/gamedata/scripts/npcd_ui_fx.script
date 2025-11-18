@@ -142,12 +142,12 @@ local FX_CONFIG = {
 		dialog = nil,
 		start = nil,
 		speed = nil,
-		cursor = 0, -- internal
-		y = 0,		-- internal
-		height = 0, -- internal
-		cycle = 0, -- internal
+		cursor = 0, 		-- internal
+		y = 0,				-- internal
+		height = 0, 		-- internal
+		cycle = 0, 			-- internal
 		starting_position = 0, -- 0 - from middle to full, 1 - from top to full , 2 - from bottom to full
-		show_on_position = nil, -- position to show the dialog at (vector2)
+		show_on_position = nil, -- y position to show the dialog (must be used with CUIWindow Frame) 
 		on_showing_complete = nil,
 	},
 	[FX.HIDING] = {
@@ -155,9 +155,10 @@ local FX_CONFIG = {
 		dialog = nil,
 		start = nil,
 		speed = nil,
-		cursor = 0,
-		y = 0,
-		height = 0,
+		cursor = 0,  	-- internal
+		y = 0, 			-- internal
+		height = 0, 	-- internal
+		cycle = 0, 		-- internal
 		on_hiding_complete = nil,
 	},
 	[FX.TRANSLATE] = { -- translate the dialog from its initial position along the specified orientation and direction
@@ -764,8 +765,9 @@ function run_hide(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.fx_ui then return end
+	config.cycle = config.cycle + 1
+	config.cursor = config.cursor + 4 * config.cycle/2
 
-	config.cursor = config.cursor + 6
 	local new_y = config.y + config.cursor
 	local new_height = config.height - (config.cursor * 2)
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, new_y))
@@ -786,6 +788,7 @@ function on_start_hide(runner_name)
 	config.height = config.fx_ui:GetHeight()
 	-- reset cursor
 	config.cursor = 0
+	config.cycle = 1
 	-- set y postion to original
 	config.y = config.fx_ui:GetWndPos().y
 	return true
