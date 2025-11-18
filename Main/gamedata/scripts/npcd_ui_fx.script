@@ -142,9 +142,12 @@ local FX_CONFIG = {
 		dialog = nil,
 		start = nil,
 		speed = nil,
-		cursor = 0,
-		y = 0,
-		height = 0,
+		cursor = 0, -- internal
+		y = 0,		-- internal
+		height = 0, -- internal
+		cycle = 0, -- internal
+		starting_position = 0, -- 0 - from middle to full, 1 - from top to full , 2 - from bottom to full
+		show_on_position = nil, -- position to show the dialog at (vector2)
 		on_showing_complete = nil,
 	},
 	[FX.HIDING] = {
@@ -655,13 +658,29 @@ function run_show(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.fx_ui then return end
-
-	config.cursor = config.cursor + 6
-	local new_y = config.y - config.cursor
-	local new_height = config.cursor * 2
+	config.cycle = config.cycle + 1
+	config.cursor = config.cursor + 2 * config.cycle/2
+	local new_y
+	local new_height
+	if config.starting_position == 1 then
+		-- from top
+		new_y = config.y
+		new_height = config.cursor
+	elseif config.starting_position == 2 then
+		-- from bottom
+		new_y = config.y - config.cursor
+		new_height = config.cursor
+	else
+		-- from middle
+		new_y = config.y - config.cursor
+		new_height = config.cursor * 2
+	end
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, new_y))
 	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), new_height))
-	Printer:Debug(LOG.INFO, CAT.UI_ACTION," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
+	if config.show_on_position and new_y < config.show_on_position then
+		config.fx_ui:Show(true)
+	end
+	Printer:Debug(LOG.INFO, CAT.UI," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
 end
 
 function on_start_show(runner_name)
@@ -670,7 +689,7 @@ function on_start_show(runner_name)
 	local config = fx_job.config
 	if not config.dialog then return end
 	config.fx_ui = config.dialog
-	Printer:Debug(LOG.START, CAT.UI_ACTION," starting show_dialog")
+	Printer:Debug(LOG.START, CAT.UI," starting show_dialog")
 	config.original = {}
 	-- save original y position
 	config.original_y = config.fx_ui:GetWndPos().y
@@ -678,12 +697,27 @@ function on_start_show(runner_name)
 	config.height = config.fx_ui:GetHeight()
 	-- reset cursor
 	config.cursor = 0
-	-- set y postion to middle
-	config.y = config.fx_ui:GetWndPos().y + config.fx_ui:GetHeight() / 2
+	if not config.starting_position then
+		config.starting_position = 0 -- from middle
+	end
+	-- set y postion to starting_position
+	if config.starting_position == 1 then
+		-- from top
+		config.y = config.fx_ui:GetWndPos().y
+	elseif config.starting_position == 2 then
+		-- from bottom
+		config.y = config.fx_ui:GetWndPos().y + config.fx_ui:GetHeight()
+	else
+		-- from middle
+		config.y = config.fx_ui:GetWndPos().y + config.fx_ui:GetHeight() / 2
+	end
+	config.cycle = 1
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.y))
 	-- initial height 0
 	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), 0))
-	config.fx_ui:Show(true)
+	if not config.show_on_position then
+		config.fx_ui:Show(true)
+	end
 	return true
 end
 
@@ -906,6 +940,7 @@ function SFXVideoTerminal:__init(sfx_config)
 	showing.dialog = self.display
 	showing.speed = sfx_config.turn_on_speed
 	showing.start_timer = sfx_config.start_timer
+	showing.starting_position = sfx_config.display_showing
 	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_started", sfx_config.id}
 	add_fx(showing, sfx_config.group)
 	self.fx.showing_display = showing
