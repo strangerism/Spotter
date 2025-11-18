@@ -659,17 +659,20 @@ function run_show(runner_name)
 	local config = fx_job.config
 	if not config.fx_ui then return end
 	config.cycle = config.cycle + 1
-	config.cursor = config.cursor + 2 * config.cycle/2
+	config.cursor = config.cursor + 4 * config.cycle/2
 	local new_y
 	local new_height
+	local show_threshold
 	if config.starting_position == 1 then
 		-- from top
 		new_y = config.y
 		new_height = config.cursor
+		show_threshold = new_height
 	elseif config.starting_position == 2 then
 		-- from bottom
 		new_y = config.y - config.cursor
 		new_height = config.cursor
+		show_threshold = new_y
 	else
 		-- from middle
 		new_y = config.y - config.cursor
@@ -677,8 +680,13 @@ function run_show(runner_name)
 	end
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, new_y))
 	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), new_height))
-	if config.show_on_position and new_y < config.show_on_position then
-		config.fx_ui:Show(true)
+	-- show on position check for CUIWindow of type Frame that need to be shown only when reaching a certain position
+	if config.show_on_position then
+		local should_show = (config.starting_position == 2 and show_threshold < config.show_on_position) or 
+		                   (config.starting_position == 1 and show_threshold > config.show_on_position)
+		if should_show then
+			config.fx_ui:Show(true)
+		end
 	end
 	Printer:Debug(LOG.INFO, CAT.UI," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
 end

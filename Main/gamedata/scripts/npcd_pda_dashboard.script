@@ -1155,7 +1155,8 @@ function npcd_dashboard_tab:InitDetailsWindow()
     showing.dialog = UI_DETAILS.background
     showing.speed = 0
     showing.starting_position = 2 -- from bottom
-    showing.show_on_position = 330
+    showing.show_on_position = 300
+    -- showing.show_on_position = 120
     showing.on_showing_complete = {"npcd_pda_dashboard", "details_window_showing_complete"}
     npcd_ui_fx.add_fx(showing)
     UI_DETAILS.fx = {}
