@@ -379,23 +379,25 @@
 			</stat_group>
 			<!-- Talents Tab -->
 			<talent_section x="0" y="0" width="340" height="20" stretch="1">
-				<texture a="255">ui_npcd_pda_talent_section</texture>
+				<background x="0" y="0" width="340" height="20" stretch="1">
+					<texture a="255">ui_npcd_pda_talent_section</texture>
+				</background>
 				<name x="0" y="0" width="340" height="20">
 					<text align="c" vert_align="b" font="letterica18" color="pda_green"></text>
 				</name>		
-				<spacer x="0" y="0" width="340" height="10" stretch="1">	
+				<spacer x="0" y="0" width="340" height="5" stretch="1">	
 				</spacer>								
 			</talent_section>
-			<!-- <talent_section_button x="0" y="0" width="340" height="20" stretch="1">
+			<talent_section_button x="0" y="0" width="340" height="20" stretch="1">
 				<text align="c" vert_align="c" x="0" y="0" font="letterica18"></text>
-				<texture>ui_npcd_pda_talent_section_button</texture>
+				<texture></texture>
 				<text_color>
 					<e color ="pda_green"/>
 					<t color ="ui_white"/>
 					<e color ="pda_green"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
-			</talent_section_button>			 -->
+			</talent_section_button>			
 			<talent_scroll x="0" y="0" width="340" height="40" right_ident="0" left_ident="0" top_indent="10" bottom_indent="0" vert_interval="5" always_show_scroll="0"/>		
 			<talent_group x="0" y="0" width="340" height="30" stretch="1">	
 			</talent_group>							

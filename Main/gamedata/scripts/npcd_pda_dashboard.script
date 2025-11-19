@@ -734,7 +734,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
         self.npc_panel.specs.content.talent_section[section_name] = {}
         self.npc_panel.specs.content.talent_section[section_name].show = true
     end
-    Printer:DebugTable("NPC Panel Specs Talent Sections", self.npc_panel.specs.content.talent_section)
+    self.npc_panel.specs.content.update_talent_scroll = nil
     -- self.npc_panel.info.dialog:Show(false)
 end
 
@@ -925,57 +925,74 @@ end
 
 function npcd_dashboard_tab:__CreateTalentSection(npc_id, feat_type, scroll)
     local name = gc("ui_mcm_lst_" .. feat_type)
-
+    Printer:Debug(LOG.INFO, CAT.UI, "Creating Talent Section - Type: %s Name: %s", feat_type, name)
     if feat_type == npcd.FEAT_TYPE.PASSIVE or feat_type == npcd.FEAT_TYPE.ACTIVE then
-        name = name .. gc("ui_npcd_details_ability_header")
+        name = name .. " " .. gc("ui_npcd_details_ability_header")
     end
     local talent_section = xml:InitStatic("npc_panel:specs:talent_section", nil)
+    local section_background = xml:InitStatic("npc_panel:specs:talent_section:background", talent_section)
     local section_name = xml:InitTextWnd("npc_panel:specs:talent_section:name", talent_section)
     section_name:SetText(name)
-    scroll:AddWindow(talent_section, true)
-    self.npc_panel.specs.content.talent_section[feat_type].section = talent_section
+    self.npc_panel.specs.content.talent_section[feat_type].dialog = talent_section
     self.npc_panel.specs.content.talent_section[feat_type].groups = {}
-    
-    -- local talent_scroll = xml:InitScrollView("npc_panel:specs:talent_scroll", nil)
-    -- scroll:AddWindow(talent_scroll, true)
-    local column = 0
-    local row = 0
-    local talent_grp = xml:InitFrame("npc_panel:specs:talent_group", nil)
-    table.insert(self.npc_panel.specs.content.talent_section[feat_type].groups, talent_grp)
-    local feat_list = npcd.get_npc_feats_bytype(npc_id, feat_type)
-    
-    for _, feat in pairs(feat_list or {}) do
-        local talent = xml:InitStatic("npc_panel:specs:talent", talent_grp)
-        talent:SetWndPos(vector2():set(talent:GetWndPos().x + column * (talent:GetWidth() + 5), talent:GetWndPos().y ))
+    -- toggle button
+    local talent_section_button = xml:Init3tButton("npc_panel:specs:talent_section_button", talent_section)
+    local id = "talent_section_button" .. feat_type -- .. "_" .. math.random(1000,9999)
+    self:Register(talent_section_button, id)
+    self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "Toggling Talent Section - Type: %s", feat_type)
+        self.npc_panel.specs.content.talent_section[feat_type].show = not self.npc_panel.specs.content.talent_section[feat_type].show
+        self.npc_panel.specs.content.update_talent_scroll = true
+    end, self)
 
-        -- icon
-        local icon_frame = xml:InitStatic("npc_panel:specs:talent:icon_frame", talent)
-        local icon = xml:InitStatic("npc_panel:specs:talent:icon_frame:icon", icon_frame)
-        talent.talent_icon = icon
-        icon:InitTexture(feat.icon)
-        local hint = { type = HINT_TYPE.FEAT, id = feat.uid, ele = icon }
-        table.insert(self.npc_panel.specs.content.hints, hint)
-
-        -- name
-        local name = xml:InitTextWnd("npc_panel:specs:talent:name", talent)
-        name:SetText(gc(feat and feat.name) or "NULL")
-
-        -- arrange in grid
-        column = column + 1
-        if column > 2 then
-            column = 0
-            scroll:AddWindow(talent_grp, true)
-            talent_grp = xml:InitFrame("npc_panel:specs:talent_group", talent_section)
+    local talent_grp = xml:InitFrame("npc_panel:specs:talent_group", talent_section)
+    if self.npc_panel.specs.content.talent_section[feat_type].show then
+        local column = 0
+        local row = 0
+        local feat_list = npcd.get_npc_feats_bytype(npc_id, feat_type)
+        -- local feat_list = npcd.get_npc_feats(npc_id)
+        local section_y_offset = talent_section:GetWndPos().y + talent_section:GetHeight()
+        for _, feat in pairs(feat_list or {}) do
+            if column > 2 then
+                column = 0
+                row = row + 1
+                Printer:Debug(LOG.INFO, CAT.UI, "Adding Talent Group to Section - Columns full, creating new group")
+                talent_grp = xml:InitFrame("npc_panel:specs:talent_group", talent_section)
+            end
+            local talent = xml:InitStatic("npc_panel:specs:talent", talent_grp)
+            talent:SetWndPos(vector2():set(talent:GetWndPos().x + column * (talent:GetWidth() + 5), section_y_offset + talent:GetWndPos().y + row * (talent:GetHeight() + 5)))
+            -- icon
+            local icon_frame = xml:InitStatic("npc_panel:specs:talent:icon_frame", talent)
+            local icon = xml:InitStatic("npc_panel:specs:talent:icon_frame:icon", icon_frame)
+            talent.talent_icon = icon
+            icon:InitTexture(feat.icon)
+            local hint = { type = HINT_TYPE.FEAT, id = feat.uid, ele = icon }
+            table.insert(self.npc_panel.specs.content.hints, hint)
+            -- name
+            local name = xml:InitTextWnd("npc_panel:specs:talent:name", talent)
+            name:SetText(gc(feat and feat.name) or "NULL")
+            -- arrange in grid
+            column = column + 1
+            table.insert(self.npc_panel.specs.content.talents, talent)
+            if column > 2 then
+                Printer:Debug(LOG.INFO, CAT.UI, "Adding Talent Group to Section - Columns full, creating new group")
+                table.insert(self.npc_panel.specs.content.talent_section[feat_type].groups, talent_grp)
+            end
         end
-        table.insert(self.npc_panel.specs.content.talents, talent)
+        -- add remaining talents
+        if column > 0 and column < 3 then
+            Printer:Debug(LOG.INFO, CAT.UI, "Adding remaining talents in section - columns %s", column)
+            table.insert(self.npc_panel.specs.content.talent_section[feat_type].groups, talent_grp)
+        end
     end
-    -- add remaining talents
-    Printer:Debug(LOG.INFO, CAT.UI, "Adding remaining talents in section - index %s", column)
-    if column > 0 and column < 3 then
-        scroll:AddWindow(talent_grp, true)
-        table.insert(self.npc_panel.specs.content.talent_section[feat_type].groups, talent_grp)
+    local visible_groups_count = 0
+    for _, group in pairs(self.npc_panel.specs.content.talent_section[feat_type].groups or {}) do
+        if self.npc_panel.specs.content.talent_section[feat_type].show then
+            visible_groups_count = visible_groups_count + 1
+        end
     end
-
+    talent_section:SetWndSize(vector2():set(talent_section:GetWidth(), talent_section:GetHeight() + visible_groups_count *  (talent_grp:GetHeight() + 5)))
+    scroll:AddWindow(talent_section, true)
     local space = xml:InitStatic("npc_panel:specs:talent_section:spacer", nil)
     scroll:AddWindow(space, true)
 end
@@ -1928,6 +1945,14 @@ end
 --------------------------------
 function npcd_dashboard_tab:Update()
     CUIScriptWnd.Update(self)
+
+    -- update the talent specs scroll
+
+    if self.npc_panel and self.npc_panel.specs and self.npc_panel.specs.content and self.npc_panel.specs.content.scroll and self.npc_panel.specs.content.update_talent_scroll then
+        self:UpdateSpecsTerminalDisplay(SPECS.TALENTS, self.npc_panel.npc_id)
+        self.npc_panel.specs.content.update_talent_scroll = false
+    end
+
     -- Update the dashboard contents here if needed.
 	-- Hint
     for _, v in pairs(self:GetAbilitiesHintElements()) do
