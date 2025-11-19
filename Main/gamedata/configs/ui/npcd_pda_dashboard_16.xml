@@ -18,7 +18,7 @@
 				<text_color>
 					<e r="200" g="200" b="200"/>
 					<t color ="ui_white"/>
-					<e r="200" g="200" b="200"/>
+					<d r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
 			</button>		
@@ -36,7 +36,7 @@
 				<text_color>
 					<e r="200" g="200" b="200"/>
 					<t color ="ui_white"/>
-					<e r="200" g="200" b="200"/>
+					<d r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
 			</button>		
@@ -54,7 +54,7 @@
 				<text_color>
 					<e r="200" g="200" b="200"/>
 					<t color ="ui_white"/>
-					<e r="200" g="200" b="200"/>
+					<d r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
 			</button>		
@@ -99,7 +99,7 @@
 				<text_color>
 					<e r="200" g="200" b="200"/>
 					<t color ="ui_white"/>
-					<e r="200" g="200" b="200"/>
+					<d r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
 			</button>
@@ -126,7 +126,7 @@
 				<text_color>
 					<e r="200" g="200" b="200"/>
 					<t color ="ui_white"/>
-					<e r="200" g="200" b="200"/>
+					<d r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
 			</button>
@@ -153,7 +153,7 @@
 				<text_color>
 					<e r="200" g="200" b="200"/>
 					<t color ="ui_white"/>
-					<e r="200" g="200" b="200"/>
+					<d r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
 			</button>			
@@ -196,7 +196,7 @@
 			<text_color>
 				<e r="200" g="200" b="200"/>
 				<t color ="ui_white"/>
-				<e r="200" g="200" b="200"/>
+				<d r="200" g="200" b="200"/>
 				<h r="255" g="255" b="255"/>
 			</text_color>
 		</item_button>							
@@ -281,7 +281,7 @@
 					<text_color>
 						<e r="200" g="200" b="200"/>
 						<t color ="ui_white"/>
-						<e r="200" g="200" b="200"/>
+						<d r="200" g="200" b="200"/>
 						<h r="255" g="255" b="255"/>
 					</text_color>
 				</button>					
@@ -308,7 +308,7 @@
 						<text_color>
 							<e r="200" g="200" b="200"/>
 							<t color ="ui_white"/>
-							<e r="200" g="200" b="200"/>
+							<d r="200" g="200" b="200"/>
 							<h r="255" g="255" b="255"/>
 						</text_color>
 					</button>		
@@ -328,7 +328,7 @@
 				<text_color>
 					<e r="200" g="200" b="200"/>
 					<t color ="ui_white"/>
-					<e r="200" g="200" b="200"/>
+					<d r="200" g="200" b="200"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
 				<icon_frame x="10" y="10" width="30" height="30" stretch="1">
@@ -380,21 +380,21 @@
 			<!-- Talents Tab -->
 			<talent_section x="0" y="0" width="340" height="20" stretch="1">
 				<background x="0" y="0" width="340" height="20" stretch="1">
-					<texture a="255">ui_npcd_pda_talent_section</texture>
+					<texture a="255">ui_npcd_pda_talent_section_empty</texture>
 				</background>
 				<name x="0" y="0" width="340" height="20">
-					<text align="c" vert_align="b" font="letterica18" color="pda_green"></text>
-				</name>		
+					<text align="c" vert_align="b" font="letterica18" color="ui_gray"></text>
+				</name>					
 				<spacer x="0" y="0" width="340" height="5" stretch="1">	
 				</spacer>								
 			</talent_section>
 			<talent_section_button x="0" y="0" width="340" height="20" stretch="1">
-				<text align="c" vert_align="c" x="0" y="0" font="letterica18"></text>
-				<texture></texture>
+				<text align="c" vert_align="b" x="0" y="0" font="letterica18"></text>
+				<texture a="255">ui_npcd_pda_talent_section_button</texture>
 				<text_color>
 					<e color ="pda_green"/>
 					<t color ="ui_white"/>
-					<e color ="pda_green"/>
+					<d color ="pda_green"/>
 					<h r="255" g="255" b="255"/>
 				</text_color>
 			</talent_section_button>			
@@ -545,7 +545,7 @@
 			<text_color>
 				<e r="200" g="200" b="200"/>
 				<t color ="ui_white"/>
-				<e r="200" g="200" b="200"/>
+				<d r="200" g="200" b="200"/>
 				<h r="255" g="255" b="255"/>
 			</text_color>			
 		</close_button>		

@@ -930,27 +930,35 @@ function npcd_dashboard_tab:__CreateTalentSection(npc_id, feat_type, scroll)
         name = name .. " " .. gc("ui_npcd_details_ability_header")
     end
     local talent_section = xml:InitStatic("npc_panel:specs:talent_section", nil)
-    local section_background = xml:InitStatic("npc_panel:specs:talent_section:background", talent_section)
-    local section_name = xml:InitTextWnd("npc_panel:specs:talent_section:name", talent_section)
-    section_name:SetText(name)
+    local feat_list = npcd.get_npc_feats_bytype(npc_id, feat_type)
+        -- local feat_list = npcd.get_npc_feats(npc_id)
+    if npcdu.tablelength(feat_list) == 0 then
+        local section_background = xml:InitStatic("npc_panel:specs:talent_section:background", talent_section)
+        local section_name = xml:InitTextWnd("npc_panel:specs:talent_section:name", talent_section)
+        section_name:SetText(name)
+    else
+        -- toggle button
+        local talent_section_button = xml:Init3tButton("npc_panel:specs:talent_section_button", talent_section)
+        if not self.npc_panel.specs.content.talent_section[feat_type].show then
+            talent_section_button:InitTexture("ui_npcd_pda_talent_section_closed_button")
+        end
+        talent_section_button:TextControl():SetText(name)
+        local id = "talent_section_button" .. feat_type -- .. "_" .. math.random(1000,9999)
+        self:Register(talent_section_button, id)
+        self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+            Printer:Debug(LOG.INFO, CAT.UI, "Toggling Talent Section - Type: %s", feat_type)
+            self.npc_panel.specs.content.talent_section[feat_type].show = not self.npc_panel.specs.content.talent_section[feat_type].show
+            self.npc_panel.specs.content.update_talent_scroll = true
+            self.npc_panel.specs.content.update_talent_scroll_pos = scroll:GetCurrentScrollPos()
+        end, self)
+    end
     self.npc_panel.specs.content.talent_section[feat_type].dialog = talent_section
     self.npc_panel.specs.content.talent_section[feat_type].groups = {}
-    -- toggle button
-    local talent_section_button = xml:Init3tButton("npc_panel:specs:talent_section_button", talent_section)
-    local id = "talent_section_button" .. feat_type -- .. "_" .. math.random(1000,9999)
-    self:Register(talent_section_button, id)
-    self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
-        Printer:Debug(LOG.INFO, CAT.UI, "Toggling Talent Section - Type: %s", feat_type)
-        self.npc_panel.specs.content.talent_section[feat_type].show = not self.npc_panel.specs.content.talent_section[feat_type].show
-        self.npc_panel.specs.content.update_talent_scroll = true
-    end, self)
 
     local talent_grp = xml:InitFrame("npc_panel:specs:talent_group", talent_section)
     if self.npc_panel.specs.content.talent_section[feat_type].show then
         local column = 0
         local row = 0
-        local feat_list = npcd.get_npc_feats_bytype(npc_id, feat_type)
-        -- local feat_list = npcd.get_npc_feats(npc_id)
         local section_y_offset = talent_section:GetWndPos().y + talent_section:GetHeight()
         for _, feat in pairs(feat_list or {}) do
             if column > 2 then
@@ -1951,6 +1959,8 @@ function npcd_dashboard_tab:Update()
     if self.npc_panel and self.npc_panel.specs and self.npc_panel.specs.content and self.npc_panel.specs.content.scroll and self.npc_panel.specs.content.update_talent_scroll then
         self:UpdateSpecsTerminalDisplay(SPECS.TALENTS, self.npc_panel.npc_id)
         self.npc_panel.specs.content.update_talent_scroll = false
+        self.npc_panel.specs.content.scroll:SetScrollPos(self.npc_panel.specs.content.update_talent_scroll_pos or 0)
+        self.npc_panel.specs.content.update_talent_scroll_pos = nil
     end
 
     -- Update the dashboard contents here if needed.

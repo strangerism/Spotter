@@ -128,8 +128,19 @@
 
 		<texture id="ui_npcd_pda_talent_section_button_d" x="1171" y="967" width="831" height="39" />
 		<texture id="ui_npcd_pda_talent_section_button_e" x="1171" y="967" width="831" height="39" />
-		<texture id="ui_npcd_pda_talent_section_button_h" x="1171" y="967" width="831" height="39" />
+		<texture id="ui_npcd_pda_talent_section_button_h" x="1171" y="927" width="831" height="39" />
 		<texture id="ui_npcd_pda_talent_section_button_t" x="1171" y="967" width="831" height="39" />
+
+		<texture id="ui_npcd_pda_talent_section_closed_button_d" x="1171" y="1007" width="831" height="39" />
+		<texture id="ui_npcd_pda_talent_section_closed_button_e" x="1171" y="1007" width="831" height="39" />
+		<texture id="ui_npcd_pda_talent_section_closed_button_h" x="1171" y="1047" width="831" height="39" />
+		<texture id="ui_npcd_pda_talent_section_closed_button_t" x="1171" y="1007" width="831" height="39" />
+
+		<texture id="ui_npcd_pda_talent_section_empty" 			x="1171" y="1088" width="831" height="39" />
+		<texture id="ui_npcd_pda_talent_section_empty_button_d" x="1171" y="1322" width="473" height="73" />
+		<texture id="ui_npcd_pda_talent_section_empty_button_e" x="1171" y="1322" width="473" height="73" />
+		<texture id="ui_npcd_pda_talent_section_empty_button_h" x="1171" y="1322" width="473" height="73" />
+		<texture id="ui_npcd_pda_talent_section_empty_button_t" x="1171" y="1322" width="473" height="73" />
 
 		<texture id="ui_npcd_pda_talent_item1" x="1171" y="1127" width="318" height="71" />
 
