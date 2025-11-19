@@ -333,6 +333,17 @@ function get_perk_feat(perk_id, feat_id)
 	return perks[perk_id].feats[feat_id]
 end
 
+function get_perk_feats_bytype(perk_id, feat_type)
+	if not perk_id or not perks[perk_id].feats then return end -- cannot continue
+	local feats_bytype = {}
+	for _, feat in pairs(perks[perk_id].feats) do
+		if feat.type == feat_type then
+			table.insert(feats_bytype, feat)
+		end
+	end
+	return feats_bytype
+end
+
 function get_feat_stance(perk_id, feat_id) -- note: feat_id is optional, if not provided, perk_id is feat_uid 
 	if not perk_id or not perks[perk_id].feats then return end -- cannot continue
 	if not feat_id then
@@ -828,6 +839,31 @@ function get_npc_feat(npc_id, feat)
 		Ability = npcdu.copy(npcs[npc_id].Ability[feat.uid])
 	}
 	return npc_feat
+end
+
+function get_npc_feats_bytype(npc_id, feat_type)
+	-- feat_type is required
+	local npc_feats_list = {}
+	for _, npc_perk in pairs(npcs[npc_id].Perk) do
+		for _, perk in pairs(perks) do
+			if perk.id == npc_perk.id then
+				for _, feat in pairs(perk.feats) do
+					if feat.type == feat_type then
+						local npc_feat = npcdu.copy(feat)
+						npc_feat["npc_id"] = npc_id
+						npc_feat["perk_module"] = perk.module
+						npc_feat["perk_id"] = perk.id
+						npc_feat["perk_name"] = perk.name
+						local rank = npcdu.get_perk_rank(npc_id)
+						npc_feat["stats"] = feat.stats[rank]
+						-- npc_feat["Ability"] = npcdu.copy(npcs[npc_id].Ability[feat.id])
+						table.insert(npc_feats_list, npc_feat)
+					end
+				end
+			end
+		end
+	end
+	return npc_feats_list
 end
 
 -- api for npcd modules to read their own feat stats from npc profiles

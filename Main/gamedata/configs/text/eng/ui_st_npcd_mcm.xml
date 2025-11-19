@@ -185,6 +185,12 @@
 	<string id="ui_mcm_lst_st_npcd_feat_type_mutation">
 		<text>Mutation</text>
 	</string>	
+	<string id="ui_mcm_lst_st_npcd_feat_type_trait">
+		<text>Trait</text>
+	</string>	
+	<string id="ui_mcm_lst_st_npcd_feat_type_boon">
+		<text>Boon</text>
+	</string>			
 	<!-- Feat Category -->
 	<string id="ui_mcm_lst_st_npcd_feat_category_combat">
 		<text>Combat</text>

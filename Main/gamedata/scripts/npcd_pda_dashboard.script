@@ -152,7 +152,7 @@ TERMINAL_TABS = {
         default = true,
     },
     [2] = {
-        name = SPECS.FEATS,
+        name = SPECS.TALENTS,
         label = "st_npcd_specs_tab_talents",
     },
     [3] = {
@@ -728,6 +728,13 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     -- ------------------------------
     self.npc_panel.specs.terminal = npcd_ui_fx.SFXVideoTerminal_Create(specs_terminal, self)
     
+    self.npc_panel.specs.content.hints = {}
+    self.npc_panel.specs.content.talent_section = {}
+    for _, section_name in pairs(npcd.FEAT_TYPE) do
+        self.npc_panel.specs.content.talent_section[section_name] = {}
+        self.npc_panel.specs.content.talent_section[section_name].show = true
+    end
+    Printer:DebugTable("NPC Panel Specs Talent Sections", self.npc_panel.specs.content.talent_section)
     -- self.npc_panel.info.dialog:Show(false)
 end
 
@@ -799,6 +806,12 @@ function npcd_dashboard_tab:__ClearSpecsTabScrollRows()
         row.button = nil
     end
     self.npc_panel.specs.content.scroll.row = {}
+
+    for _, talent in pairs(self.npc_panel.specs.content.talents or {}) do
+        talent.talent_icon:Show(false)
+        talent.talent_icon = nil
+    end
+    self.npc_panel.specs.content.talents = {}
 end
 
 function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
@@ -809,7 +822,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         spec_name = TERMINAL_TABS_UTIL.get_default_tab().name
         npc_id = self.npc_panel.npc_id
     end
-
+    self.npc_panel.specs.content.hints = {}
     --------------------------------
     --- clears content
     --- ------------------------------
@@ -817,6 +830,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
     if spec_name == SPECS.ABILITIES then
         Printer:Debug(LOG.INFO, CAT.UI, "Updating Abilities Spec Content")
         -- update the header
+        self.npc_panel.specs.header.dialog:Show(true)
         self.npc_panel.specs.header.content:Show(false)
         self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
         local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
@@ -825,6 +839,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         local source = xml:InitTextWnd("npc_panel:specs:ability:h_source", self.npc_panel.specs.header.content)
         local rank = xml:InitTextWnd("npc_panel:specs:ability:h_rank", self.npc_panel.specs.header.content)
         label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+        self.npc_panel.specs.header.content:Show(true)
         --------------------------------
         -- update the content
         -- --------------------------------
@@ -848,35 +863,36 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         end
         scroll:Show(true)
     end
-    if spec_name == SPECS.FEATS then
-        -- update the header
+    if spec_name == SPECS.TALENTS then
+
+        --------------------------------
+        --- update the header
+        --------------------------------
+        self.npc_panel.specs.header.dialog:Show(true)
         self.npc_panel.specs.header.content:Show(false)
-        self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
-        local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
-        local type = xml:InitTextWnd("npc_panel:specs:ability:h_type", self.npc_panel.specs.header.content)
-        local mode = xml:InitTextWnd("npc_panel:specs:ability:h_mode", self.npc_panel.specs.header.content)
-        local source = xml:InitTextWnd("npc_panel:specs:ability:h_source", self.npc_panel.specs.header.content)
-        local rank = xml:InitTextWnd("npc_panel:specs:ability:h_rank", self.npc_panel.specs.header.content)
-        label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+        -- self.npc_panel.specs.header.content:Show(false)
+        -- self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
+        -- local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
+        -- label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+        -- self.npc_panel.specs.header.content:Show(true)
+
         --------------------------------
         -- update the content
         -- --------------------------------
-
-        -- update the scroll
+        -- reset the scroll
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
+        Printer:Debug(LOG.INFO, CAT.UI, "Clearing Specs Tab Scroll Rows for Talents Spec")
         scroll:Clear()
         self:__ClearSpecsTabScrollRows()
+        self.npc_panel.specs.content.talents = {}
         local npc_deck = npcd.get_npc(npc_id)
         if npc_deck then
-            local index = 0
-            for _, feat in pairs(npcd.get_npc_feats(npc_id) or {}) do
-                if feat.type ~= npcd.FEAT_TYPE.ACTIVE  then
-                    Printer:Debug(LOG.INFO, CAT.UI, "Creating Feat Row for Feat: " .. feat.name)
-                    self:__CreateFeatRow(npc_id, feat, scroll, index)
-                    index = index + 1
-                end
-            end
+            self:__CreateTalentSection(npc_id, npcd.FEAT_TYPE.ACTIVE, scroll)
+            self:__CreateTalentSection(npc_id, npcd.FEAT_TYPE.PASSIVE, scroll)
+            self:__CreateTalentSection(npc_id, npcd.FEAT_TYPE.MUTATION, scroll)
+            self:__CreateTalentSection(npc_id, npcd.FEAT_TYPE.BOON, scroll)
+            self:__CreateTalentSection(npc_id, npcd.FEAT_TYPE.TRAIT, scroll)
         end
         scroll:Show(true)
     end
@@ -905,6 +921,63 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         self:__ClearSpecsTabScrollRows()
     end
     -- Printer:DebugTable("Specs Scroll Rows", self.npc_panel.specs.content.scroll.row)
+end
+
+function npcd_dashboard_tab:__CreateTalentSection(npc_id, feat_type, scroll)
+    local name = gc("ui_mcm_lst_" .. feat_type)
+
+    if feat_type == npcd.FEAT_TYPE.PASSIVE or feat_type == npcd.FEAT_TYPE.ACTIVE then
+        name = name .. gc("ui_npcd_details_ability_header")
+    end
+    local talent_section = xml:InitStatic("npc_panel:specs:talent_section", nil)
+    local section_name = xml:InitTextWnd("npc_panel:specs:talent_section:name", talent_section)
+    section_name:SetText(name)
+    scroll:AddWindow(talent_section, true)
+    self.npc_panel.specs.content.talent_section[feat_type].section = talent_section
+    self.npc_panel.specs.content.talent_section[feat_type].groups = {}
+    
+    -- local talent_scroll = xml:InitScrollView("npc_panel:specs:talent_scroll", nil)
+    -- scroll:AddWindow(talent_scroll, true)
+    local column = 0
+    local row = 0
+    local talent_grp = xml:InitFrame("npc_panel:specs:talent_group", nil)
+    table.insert(self.npc_panel.specs.content.talent_section[feat_type].groups, talent_grp)
+    local feat_list = npcd.get_npc_feats_bytype(npc_id, feat_type)
+    
+    for _, feat in pairs(feat_list or {}) do
+        local talent = xml:InitStatic("npc_panel:specs:talent", talent_grp)
+        talent:SetWndPos(vector2():set(talent:GetWndPos().x + column * (talent:GetWidth() + 5), talent:GetWndPos().y ))
+
+        -- icon
+        local icon_frame = xml:InitStatic("npc_panel:specs:talent:icon_frame", talent)
+        local icon = xml:InitStatic("npc_panel:specs:talent:icon_frame:icon", icon_frame)
+        talent.talent_icon = icon
+        icon:InitTexture(feat.icon)
+        local hint = { type = HINT_TYPE.FEAT, id = feat.uid, ele = icon }
+        table.insert(self.npc_panel.specs.content.hints, hint)
+
+        -- name
+        local name = xml:InitTextWnd("npc_panel:specs:talent:name", talent)
+        name:SetText(gc(feat and feat.name) or "NULL")
+
+        -- arrange in grid
+        column = column + 1
+        if column > 2 then
+            column = 0
+            scroll:AddWindow(talent_grp, true)
+            talent_grp = xml:InitFrame("npc_panel:specs:talent_group", talent_section)
+        end
+        table.insert(self.npc_panel.specs.content.talents, talent)
+    end
+    -- add remaining talents
+    Printer:Debug(LOG.INFO, CAT.UI, "Adding remaining talents in section - index %s", column)
+    if column > 0 and column < 3 then
+        scroll:AddWindow(talent_grp, true)
+        table.insert(self.npc_panel.specs.content.talent_section[feat_type].groups, talent_grp)
+    end
+
+    local space = xml:InitStatic("npc_panel:specs:talent_section:spacer", nil)
+    scroll:AddWindow(space, true)
 end
 
 function npcd_dashboard_tab:__GetStatSuffix(stat_name)
@@ -1857,10 +1930,9 @@ function npcd_dashboard_tab:Update()
     CUIScriptWnd.Update(self)
     -- Update the dashboard contents here if needed.
 	-- Hint
-    -- Printer:DebugTable(string.format("%s Hint Elements", self.npc_panel.specs.active_spec), self:GetAbilitiesHintElements())
-	for _, v in pairs(self:GetAbilitiesHintElements()) do
+    for _, v in pairs(self:GetAbilitiesHintElements()) do
         -- Printer:Debug(LOG.DEBUG, CAT.UI, "Checking Hint Element: " .. tostring(v.data and v.data.feat_name or v.data and v.data.perk_name or "N/A"))
-		if self.show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
+        if self.show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
             if v.data then
                 self.hint_title:SetText( v.data.feat_type .. " Feat" )
                 self.hint_icon:InitTexture( v.data.feat_icon )
@@ -1870,10 +1942,9 @@ function npcd_dashboard_tab:Update()
                 if self.hint_feat_uid then
                     RegisterScriptCallback("on_key_press",on_key_press_feat_hint)
                 end
+                return
             end
-			return
 		end
-
 		if self.show_hint and v and v.perk_icon and v.perk_icon:IsCursorOverWindow() then
             if v.data then
                 self.hint_title:SetText( v.data.perk_type .. " Perk" )
@@ -1884,10 +1955,11 @@ function npcd_dashboard_tab:Update()
                 if self.hint_perk_uid then
                     RegisterScriptCallback("on_key_press",on_key_press_perk_hint)
                 end
+                return
             end
-			return
 		end
 	end
+     -- Check Details Window Hints
     if UI_DETAILS.dialog:IsShown() then
         for _, hint in ipairs(UI_DETAILS.hints or {}) do
             if hint.ele and hint.ele:IsCursorOverWindow() then
@@ -1902,8 +1974,9 @@ function npcd_dashboard_tab:Update()
                         if self.hint_feat_uid then
                             RegisterScriptCallback("on_key_press",on_key_press_feat_hint)
                         end
+                        return
                     end
-                end                  
+                end
                 if hint.type == HINT_TYPE.PERK then
                     local perk = npcd.get_perk(hint.id)
                     if perk then
@@ -1915,9 +1988,27 @@ function npcd_dashboard_tab:Update()
                         if self.hint_perk_uid then
                             RegisterScriptCallback("on_key_press",on_key_press_perk_hint)
                         end
+                        return
                     end
-                end              
-                return
+                end
+            end
+        end
+    end
+    if self.npc_panel.specs.active_spec == SPECS.TALENTS and not UI_DETAILS.dialog:IsShown() then
+        for _, hint in ipairs(self.npc_panel.specs.content.hints or {}) do
+            if hint.ele and hint.ele:IsCursorOverWindow() then
+                local feat = npcd.get_ability_feat(hint.id)
+                if feat then
+                    self.hint_title:SetText( gc("ui_mcm_lst_" .. feat.type) .. " Feat" )
+                    self.hint_icon:InitTexture( feat.icon )
+                    self.hint_name:SetText( gc(feat.name) )
+                    self:SetHint( "\\n \\n" .. gc(feat.hint), UI_APP[APP.PROFILES].dialog)
+                    self.hint_feat_uid = hint.id
+                    if self.hint_feat_uid then
+                        RegisterScriptCallback("on_key_press",on_key_press_feat_hint)
+                    end
+                    return
+                end
             end
         end
     end

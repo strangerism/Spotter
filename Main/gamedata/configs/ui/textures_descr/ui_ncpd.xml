@@ -124,6 +124,15 @@
 
 		<texture id="ui_npcd_pda_icon_black_frame" x="1305" y="203" width="85" height="85" />
 
+		<texture id="ui_npcd_pda_talent_section" x="1171" y="967" width="831" height="39" />
+
+		<texture id="ui_npcd_pda_talent_section_button_d" x="1171" y="967" width="831" height="39" />
+		<texture id="ui_npcd_pda_talent_section_button_e" x="1171" y="967" width="831" height="39" />
+		<texture id="ui_npcd_pda_talent_section_button_h" x="1171" y="967" width="831" height="39" />
+		<texture id="ui_npcd_pda_talent_section_button_t" x="1171" y="967" width="831" height="39" />
+
+		<texture id="ui_npcd_pda_talent_item1" x="1171" y="1127" width="318" height="71" />
+
 	</file>	
 	<file name="ui\npcd\ui_npcd_hint">
 	    <!-- <texture id="ui_npcd_pda_hint_wnd_40k" x="0" y="0" width="778" height="682" /> -->	
