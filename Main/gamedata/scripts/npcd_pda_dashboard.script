@@ -931,7 +931,7 @@ function npcd_dashboard_tab:__CreateTalentSection(npc_id, feat_type, scroll)
     end
     local talent_section = xml:InitStatic("npc_panel:specs:talent_section", nil)
     local feat_list = npcd.get_npc_feats_bytype(npc_id, feat_type)
-        -- local feat_list = npcd.get_npc_feats(npc_id)
+    -- feat_list = npcd.get_npc_feats(npc_id)
     if npcdu.tablelength(feat_list) == 0 then
         local section_background = xml:InitStatic("npc_panel:specs:talent_section:background", talent_section)
         local section_name = xml:InitTextWnd("npc_panel:specs:talent_section:name", talent_section)
