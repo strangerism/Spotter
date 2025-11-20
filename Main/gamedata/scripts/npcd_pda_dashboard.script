@@ -831,6 +831,7 @@ function npcd_dashboard_tab:__ClearSpecsTabScrollRows()
         talent.talent_icon = nil
     end
     self.npc_panel.specs.content.talents = {}
+    self.npc_panel.specs.content.hints = {}
 end
 
 function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
@@ -1213,6 +1214,8 @@ function npcd_dashboard_tab:InitNPCPanel(npc_id)
     self.npc_panel.specs.terminal:SwitchOn()
     self.npc_panel.init = true
     self.npc_panel.info.rank:Show(true)
+    local default_tab = TERMINAL_TABS_UTIL.get_default_tab()
+    self.npc_panel.specs.terminal:SetActiveTab(default_tab.index)
 end
 
 function npcd_dashboard_tab:UpdateNPCPanel(npc_id)
@@ -2005,6 +2008,7 @@ function npcd_dashboard_tab:Update()
     -- Update the dashboard contents here if needed.
 	-- Hint
     for _, v in pairs(self:GetAbilitiesHintElements()) do
+        -- Printer:Debug(LOG.START, CAT.UI, "Checking Hint Element")
         -- Printer:Debug(LOG.DEBUG, CAT.UI, "Checking Hint Element: " .. tostring(v.data and v.data.feat_name or v.data and v.data.perk_name or "N/A"))
         if self.show_hint and v and v.feat_icon and v.feat_icon:IsCursorOverWindow() then
             if v.data then
@@ -2035,6 +2039,7 @@ function npcd_dashboard_tab:Update()
 	end
      -- Check Details Window Hints
     if UI_DETAILS.dialog:IsShown() then
+        -- Printer:Debug(LOG.START, CAT.UI, "Checking Details Window Hint")
         for _, hint in ipairs(UI_DETAILS.hints or {}) do
             if hint.ele and hint.ele:IsCursorOverWindow() then
                 if hint.type == HINT_TYPE.FEAT then
@@ -2069,6 +2074,7 @@ function npcd_dashboard_tab:Update()
         end
     end
     if self.npc_panel.specs.active_spec == SPECS.TALENTS and not UI_DETAILS.dialog:IsShown() then
+        -- Printer:Debug(LOG.START, CAT.UI, "Checking NPC Panel Talents Hint")
         for _, hint in ipairs(self.npc_panel.specs.content.hints or {}) do
             if hint.ele and hint.ele:IsCursorOverWindow() then
                 local feat = npcd.get_ability_feat(hint.id)

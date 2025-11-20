@@ -554,7 +554,7 @@ function on_stop_flickering(runner_name)
 		-- execute custom random cooldown functor
 		local cooldown = execute_func(unpack(config.random_cooldown))
 		if cooldown and type(cooldown) == "number" then
-			Printer:Debug(LOG.INFO, CAT.UI," flickering cooldown for %s set to %s", runner_name, cooldown)
+			Printer:Debug(LOG.INFO, CAT.UI_ACTION," flickering cooldown for %s set to %s", runner_name, cooldown)
 			config.cooldown_value = cooldown
 		end
 	end
@@ -689,7 +689,7 @@ function run_show(runner_name)
 			config.fx_ui:Show(true)
 		end
 	end
-	Printer:Debug(LOG.INFO, CAT.UI," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
 end
 
 function on_start_show(runner_name)
@@ -698,7 +698,7 @@ function on_start_show(runner_name)
 	local config = fx_job.config
 	if not config.dialog then return end
 	config.fx_ui = config.dialog
-	Printer:Debug(LOG.START, CAT.UI," starting show_dialog")
+	Printer:Debug(LOG.START, CAT.UI_ACTION," starting show_dialog")
 	config.original = {}
 	-- save original y position
 	config.original_y = config.fx_ui:GetWndPos().y
@@ -926,7 +926,7 @@ end
 
 class "SFXVideoTerminal"
 function SFXVideoTerminal:__init(sfx_config)
-	Printer:Debug(LOG.RUN, CAT.UI,"SFXVideoTerminal: name %s  group %s initializing", sfx_config.name, sfx_config.group)
+	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"SFXVideoTerminal: name %s  group %s initializing", sfx_config.name, sfx_config.group)
 	Printer:DebugTable("SFXVideoTerminal Config:", sfx_config)
 
 	self.dialog = sfx_config.parent
@@ -1033,9 +1033,9 @@ function SFXVideoTerminal:__init(sfx_config)
 			-- register tab click event
 			self.parent_dialog:Register(self.tabs.button[index], sfx_config.id .. "_terminal_tab_" .. index)
 			self.parent_dialog:AddCallback(sfx_config.id .. "_terminal_tab_" .. index, ui_events.BUTTON_CLICKED, function ()
-				Printer:Debug(LOG.RUN, CAT.UI,"SFXVideoTerminal: [%s][%s] tab %s clicked", sfx_config.name, sfx_config.group, index)
+				Printer:Debug(LOG.RUN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] tab %s clicked", sfx_config.name, sfx_config.group, index)
 				if tab_config.on_click_callback then
-					Printer:Debug(LOG.INFO, CAT.UI,"SFXVideoTerminal: executing tab callback impl for tab %s", tab_config.name)
+					Printer:Debug(LOG.INFO, CAT.UI_ACTION,"SFXVideoTerminal: executing tab callback impl for tab %s", tab_config.name)
 					if (type(tab_config.on_click_callback.functor) == "function") then 
 						tab_config.on_click_callback.functor(tab_config.on_click_callback.self, index, tab_config.name)
 					end
@@ -1059,7 +1059,7 @@ function SFXVideoTerminal:__init(sfx_config)
 	if sfx_config.dirt then
 		self.dirt = self.xml:InitStatic(sfx_config.dirt, self.glass)
 	end
-	Printer:Debug(LOG.ADD, CAT.UI,"SFXVideoTerminal: [%s][%s] initialized", sfx_config.name, sfx_config.group)
+	Printer:Debug(LOG.ADD, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] initialized", sfx_config.name, sfx_config.group)
 	self.config = sfx_config
 end
 
@@ -1076,7 +1076,7 @@ function SFXVideoTerminal:SetActiveTab(index)
 end
 
 function SFXVideoTerminal:__on_started()
-	Printer:Debug(LOG.WARN, CAT.UI,"SFXVideoTerminal: [%s][%s] On started", self.config.name, self.config.group)
+	Printer:Debug(LOG.WARN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] On started", self.config.name, self.config.group)
 	self.display:Show(true)
 	-- add glass overlay
 	-- self.glass = self.xml:InitStatic(self.config.glass, self.display)
@@ -1103,17 +1103,17 @@ function SFXVideoTerminal:__on_started()
 end
 
 function SFXVideoTerminal:__on_content_displayed()
-	Printer:Debug(LOG.WARN, CAT.UI,"SFXVideoTerminal: [%s][%s] On content displayed", self.config.name, self.config.group)
+	Printer:Debug(LOG.WARN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] On content displayed", self.config.name, self.config.group)
 	npcd_ui_fx.resume_fx(self.fx.scanlines.id)
 	self.fx.flickering.flickering_duration = 40
 	npcd_ui_fx.resume_fx(self.fx.flickering.id)
 	if self.header then
 		self.display:AttachChild(self.header)
 		self.header:Show(true)
-		Printer:Debug(LOG.INFO, CAT.UI," SFXVideoTerminal: header shown")
+		Printer:Debug(LOG.INFO, CAT.UI_ACTION," SFXVideoTerminal: header shown")
 	end
 	if self.config.on_content_displayed_callback then
-		Printer:Debug(LOG.INFO, CAT.UI,"SFXVideoTerminal: executing on_content_displayed_callback")
+		Printer:Debug(LOG.INFO, CAT.UI_ACTION,"SFXVideoTerminal: executing on_content_displayed_callback")
 		if (type(self.config.on_content_displayed_callback.functor) == "function") then 
 			self.config.on_content_displayed_callback.functor(self.config.on_content_displayed_callback.self)
 		end
@@ -1137,7 +1137,7 @@ end
 --- Only use if you want to change to a new header
 --- To update the content of the existing header use direct manipulation of the header element.
 function SFXVideoTerminal:UpdateHeader(header)
-	Printer:Debug(LOG.STOP, CAT.UI,"SFXVideoTerminal: [%s][%s] update header", self.config.name, self.config.group)
+	Printer:Debug(LOG.STOP, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] update header", self.config.name, self.config.group)
 	if self.header then
 		self.header:Show(false)
 		self.display:AttachChild(header)
@@ -1147,7 +1147,7 @@ function SFXVideoTerminal:UpdateHeader(header)
 end
 
 -- function SFXVideoTerminal:Reset()
--- 	Printer:Debug(LOG.STOP, CAT.UI," SFXVideoTerminal: reset")
+-- 	Printer:Debug(LOG.STOP, CAT.UI_ACTION," SFXVideoTerminal: reset")
 -- 	self.display:Show(false)
 -- 	self.content:Show(false)
 -- 	if self.header then
@@ -1156,7 +1156,7 @@ end
 -- end
 
 function SFXVideoTerminal_Create(sfx_config, parent_dialog)
-	Printer:Debug(LOG.START, CAT.UI,"Creating SFXVideoTerminal [%s][%s]", sfx_config.name, sfx_config.group)
+	Printer:Debug(LOG.START, CAT.UI_ACTION,"Creating SFXVideoTerminal [%s][%s]", sfx_config.name, sfx_config.group)
 	local sfx_id = sfx_config.type .. "_" .. (name or "") .. "_".. tostring(math.random(10000, 99999))
 	sfx_config.id = sfx_id
 	sfx_config.parent_dialog = parent_dialog
@@ -1166,21 +1166,21 @@ function SFXVideoTerminal_Create(sfx_config, parent_dialog)
 end
 
 function SFXVideoTerminal:Show(show)
-	Printer:Debug(LOG.RUN, CAT.UI,"SFXVideoTerminal: [%s][%s] show %s", self.config.name, self.config.group, tostring(show))
+	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] show %s", self.config.name, self.config.group, tostring(show))
 	if self.dialog then
-		Printer:Debug(LOG.INFO, CAT.UI,"SFXVideoTerminal: setting dialog visibility to %s", tostring(show))
+		Printer:Debug(LOG.INFO, CAT.UI_ACTION,"SFXVideoTerminal: setting dialog visibility to %s", tostring(show))
 		self.dialog:Show(show)
 	end
 end
 
 function SFXVideoTerminal:SwitchOn()
-	Printer:Debug(LOG.RUN, CAT.UI,"SFXVideoTerminal: [%s][%s] switch on", self.config.name, self.config.group)
-	Printer:Debug(LOG.RUN, CAT.UI,"Starting FX: [%s][%s] %s", self.config.name, self.config.group, self.fx.showing_display.id)
+	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] switch on", self.config.name, self.config.group)
+	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"Starting FX: [%s][%s] %s", self.config.name, self.config.group, self.fx.showing_display.id)
 	npcd_ui_fx.resume_fx(self.fx.showing_display.id)
 end
 
 function SFXVideoTerminal:SwitchOff()
-	Printer:Debug(LOG.RUN, CAT.UI,"SFXVideoTerminal: [%s][%s] switch off", self.config.name, self.config.group)
+	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] switch off", self.config.name, self.config.group)
 	if self.fx.scanlines then
 		npcd_ui_fx.remove_fx(self.fx.scanlines.id)
 	end
@@ -1202,23 +1202,23 @@ end
 
 
 function sfx_video_terminal_on_started(sfx_id)
-	-- Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: started callback %s", sfx_id)
+	-- Printer:Debug(LOG.RUN, CAT.UI_ACTION," SFXVideoTerminal: started callback %s", sfx_id)
 	-- Printer:DebugTable("SFX INSTANCES:", SFX_INSTANCES)
 	local video_terminal = SFX_INSTANCES[sfx_id]
 	if video_terminal and video_terminal.__on_started then
 		video_terminal:__on_started()
 	else
-		Printer:Debug(LOG.ERROR, CAT.UI,"SFXVideoTerminal: started failed, invalid self reference")
+		Printer:Debug(LOG.ERROR, CAT.UI_ACTION,"SFXVideoTerminal: started failed, invalid self reference")
 	end
 end
 
 function sfx_video_terminal_on_content_displayed(sfx_id)
-	-- Printer:Debug(LOG.RUN, CAT.UI," SFXVideoTerminal: content displayed callback %s", sfx_id)
+	-- Printer:Debug(LOG.RUN, CAT.UI_ACTION," SFXVideoTerminal: content displayed callback %s", sfx_id)
 	local video_terminal = SFX_INSTANCES[sfx_id]
 	if video_terminal and video_terminal.__on_content_displayed then
 		video_terminal:__on_content_displayed()
 	else
-		Printer:Debug(LOG.ERROR, CAT.UI,"SFXVideoTerminal: on_content_displayed failed, invalid self reference")
+		Printer:Debug(LOG.ERROR, CAT.UI_ACTION,"SFXVideoTerminal: on_content_displayed failed, invalid self reference")
 	end
 end
 
