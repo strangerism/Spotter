@@ -65,9 +65,10 @@ NPCS_CHARACTERISTICS = {
 local SPECS = {
     ABILITIES = "abilities",
     TALENTS = "talents",
-    EFFECTS = "effects",
+    PERKS = "perks",
     EQUIPMENT = "equipment",
     FEATS = "feats",
+    EFFECTS = "effects",
 }
 
 local STRING_PREFIX = "pda_btn_npcd_"
@@ -156,8 +157,8 @@ TERMINAL_TABS = {
         label = "st_npcd_specs_tab_talents",
     },
     [3] = {
-        name = SPECS.EFFECTS,
-        label = "st_npcd_specs_tab_effects",
+        name = SPECS.PERKS,
+        label = "st_npcd_specs_tab_perks",
     },
     [4] = {
         name = SPECS.EQUIPMENT,
@@ -182,6 +183,23 @@ TERMINAL_TABS_UTIL = {
         return "n/a"
     end,
 }
+
+VIEW = {
+    ALL = "all",
+    GROUPED = "grouped",
+}
+
+UI_TALENTS_VIEW = {
+    [VIEW.ALL] = {
+        icon = "ui_npcd_pda_scroller_item_highlight_green_button",
+        desc = "st_npcd_specs_tab_talents_all",
+    },
+    [VIEW.GROUPED] = {
+        icon = "ui_npcd_pda_scroller_item_highlight_yellow_button",
+        desc = "st_npcd_specs_tab_talents_grouped",
+    },
+}
+
 
 UI_DETAILS = {
     dialog = nil,
@@ -360,7 +378,7 @@ function npcd_dashboard_tab:InitItemScroller()
 -- FX: Showing on scroller background
     local glass_showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
     glass_showing.dialog = self.menu_scroller.ui.glass
-    glass_showing.speed = 0.005
+    glass_showing.speed = 0.02
     glass_showing.on_showing_complete = {"npcd_pda_dashboard", "items_scroller_glass_showing_fx_stop"}
     npcd_ui_fx.add_fx(glass_showing)
     self.menu_scroller.fx.glass_showing = glass_showing
@@ -735,6 +753,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
         self.npc_panel.specs.content.talent_section[section_name].show = true
     end
     self.npc_panel.specs.content.update_talent_scroll = nil
+    self.npc_panel.specs.header.talents_view = VIEW.GROUPED
     -- self.npc_panel.info.dialog:Show(false)
 end
 
@@ -870,12 +889,28 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         --------------------------------
         self.npc_panel.specs.header.dialog:Show(true)
         self.npc_panel.specs.header.content:Show(false)
-        -- self.npc_panel.specs.header.content:Show(false)
-        -- self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
-        -- local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
-        -- label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
-        -- self.npc_panel.specs.header.content:Show(true)
-
+        self.npc_panel.specs.header.content = xml:Init3tButton("npc_panel:specs:terminal_display:header:button", self.npc_panel.specs.header.dialog)
+        if self.npc_panel.specs.header.talents_view == VIEW.GROUPED then
+            Printer:Debug(LOG.INFO, CAT.UI, "Setting Talents View to GROUPED")
+            self.npc_panel.specs.header.content:InitTexture(UI_TALENTS_VIEW[VIEW.GROUPED].icon)
+            self.npc_panel.specs.header.content:TextControl():SetText(gc(UI_TALENTS_VIEW[VIEW.GROUPED].desc))
+        else
+            Printer:Debug(LOG.INFO, CAT.UI, "Setting Talents View to ALL")
+            self.npc_panel.specs.header.content:InitTexture(UI_TALENTS_VIEW[VIEW.ALL].icon)
+            self.npc_panel.specs.header.content:TextControl():SetText(gc(UI_TALENTS_VIEW[VIEW.ALL].desc))
+        end
+        local id = "talents_view" .. spec_name -- .. "_" .. math.random(1000,9999)
+        self:Register(self.npc_panel.specs.header.content, id)
+        self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+            Printer:Debug(LOG.INFO, CAT.UI, "Toggling Talents View Mode")
+            if self.npc_panel.specs.header.talents_view == VIEW.GROUPED then
+                self.npc_panel.specs.header.talents_view = VIEW.ALL
+            else
+                self.npc_panel.specs.header.talents_view = VIEW.GROUPED
+            end
+            self.npc_panel.specs.content.update_talent_scroll = true
+            self.npc_panel.specs.content.update_talent_scroll_pos = self.npc_panel.specs.content.scroll:GetCurrentScrollPos()
+        end, self)
         --------------------------------
         -- update the content
         -- --------------------------------
@@ -897,7 +932,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         scroll:Show(true)
     end
 
-    if spec_name == SPECS.EFFECTS then
+    if spec_name == SPECS.PERKS then
         -- update the header
         self.npc_panel.specs.header.content:Show(false)
         self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
@@ -932,6 +967,7 @@ function npcd_dashboard_tab:__CreateTalentSection(npc_id, feat_type, scroll)
     local talent_section = xml:InitStatic("npc_panel:specs:talent_section", nil)
     local feat_list = npcd.get_npc_feats_bytype(npc_id, feat_type)
     -- feat_list = npcd.get_npc_feats(npc_id)
+    if self.npc_panel.specs.header.talents_view == VIEW.GROUPED then
     if npcdu.tablelength(feat_list) == 0 then
         local section_background = xml:InitStatic("npc_panel:specs:talent_section:background", talent_section)
         local section_name = xml:InitTextWnd("npc_panel:specs:talent_section:name", talent_section)
@@ -951,6 +987,9 @@ function npcd_dashboard_tab:__CreateTalentSection(npc_id, feat_type, scroll)
             self.npc_panel.specs.content.update_talent_scroll = true
             self.npc_panel.specs.content.update_talent_scroll_pos = scroll:GetCurrentScrollPos()
         end, self)
+    end
+    else
+        talent_section:SetWndSize(vector2():set(talent_section:GetWidth(), 0))
     end
     self.npc_panel.specs.content.talent_section[feat_type].dialog = talent_section
     self.npc_panel.specs.content.talent_section[feat_type].groups = {}

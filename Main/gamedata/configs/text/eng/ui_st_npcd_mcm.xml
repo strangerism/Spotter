@@ -398,12 +398,23 @@
 	<string id="st_npcd_specs_tab_feats">
 		<text>Feats</text>
 	</string>	
+	<string id="st_npcd_specs_tab_perks">
+		<text>Perks</text>
+	</string>	
 	<string id="st_npcd_specs_tab_effects">
 		<text>Effects</text>
 	</string>
 	<string id="st_npcd_specs_tab_equipment">
 		<text>Equipment</text>
 	</string>
+
+<!-- talents tab header toggle -->
+	<string id="st_npcd_specs_tab_talents_all">
+		<text>All</text>
+	</string>
+	<string id="st_npcd_specs_tab_talents_grouped">
+		<text>Grouped</text>
+	</string>	
 
 <!-- hint details			 -->
 	<string id="ui_npcd_details_ability_header">
