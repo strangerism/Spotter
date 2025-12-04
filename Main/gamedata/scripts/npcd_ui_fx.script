@@ -716,7 +716,7 @@ function run_show(runner_name)
 			config.fx_ui:Show(true)
 		end
 	end
-	Printer:Debug(LOG.INFO, CAT.UI," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
 end
 
 function on_start_show(runner_name)
@@ -1217,7 +1217,7 @@ function SFXVideoTerminal:SwitchOn()
 end
 
 function SFXVideoTerminal:SwitchOff()
-	Printer:Debug(LOG.RUN, CAT.UI,"SFXVideoTerminal: [%s][%s] switch off", self.config.name, self.config.group)
+	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] switch off", self.config.name, self.config.group)
 	self.state = "off"
 	if self.fx.scanlines then
 		npcd_ui_fx.remove_fx(self.fx.scanlines.id)

@@ -40,7 +40,7 @@ local APP = {
     HOME = "home",
     PROFILES = "profiles",
     PERKS = "perks",
-    DECK = "deck"
+    DATA = "data"
 }
 
 local MENU = {
@@ -54,6 +54,10 @@ local MENU = {
         PERKS = "perks",
         FEATS = "feats",
         EFFECTS = "effects",
+        GUIDE = "guide",
+        TUTORIALS = "tutorials",
+        GLOSSARY = "glossary",
+        LOGS = "logs",
 }
 
 NPCS_CHARACTERISTICS = {
@@ -122,10 +126,10 @@ UI_APP = {
         dialog = nil,
         default_menu = MENU.DISCOVERED,
     },
-    [APP.DECK] = {
+    [APP.DATA] = {
         active = nil,
         dialog = nil,
-        default_menu = MENU.PERKS,
+        default_menu = MENU.GUIDE,
     },
 }
 
@@ -142,10 +146,11 @@ local APP_MENU = {
         MENU.LEARNED,
         MENU.ALL,
     },
-    [APP.DECK] = {
-        MENU.PERKS,
-        MENU.FEATS,
-        MENU.EFFECTS,
+    [APP.DATA] = {
+        MENU.GUIDE,
+        MENU.TUTORIALS,
+        MENU.GLOSSARY,
+        MENU.LOGS,
     },
 }
 
@@ -318,7 +323,7 @@ function npcd_dashboard_tab:InitControls()
     self:InitHomePanel()
     self:InitProfilesPanel()
     self:InitPerksPanel()
-    self:InitDeckPanel()
+    self:InitDataPanel()
     self:InitAppsMenu()
     self:InitItemScroller()
     self:InitNPCPanelInfo()
@@ -457,19 +462,19 @@ function npcd_dashboard_tab:InitAppsBar()
     xml:InitStatic("apps_bar:perks:tab_right", self.app[APP.PERKS].tab)
     self:Register(self.app[APP.PERKS].button, "app_button_" .. APP.PERKS)
 
-    self.app[APP.DECK] = {}
-    self.app[APP.DECK].tab = xml:InitStatic("apps_bar:deck", self.apps_bar)
-    xml:InitStatic("apps_bar:deck:tab_left", self.app[APP.DECK].tab)
-    self.app[APP.DECK].button = xml:Init3tButton("apps_bar:deck:button", self.app[APP.DECK].tab)
-    self.app[APP.DECK].button:Enable(true)
-    self.app[APP.DECK].button:TextControl():SetFont(GetFontSmall())
-    xml:InitStatic("apps_bar:deck:tab_right", self.app[APP.DECK].tab)
-    self:Register(self.app[APP.DECK].button, "app_button_" .. APP.DECK)
+    self.app[APP.DATA] = {}
+    self.app[APP.DATA].tab = xml:InitStatic("apps_bar:data", self.apps_bar)
+    xml:InitStatic("apps_bar:data:tab_left", self.app[APP.DATA].tab)
+    self.app[APP.DATA].button = xml:Init3tButton("apps_bar:data:button", self.app[APP.DATA].tab)
+    self.app[APP.DATA].button:Enable(true)
+    self.app[APP.DATA].button:TextControl():SetFont(GetFontSmall())
+    xml:InitStatic("apps_bar:data:tab_right", self.app[APP.DATA].tab)
+    self:Register(self.app[APP.DATA].button, "app_button_" .. APP.DATA)
 
     Printer:Debug(LOG.INFO, CAT.UI, "Initialising NPCD PDA Dashboard UI Callbacks")
     self:AddCallback("app_button_" .. APP.PROFILES, ui_events.BUTTON_CLICKED, self.On_Profiles_Button_Clicked, self)
     self:AddCallback("app_button_" .. APP.PERKS, ui_events.BUTTON_CLICKED, self.On_Perks_Button_Clicked, self)
-    self:AddCallback("app_button_" .. APP.DECK, ui_events.BUTTON_CLICKED, self.On_Deck_Button_Clicked, self)
+    self:AddCallback("app_button_" .. APP.DATA, ui_events.BUTTON_CLICKED, self.On_Data_Button_Clicked, self)
 
     npcd_ui_fx.resume_fx(self.apps_bar_scanline.id)
 end
@@ -706,6 +711,37 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.content.idcard.name = xml:InitTextWnd("npc_panel:info:idcard_group:name", idcard_group)
     self.npc_panel.info.content.idcard.community = xml:InitTextWnd("npc_panel:info:idcard_group:community", idcard_group)
 
+    self.npc_panel.info.content.idcard.favorite = xml:Init3tButton("npc_panel:info:idcard_group:favorite", idcard_group)
+    -- self.npc_panel.info.content.idcard.favorite:InitTexture("ui_npcd_pda_npc_detail_info_favorite_button")
+
+    self.npc_panel.info.content.idcard.unfavorite = xml:Init3tButton("npc_panel:info:idcard_group:unfavorite", idcard_group)
+    -- self.npc_panel.info.content.idcard.unfavorite:InitTexture("ui_npcd_pda_npc_detail_info_unfavorite_button")
+
+    self:Register(self.npc_panel.info.content.idcard.favorite, "npc_panel_idcard_favorite_button")
+    self:AddCallback("npc_panel_idcard_favorite_button", ui_events.BUTTON_CLICKED, function ()
+        npcd.set_favorite(self.npc_panel.npc_id, true)
+        self.npc_panel.info.content.idcard.favorite:Show(false)
+        self.npc_panel.info.content.idcard.unfavorite:Show(true)
+        Printer:Debug(LOG.INFO, CAT.UI, "NPC ID " .. self.npc_panel.npc_id .. " added to favorites")
+    end, self)
+    self.npc_panel.info.content.idcard.favorite:Show(false)
+
+    self:Register(self.npc_panel.info.content.idcard.unfavorite, "npc_panel_idcard_unfavorite_button")
+    self:AddCallback("npc_panel_idcard_unfavorite_button", ui_events.BUTTON_CLICKED, function ()
+        npcd.set_favorite(self.npc_panel.npc_id, false)
+        self.npc_panel.info.content.idcard.favorite:Show(true)
+        self.npc_panel.info.content.idcard.unfavorite:Show(false)
+        Printer:Debug(LOG.INFO, CAT.UI, "NPC ID " .. self.npc_panel.npc_id .. " removed from favorites")
+    end, self)
+    self.npc_panel.info.content.idcard.unfavorite:Show(false)
+
+    self.npc_panel.info.content.idcard.locked = xml:InitStatic("npc_panel:info:idcard_group:lock", idcard_group)
+    self.npc_panel.info.content.idcard.locked:InitTexture("ui_npcd_pda_npc_detail_info_locked")
+    self.npc_panel.info.content.idcard.locked:Show(false)
+    self.npc_panel.info.content.idcard.unlocked = xml:InitStatic("npc_panel:info:idcard_group:lock", idcard_group)
+    self.npc_panel.info.content.idcard.unlocked:InitTexture("ui_npcd_pda_npc_detail_info_unlocked")
+    self.npc_panel.info.content.idcard.unlocked:Show(false)
+
 -- FX: Showing on portrait
     local showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
     showing.dialog = self.npc_panel.info.content.idcard.portrait
@@ -904,18 +940,34 @@ function npcd_dashboard_tab:UpdateInfoTerminalDisplay(npc_id)
         self.npc_panel.info.content.idcard.portrait:Show(false)
         self.npc_panel.info.content.idcard.name:SetText(npc_data.name)
         self.npc_panel.info.content.idcard.community:SetText(npc_data.community)
+        if npcd.get_favorite(npc_id) then
+            self.npc_panel.info.content.idcard.favorite:Show(false)
+            self.npc_panel.info.content.idcard.unfavorite:Show(true)
+        else
+            self.npc_panel.info.content.idcard.favorite:Show(true)
+            self.npc_panel.info.content.idcard.unfavorite:Show(false)
+        end
         self.npc_panel.info.rank:SetText(npc_data.perk_rank)
         -- self.npc_panel.info.rank:SetFont(GetFontMedium())
     end
 
     local npc_deck = npcd.get_npc(npc_id)
-    Printer:TraceTable("NPC DECK", npc_deck)
+    Printer:DebugTable("NPC DECK", npc_deck)
     if npc_deck then
         for name, value in pairs(npc_deck.Characteristics or {}) do
             Printer:Debug(LOG.INFO, CAT.UI, "NPC Characteristic[" .. name .. "]: " .. value)
             if self.npc_panel.info.content.characteristics[name] then
                 self.npc_panel.info.content.characteristics[name].value:SetText(tostring(value) or "null")
             end
+        end
+        if not npc_deck.show_profile then
+            Printer:Debug(LOG.INFO, CAT.UI, "NPC Profile Locked")
+            self.npc_panel.info.content.idcard.locked:Show(true)
+            self.npc_panel.info.content.idcard.unlocked:Show(false)
+        else
+            Printer:Debug(LOG.INFO, CAT.UI, "NPC Profile Unlocked")
+            self.npc_panel.info.content.idcard.locked:Show(false)
+            self.npc_panel.info.content.idcard.unlocked:Show(true)
         end
     end
     self.npc_panel.info.content.fx.char_flickering.flickering_duration = 100
@@ -976,7 +1028,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         self.npc_panel.specs.header.content:Show(false)
         self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
         local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)
-        local type = xml:InitTextWnd("npc_panel:specs:ability:h_type", self.npc_panel.specs.header.content)
+        -- local type = xml:InitTextWnd("npc_panel:specs:ability:h_type", self.npc_panel.specs.header.content)
         local mode = xml:InitTextWnd("npc_panel:specs:ability:h_mode", self.npc_panel.specs.header.content)
         local source = xml:InitTextWnd("npc_panel:specs:ability:h_source", self.npc_panel.specs.header.content)
         local rank = xml:InitTextWnd("npc_panel:specs:ability:h_rank", self.npc_panel.specs.header.content)
@@ -993,7 +1045,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         self:__ClearSpecsTabScrollRows()
         local npc_deck = npcd.get_npc(npc_id)
         -- Printer:DebugTable("NPC Abilities", npc_deck.Ability)
-        if npc_deck then
+        if npc_deck and npc_deck.show_profile then
             local index = 0
             for _, ability in pairs(npc_deck.Ability) do
                 local feat = npcd.get_ability_feat(ability.id)
@@ -1045,7 +1097,7 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         self:__ClearSpecsTabScrollRows()
         self.npc_panel.specs.content.talents = {}
         local npc_deck = npcd.get_npc(npc_id)
-        if npc_deck then
+        if npc_deck and npc_deck.show_profile then
             self:__CreateTalentSection(npc_id, npcd.FEAT_TYPE.ACTIVE, scroll)
             self:__CreateTalentSection(npc_id, npcd.FEAT_TYPE.PASSIVE, scroll)
             self:__CreateTalentSection(npc_id, npcd.FEAT_TYPE.MUTATION, scroll)
@@ -1061,10 +1113,25 @@ function npcd_dashboard_tab:UpdateSpecsTerminalDisplay(spec_name, npc_id)
         self.npc_panel.specs.header.content = xml:InitStatic("npc_panel:specs:terminal_display:header:content", self.npc_panel.specs.header.dialog)
         local label = xml:InitTextWnd("npc_panel:specs:terminal_display:header:content:label", self.npc_panel.specs.header.content)        
         label:SetText(TERMINAL_TABS_UTIL.get_label(spec_name))
+        local type = xml:InitTextWnd("npc_panel:specs:perk:h_type", self.npc_panel.specs.header.content)
+        local category = xml:InitTextWnd("npc_panel:specs:perk:h_category", self.npc_panel.specs.header.content)
+        local rank = xml:InitTextWnd("npc_panel:specs:perk:h_rank", self.npc_panel.specs.header.content)
+
         local scroll = self.npc_panel.specs.content.scroll
         scroll:Show(false)
         scroll:Clear()
         self:__ClearSpecsTabScrollRows()
+        local npc_perks = npcd.get_npc_perks(npc_id)
+        local npc_deck = npcd.get_npc(npc_id)
+        if npc_perks and (npc_deck and npc_deck.show_profile) then
+            local index = 0
+            for _, perk in pairs(npc_perks) do
+                local perk = npcd.get_perk(perk.id)
+                self:__CreatePerkRow(npc_id, perk, scroll, index)
+                index = index + 1
+            end
+        end
+        scroll:Show(true)        
     end
 
     if spec_name == SPECS.EQUIPMENT then
@@ -1214,9 +1281,9 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     icon:InitTexture(row_data.feat_icon)
     scroll.row[index].feat_icon = icon
 
-    local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
-    type:SetText(row_data.feat_type)
-    type:SetFont(GetFontSmall())
+    -- local type = xml:InitTextWnd("npc_panel:specs:ability:type", scroll.row[index].button)
+    -- type:SetText(row_data.feat_type)
+    -- type:SetFont(GetFontSmall())
 
     local mode = xml:InitTextWnd("npc_panel:specs:ability:mode", scroll.row[index].button)
     mode:SetText(row_data.feat_mode)
@@ -1238,6 +1305,49 @@ function npcd_dashboard_tab:__CreateAbilityRow(npc_id, feat, scroll, index)
     self:Register(scroll.row[index].button, id)
     self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
         Printer:Debug(LOG.INFO, CAT.UI, "NPC Ability Button Clicked - Ability: " .. row_data.feat_name)
+    end, self)
+end
+
+function npcd_dashboard_tab:__CreatePerkRow(npc_id, perk, scroll, index)
+    scroll.row[index] = {}
+    scroll.row[index].button = xml:Init3tButton("npc_panel:specs:perk", nil)
+    scroll:AddWindow(scroll.row[index].button, true)
+    local row_data = {
+        perk_name = gc(perk and perk.name) or "NULL",
+        perk_hint = gc(perk and perk.hint) or "NULL",
+        perk_icon = perk and perk.icon or "ui_npcd_hud_default_icon",
+        perk_type = gc(perk and "ui_mcm_lst_" .. perk.type) or "NULL",
+        perk_category = gc(perk and "ui_mcm_lst_" .. perk.category) or "NULL",
+        perk_id = perk and perk.id or "NULL",
+        rank = npcdu.get_perk_rank_desc(npc_id, perk.id) or "NULL",
+    }
+    i = 0
+    scroll.row[index].button:TextControl():SetText("+++   " .. row_data.perk_name .. "   +++")
+
+    local icon_frame = xml:InitStatic("npc_panel:specs:perk:icon_frame", scroll.row[index].button)
+    local icon = xml:InitStatic("npc_panel:specs:perk:icon", scroll.row[index].button)
+    icon:InitTexture(row_data.perk_icon)
+    scroll.row[index].perk_icon = icon
+
+    local type = xml:InitTextWnd("npc_panel:specs:perk:type", scroll.row[index].button)
+    type:SetText(row_data.perk_type)
+    type:SetFont(GetFontSmall())
+
+    local category = xml:InitTextWnd("npc_panel:specs:perk:category", scroll.row[index].button)
+    category:SetText(row_data.perk_category)
+    category:SetFont(GetFontSmall())
+    
+    local rank = xml:InitTextWnd("npc_panel:specs:perk:rank", scroll.row[index].button)
+    rank:SetText(row_data.rank)
+    rank:SetFont(GetFontMedium())
+
+    scroll.row[index].data = row_data
+
+    -- -- register button callback
+    local id = "npc_perk_button_" .. index -- .. "_" .. math.random(1000,9999)
+    self:Register(scroll.row[index].button, id)
+    self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "NPC Perk Button Clicked - Perk: " .. row_data.perk_name)
     end, self)
 end
 
@@ -2627,16 +2737,16 @@ function npcd_dashboard_tab:InitPerksPanel()
 end
 
 
----- Deck Panel
+---- Data Panel
 --- ------------------------------
-function npcd_dashboard_tab:InitDeckPanel()
-    -- Deck Panel
-    UI_APP[APP.DECK].active = false
-    UI_APP[APP.DECK].dialog = xml:InitStatic("deck_panel", self)
-    local panel_bg = xml:InitStatic("deck_panel:panel_bg", UI_APP[APP.DECK].dialog)
+function npcd_dashboard_tab:InitDataPanel()
+    -- Data Panel
+    UI_APP[APP.DATA].active = false
+    UI_APP[APP.DATA].dialog = xml:InitStatic("data_panel", self)
+    local panel_bg = xml:InitStatic("data_panel:panel_bg", UI_APP[APP.DATA].dialog)
     xml:InitStatic("profiles_panel:v_main_separator", panel_bg)
-    xml:InitStatic("deck_panel:panel_logo", panel_bg)
-    UI_APP[APP.DECK].dialog:Show(false)
+    xml:InitStatic("data_panel:panel_logo", panel_bg)
+    UI_APP[APP.DATA].dialog:Show(false)
 end
 
 --------------------------------
@@ -2727,6 +2837,10 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
         self:RemoveNPCPanel()
         self:StartPerksBrowser(app_name, menu_name)
     end
+    if app_name == APP.DATA then
+        self:RemoveNPCPanel()
+        self:ClosePerksBrowser()
+    end
 end
 
 function npcd_dashboard_tab:DeactivateOtherMenus(app_name, menu_name)
@@ -2774,7 +2888,7 @@ function npcd_dashboard_tab:On_Profiles_Button_Clicked()
 
     self.app[APP.PROFILES].button:Enable(false)
     self.app[APP.PERKS].button:Enable(true)
-    self.app[APP.DECK].button:Enable(true)
+    self.app[APP.DATA].button:Enable(true)
 
     self.menu_scroller.ui.bg:Show(false)
     self.menu_scroller.ui.glass:Show(false)
@@ -2790,23 +2904,23 @@ function npcd_dashboard_tab:On_Perks_Button_Clicked()
 
     self.app[APP.PROFILES].button:Enable(true)
     self.app[APP.PERKS].button:Enable(false)
-    self.app[APP.DECK].button:Enable(true)
+    self.app[APP.DATA].button:Enable(true)
 
     self:ActivateAppPanel(APP.PERKS)
 end
 
-function npcd_dashboard_tab:On_Deck_Button_Clicked()
-    Printer:Debug(LOG.START, CAT.UI, "DECK Button Clicked")
+function npcd_dashboard_tab:On_Data_Button_Clicked()
+    Printer:Debug(LOG.START, CAT.UI, "DATA Button Clicked")
 
     self.app[APP.PROFILES].button:Enable(true)
     self.app[APP.PERKS].button:Enable(true)
-    self.app[APP.DECK].button:Enable(false)
+    self.app[APP.DATA].button:Enable(false)
 
     self.menu_scroller.ui.bg:Show(false)
     self.menu_scroller.ui.glass:Show(false)
     self.menu_scroller.ui.dialog:Show(false)
 
-    self:ActivateAppPanel(APP.DECK)
+    self:ActivateAppPanel(APP.DATA)
 end
 
 function npcd_dashboard_tab:EnableAppButtons(enable)

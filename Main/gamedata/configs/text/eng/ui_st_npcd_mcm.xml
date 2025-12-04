@@ -400,6 +400,18 @@
 	<string id="pda_btn_npcd_menu_effects">
 		<text>Effects</text>
 	</string>
+	<string id="pda_btn_npcd_menu_guide">
+		<text>Guide</text>
+	</string>
+	<string id="pda_btn_npcd_menu_tutorials">
+		<text>Tutorials</text>
+	</string>
+	<string id="pda_btn_npcd_menu_glossary">
+		<text>Glossary</text>
+	</string>	
+	<string id="pda_btn_npcd_menu_logs">
+		<text>Logs</text>
+	</string>	
 	<!-- NPCS Characteristics-->
 	<string id="st_npcd_char_survival">
 		<text>Survival</text>
@@ -439,6 +451,24 @@
 	</string>
 	<string id="st_npcd_specs_tab_equipment">
 		<text>Equipment</text>
+	</string>
+
+	<!-- header fields -->
+
+	<string id="st_npcd_specs_tab_header_type">
+		<text>Type</text>
+	</string>	
+	<string id="st_npcd_specs_tab_header_mode">
+		<text>Mode</text>
+	</string>	
+	<string id="st_npcd_specs_tab_header_source">
+		<text>Source</text>
+	</string>	
+	<string id="st_npcd_specs_tab_header_rank">
+		<text>Rank</text>
+	</string>
+	<string id="st_npcd_specs_tab_header_category">
+		<text>Category</text>
 	</string>
 
 <!-- talents tab header toggle -->

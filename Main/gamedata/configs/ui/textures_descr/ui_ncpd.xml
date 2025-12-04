@@ -101,6 +101,19 @@
 		<texture id="ui_npcd_pda_npc_detail_info_display_bg_white" x="2843" y="0" width="759" height="790" />
 		<texture id="ui_npcd_pda_npc_detail_info_display_glass" x="11" y="1323" width="877" height="419" />
 
+		<texture id="ui_npcd_pda_npc_detail_info_favorite_button_d" x="1626" y="1134" width="60" height="28" />
+		<texture id="ui_npcd_pda_npc_detail_info_favorite_button_e" x="1626" y="1134" width="60" height="28" />
+		<texture id="ui_npcd_pda_npc_detail_info_favorite_button_h" x="1756" y="1134" width="60" height="28" />
+		<texture id="ui_npcd_pda_npc_detail_info_favorite_button_t" x="1756" y="1134" width="60" height="28" />
+
+		<texture id="ui_npcd_pda_npc_detail_info_unfavorite_button_d" x="1690" y="1134" width="60" height="28" />
+		<texture id="ui_npcd_pda_npc_detail_info_unfavorite_button_e" x="1690" y="1134" width="60" height="28" />
+		<texture id="ui_npcd_pda_npc_detail_info_unfavorite_button_h" x="1756" y="1163" width="60" height="28" />
+		<texture id="ui_npcd_pda_npc_detail_info_unfavorite_button_t" x="1756" y="1163" width="60" height="28" />
+
+		<texture id="ui_npcd_pda_npc_detail_info_locked" x="1690" y="1163" width="60" height="28" />
+		<texture id="ui_npcd_pda_npc_detail_info_unlocked" x="1626" y="1163" width="60" height="28" />
+
 		<!-- npc specs -->
 		<texture id="ui_npcd_pda_npc_detail_info_spec_frame" x="2162" y="1136" width="669" height="392" />
 		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_d" x="1220" y="203" width="85" height="85" />
