@@ -23,7 +23,65 @@ MAX_MAIN_PERKS = 2
 
 PERK_CATEGORY = {
 	WARFARE = "st_npcd_perk_category_warfare",
+	COMMAND = "st_npcd_perk_category_command",
+	HUNTING = "st_npcd_perk_category_hunting",
+	SCIENCE = "st_npcd_perk_category_science",
+	DIPLOMACY = "st_npcd_perk_category_diplomacy",
+	SCAVENGING = "st_npcd_perk_category_scavenging",
+	TECHNOLOGY = "st_npcd_perk_category_technology",
+	CCON = "st_npcd_perk_category_ccon",
 }
+
+PERK_CATEGORY_UI = {
+	[PERK_CATEGORY.WARFARE] = {
+		name = "st_npcd_perk_category_warfare",
+		icon = "ui_npcd_pda_hint_wnd_perk_category_warfare",
+		desc = "st_npcd_perk_category_warfare_desc",
+	},
+	[PERK_CATEGORY.COMMAND] = {
+		name = "st_npcd_perk_category_command",
+		icon = "ui_npcd_pda_hint_wnd_perk_category_command",
+		desc = "st_npcd_perk_category_command_desc",
+	},
+	[PERK_CATEGORY.HUNTING] = {
+		name = "st_npcd_perk_category_hunting",
+		icon = "ui_npcd_pda_hint_wnd_perk_category_hunting",
+		desc = "st_npcd_perk_category_hunting_desc",
+	},
+	[PERK_CATEGORY.SCIENCE] = {
+		name = "st_npcd_perk_category_science",
+		icon = "ui_npcd_pda_hint_wnd_perk_category_science",
+		desc = "st_npcd_perk_category_science_desc",
+	},
+	[PERK_CATEGORY.DIPLOMACY] = {
+		name = "st_npcd_perk_category_diplomacy",
+		icon = "ui_npcd_pda_hint_wnd_perk_category_diplomacy",
+		desc = "st_npcd_perk_category_diplomacy_desc",
+	},
+	[PERK_CATEGORY.SCAVENGING] = {
+		name = "st_npcd_perk_category_scavenging",
+		icon = "ui_npcd_pda_hint_wnd_perk_category_scavenging",
+		desc = "st_npcd_perk_category_scavenging_desc",
+	},
+	[PERK_CATEGORY.TECHNOLOGY] = {
+		name = "st_npcd_perk_category_technology",
+		icon = "ui_npcd_pda_hint_wnd_perk_category_technology",
+		desc = "st_npcd_perk_category_technology_desc",
+	},
+	[PERK_CATEGORY.CCON] = {
+		name = "st_npcd_perk_category_ccon",
+		icon = "ui_npcd_pda_hint_wnd_perk_category_ccon",
+		desc = "st_npcd_perk_category_ccon_desc",
+	},
+}
+
+function get_perk_categories_ui_list()
+	local categories_ui_list = {}
+	for category, _ in pairs(PERK_CATEGORY) do
+		table.insert(categories_ui_list, PERK_CATEGORY_UI[PERK_CATEGORY[category]])
+	end
+	return categories_ui_list
+end
 
 PERK_TYPE = {
 	ARCHETYPE = "st_npcd_perk_type_archetype",
@@ -363,6 +421,7 @@ function get_module_perks(module)
 	end
 	return module_perks
 end
+
 
 -- function add_category(perk_category, desc)
 -- 	if not perk_category then return end
@@ -1124,6 +1183,39 @@ function set_discovered(perk_id)
 	end
 	stats.Perk[perk_id]["discovered"] = true
 	return true
+end
+
+function set_learned(perk_id)
+	if stats.Perk[perk_id] and stats.Perk[perk_id].learned then return false end
+	if not stats.Perk[perk_id] then
+		stats.Perk[perk_id] = {}
+	end
+	stats.Perk[perk_id]["learned"] = true
+	return true
+end
+
+function get_discovered_perks()
+	local discovered_perks = {}
+	for perk_id, perk in pairs(stats.Perk) do
+		if perk.discovered then
+			local perk = npcdu.copy(perks[perk_id])
+			-- table.insert(discovered_perks, perk)
+			discovered_perks[perk_id] = perk
+		end
+	end
+	return discovered_perks
+end
+
+function get_learned_perks()
+	local learned_perks = {}
+	for perk_id, perk in pairs(stats.Perk) do
+		if perk.learned then
+			local perk = npcdu.copy(perks[perk_id])
+			-- table.insert(learned_perks, perk)
+			learned_perks[perk_id] = perk
+		end
+	end
+	return learned_perks
 end
 
 function set_favorite(npc_id, favorite)

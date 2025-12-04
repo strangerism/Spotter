@@ -147,6 +147,7 @@ local FX_CONFIG = {
 		height = 0, 		-- internal
 		cycle = 0, 			-- internal
 		starting_position = 0, -- 0 - from middle to full, 1 - from top to full , 2 - from bottom to full
+		ending_height = nil, -- custom height to end showing at
 		show_on_position = nil, -- y position to show the dialog (must be used with CUIWindow Frame) 
 		on_showing_complete = nil,
 	},
@@ -225,10 +226,21 @@ end
 function remove_fx(fx_id)
 	local fx_job = FX_JOBS[fx_id]
 	if fx_job then
-		npe_execution.Remove(fx_job.runner_name)
-		if fx_job.config.fx_ui and fx_job.config.type ~= FX.SHOWING then
+		if fx_job.config.fx_ui and (fx_job.config.type ~= FX.SHOWING or fx_job.config.type ~= FX.HIDING) then
+			npe_execution.Remove(fx_job.runner_name)
 			fx_job.config.fx_ui:Show(false)
 			fx_job.config.fx_ui = nil
+		elseif fx_job.config.type == FX.SHOWING or fx_job.config.type == FX.HIDING then
+			-- Printer:Debug(LOG.UPDATED, CAT.UI_ACTION," Removing showing fx %s", fx_id)
+			-- for showing fx, just stop the runner and restore dialog to original size/position
+			npe_execution.Remove(fx_job.runner_name)
+			local config = fx_job.config
+			if config.fx_ui then
+				-- restore original position and size
+				config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.original_y))
+				config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), config.height))
+				config.fx_ui:Show(false)
+			end
 		end
 		FX_JOBS[fx_id] = nil
 	end
@@ -243,10 +255,25 @@ end
 function stop_fx(fx_id)
 	local fx_job = FX_JOBS[fx_id]
 	if fx_job then
-		npe_execution.Stop(fx_job.runner_name)
-		if fx_job.config.fx_ui and fx_job.config.type ~= FX.SHOWING then
+		if fx_job.config.fx_ui and (fx_job.config.type ~= FX.SHOWING and fx_job.config.type ~= FX.HIDING) then
+			npe_execution.Stop(fx_job.runner_name)
 			fx_job.config.fx_ui:Show(false)
 			fx_job.config.fx_ui = nil
+		elseif fx_job.config.type == FX.SHOWING or fx_job.config.type == FX.HIDING then
+			-- Printer:Debug(LOG.UPDATED, CAT.UI_ACTION," Stopping showing fx %s", fx_id)
+			-- for showing fx, just stop the runner and restore dialog to original size/position
+			npe_execution.Stop(fx_job.runner_name)
+			local config = fx_job.config
+			if config.fx_ui then
+				-- restore original position and size
+				config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.original_y))
+				config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), config.height))
+				-- print size of fx_ui
+				-- Printer:Debug(LOG.UPDATED, CAT.UI_ACTION," fx_ui size: width=%s, height=%s", config.fx_ui:GetWidth(), config.fx_ui:GetHeight())
+				-- print position
+				-- Printer:Debug(LOG.UPDATED, CAT.UI_ACTION," fx_ui position: x=%s, y=%s", config.fx_ui:GetWndPos().x, config.fx_ui:GetWndPos().y)
+				config.fx_ui:Show(false)
+			end
 		end
 	end
 end
@@ -689,7 +716,7 @@ function run_show(runner_name)
 			config.fx_ui:Show(true)
 		end
 	end
-	Printer:Debug(LOG.INFO, CAT.UI_ACTION," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
+	Printer:Debug(LOG.INFO, CAT.UI," showing dialog %s at y:%s height:%s", runner_name, new_y, new_height)
 end
 
 function on_start_show(runner_name)
@@ -700,6 +727,8 @@ function on_start_show(runner_name)
 	config.fx_ui = config.dialog
 	Printer:Debug(LOG.START, CAT.UI_ACTION," starting show_dialog")
 	config.original = {}
+	-- print original position
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," fx_ui orignal position: x=%s, y=%s", config.fx_ui:GetWndPos().x, config.fx_ui:GetWndPos().y)
 	-- save original y position
 	config.original_y = config.fx_ui:GetWndPos().y
 	-- save original height
@@ -724,6 +753,8 @@ function on_start_show(runner_name)
 	config.fx_ui:SetWndPos(vector2():set(config.fx_ui:GetWndPos().x, config.y))
 	-- initial height 0
 	config.fx_ui:SetWndSize(vector2():set(config.fx_ui:GetWidth(), 0))
+	-- print position
+	Printer:Debug(LOG.INFO, CAT.UI_ACTION," fx_ui starting position: x=%s, y=%s", config.fx_ui:GetWndPos().x, config.fx_ui:GetWndPos().y)
 	if not config.show_on_position then
 		config.fx_ui:Show(true)
 	end
@@ -752,7 +783,10 @@ function showing_completed(runner_name)
 	if not fx_job then return false end
 	local config = fx_job.config
 	if not config.fx_ui then return end
-	if config.fx_ui:GetHeight() >= config.height then
+
+	local ending_height = config.ending_height or config.height
+
+	if config.fx_ui:GetHeight() >= ending_height then
 		return true
 	else
 		return false
@@ -951,7 +985,7 @@ function SFXVideoTerminal:__init(sfx_config)
 	showing.dialog = self.display
 	showing.speed = sfx_config.turn_on_speed
 	showing.start_timer = sfx_config.start_timer
-	showing.starting_position = sfx_config.display_showing
+	showing.starting_position = sfx_config.display_showing or 0
 	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_started", sfx_config.id}
 	add_fx(showing, sfx_config.group)
 	self.fx.showing_display = showing
@@ -965,12 +999,13 @@ function SFXVideoTerminal:__init(sfx_config)
 	self.fx.hiding_display = hiding
 
 	-- FX: showing content
-	showing = get_fx_config(FX.SHOWING, sfx_config.group)
-	showing.dialog = self.content
-	showing.speed = 0.005
-	showing.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_content_displayed", sfx_config.id}
-	add_fx(showing, sfx_config.group)
-	self.fx.showing_content = showing
+	local showing_content = get_fx_config(FX.SHOWING, sfx_config.group)
+	showing_content.dialog = self.content
+	showing_content.speed = 0.005
+	showing_content.starting_position = sfx_config.content_showing or 0
+	showing_content.on_showing_complete = {"npcd_ui_fx", "sfx_video_terminal_on_content_displayed", sfx_config.id}
+	add_fx(showing_content, sfx_config.group)
+	self.fx.showing_content = showing_content
 
 -- FX: Flickering on content
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING, sfx_config.group)
@@ -1100,6 +1135,7 @@ function SFXVideoTerminal:__on_started()
 	-- 	self.dirt = self.xml:InitStatic(self.config.dirt, self.glass)
 	-- end
 	npcd_ui_fx.resume_fx(self.fx.showing_content.id)
+	self.state = "on"
 end
 
 function SFXVideoTerminal:__on_content_displayed()
@@ -1176,17 +1212,21 @@ end
 function SFXVideoTerminal:SwitchOn()
 	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] switch on", self.config.name, self.config.group)
 	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"Starting FX: [%s][%s] %s", self.config.name, self.config.group, self.fx.showing_display.id)
+	npcd_ui_fx.stop_fx(self.fx.hiding_display.id)
 	npcd_ui_fx.resume_fx(self.fx.showing_display.id)
 end
 
 function SFXVideoTerminal:SwitchOff()
-	Printer:Debug(LOG.RUN, CAT.UI_ACTION,"SFXVideoTerminal: [%s][%s] switch off", self.config.name, self.config.group)
+	Printer:Debug(LOG.RUN, CAT.UI,"SFXVideoTerminal: [%s][%s] switch off", self.config.name, self.config.group)
+	self.state = "off"
 	if self.fx.scanlines then
 		npcd_ui_fx.remove_fx(self.fx.scanlines.id)
 	end
 	npcd_ui_fx.stop_fx(self.fx.flickering.id)
 	self.content:Show(false)
 	npcd_ui_fx.resume_fx(self.fx.hiding_display.id)
+	npcd_ui_fx.stop_fx(self.fx.showing_content.id)
+	npcd_ui_fx.stop_fx(self.fx.showing_display.id)
 	if self.header then
 		self.header:Show(false)
 	end
@@ -1200,6 +1240,14 @@ function SFXVideoTerminal:SwitchOff()
 	end
 end
 
+function SFXVideoTerminal:IsOn()
+	if self.state == "on" then
+		return true
+	else
+		return false
+	end
+
+end
 
 function sfx_video_terminal_on_started(sfx_id)
 	-- Printer:Debug(LOG.RUN, CAT.UI_ACTION," SFXVideoTerminal: started callback %s", sfx_id)

@@ -102,6 +102,9 @@
 		\n- %c[orange]SECONDARY%c[white]: a minor perk with a single feat, that cannot be active. NPC always have 2 secondary perks.
 		</text>
 	</string>
+	<string id="ui_mcm_st_npcd_perk_type">
+		<text>Perk type</text>
+	</string>	
 	<string id="ui_mcm_st_npcd_perk_category">
 		<text>Perk category</text>
 	</string>	
@@ -175,6 +178,30 @@
 	<string id="ui_mcm_lst_st_npcd_perk_category_warfare">
 		<text>Warfare</text>
 	</string>
+	<string id="ui_mcm_lst_st_npcd_perk_category_command">
+		<text>Command</text>
+	</string>	
+	<string id="ui_mcm_lst_st_npcd_perk_category_hunting">
+		<text>Hunting</text>
+	</string>	
+	<string id="ui_mcm_lst_st_npcd_perk_category_science">
+		<text>Science</text>
+	</string>	
+	<string id="ui_mcm_lst_st_npcd_perk_category_diplomacy">
+		<text>Diplomacy</text>
+	</string>	
+	<string id="ui_mcm_lst_st_npcd_perk_category_scavenging">
+		<text>Scavenging</text>
+	</string>
+	<string id="ui_mcm_lst_st_npcd_perk_category_technology">
+		<text>Technology</text>
+	</string>	
+	<string id="ui_mcm_lst_st_npcd_perk_category_ccon">
+		<text>C Consciousness</text>
+	</string>				
+	<string id="ui_mcm_lst_st_npcd_perk_category_all">
+		<text>All</text>
+	</string>	
 	<!-- Feat Type -->
 	<string id="ui_mcm_lst_st_npcd_feat_type_active">
 		<text>Active</text>
@@ -279,16 +306,19 @@
 
 <!-- Feat Stat -->
 
-	<string id="st_npcd_feat_stat_cooldown_desc">
+	<string id="st_npcd_feat_stat_cooldown">
 		<text>Cooldown</text>
 	</string>
-	<string id="st_npcd_feat_stat_duration_desc">
+	<string id="st_npcd_feat_stat_duration">
 		<text>Duration</text>
 	</string>
-	<string id="st_npcd_feat_stat_chance_desc">
+	<string id="st_npcd_feat_stat_chance">
 		<text>Chance</text>
 	</string>
-	<string id="st_npcd_feat_stat_damage_desc">
+	<string id="st_npcd_feat_stat_chance_desc">
+		<text>Chance to roll</text>
+	</string>	
+	<string id="st_npcd_feat_stat_damage">
 		<text>Damage</text>
 	</string>
 
@@ -336,6 +366,9 @@
 	</string>
 	<string id="pda_btn_npcd_app_deck">
 		<text>Deck</text>
+	</string>	
+	<string id="pda_btn_npcd_app_data">
+		<text>Data</text>
 	</string>			
 	<string id="pda_btn_npcd_menu_squad">
 		<text>Squad</text>
@@ -423,6 +456,9 @@
 	<string id="ui_npcd_details_perk_header">
 		<text>Perk</text>
 	</string>	
+	<string id="ui_npcd_details_perk_category_caption">
+		<text>Category</text>
+	</string>		
 	<string id="ui_npcd_details_ability_cost">
 		<text>Cost</text>
 	</string>
@@ -453,4 +489,36 @@
 	<string id="ui_npcd_details_ability_rank">
 		<text>Rank</text>
 	</string>	
+
+	<!-- perk details -->
+	<string id="ui_npcd_details_perk_characteristics_header">
+		<text>- [ Characteristics ] -</text>
+	</string>
+	<string id="ui_npcd_details_perk_characteristics_type">
+		<text>Type</text>
+	</string>	
+	<string id="ui_npcd_details_perk_characteristics_category">
+		<text>Category</text>
+	</string>	
+	<string id="ui_npcd_details_perk_characteristics_chance">
+		<text>Chance</text>
+	</string>	
+	<string id="ui_npcd_details_perk_characteristics_requirements">
+		<text>Requires</text>
+	</string>	
+	<string id="ui_npcd_details_perk_characteristics_faction">
+		<text>Faction</text>
+	</string>		
+	<string id="ui_npcd_details_perk_description_header">
+		<text>- [ Description ] -</text>
+	</string>	
+	<string id="ui_npcd_details_perk_feats_header">
+		<text>- [ Feats ] -</text>
+	</string>
+	<string id="ui_npcd_details_perk_search">
+		<text>Enter text...</text>
+	</string>	
+	<string id="ui_npcd_details_perk_filter">
+		<text>Categories</text>
+	</string>		
 </string_table>

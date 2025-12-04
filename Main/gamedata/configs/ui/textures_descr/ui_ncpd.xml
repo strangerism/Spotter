@@ -84,6 +84,11 @@
 		<texture id="ui_npcd_pda_scroller_item_darkfill_button_h" x="1135" y="455" width="337" height="48" />
 		<texture id="ui_npcd_pda_scroller_item_darkfill_button_t" x="1135" y="455" width="337" height="48" />		
 
+		<texture id="ui_npcd_pda_perks_scroller_button_d" x="1657" y="1322" width="344" height="60" />
+		<texture id="ui_npcd_pda_perks_scroller_button_e" x="1135" y="806" width="10" height="10" />
+		<texture id="ui_npcd_pda_perks_scroller_button_h" x="1135" y="455" width="337" height="48" />
+		<texture id="ui_npcd_pda_perks_scroller_button_t" x="1135" y="455" width="337" height="48" />	
+
 		<!-- npc details						 -->
 		<texture id="ui_npcd_pda_npc_detail_panel_frame" x="2162" y="22" width="669" height="288" />
 		<texture id="ui_npcd_pda_npc_detail_panel_glass" x="2213" y="371" width="535" height="227" />
@@ -144,6 +149,23 @@
 
 		<texture id="ui_npcd_pda_talent_item1" x="1171" y="1127" width="318" height="71" />
 
+		<texture id="ui_npcd_pda_perk_card"    x="1171" y="1213" width="390" height="102" />
+		<texture id="ui_npcd_pda_perk_icon_frame"    x="1171" y="1332" width="90" height="91" />
+
+		<texture id="ui_npcd_pda_feat_details_close_e"    x="1497" y="1135" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_close_d"    x="1497" y="1135" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_close_h"    x="1518" y="1135" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_close_t"    x="1518" y="1135" width="17" height="17" />
+
+		<texture id="ui_npcd_pda_feat_details_minimize_e"    x="1539" y="1175" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_minimize_d"    x="1539" y="1175" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_minimize_h"    x="1559" y="1175" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_minimize_t"    x="1559" y="1175" width="17" height="17" />
+
+		<texture id="ui_npcd_pda_feat_details_maximize_e"    x="1539" y="1155" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_maximize_d"    x="1539" y="1155" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_maximize_h"    x="1559" y="1155" width="17" height="17" />
+		<texture id="ui_npcd_pda_feat_details_maximize_t"    x="1559" y="1155" width="17" height="17" />
 	</file>	
 	<file name="ui\npcd\ui_npcd_hint">
 	    <!-- <texture id="ui_npcd_pda_hint_wnd_40k" x="0" y="0" width="778" height="682" /> -->	
@@ -159,6 +181,20 @@
 	    <texture id="ui_npcd_pda_hint_wnd_40k_lb"    x="0" y="512" width="230" height="170" />
 	    <texture id="ui_npcd_pda_hint_wnd_40k_b"     x="306" y="512" width="170" height="170" />
 	    <texture id="ui_npcd_pda_hint_wnd_40k_rb"    x="548" y="512" width="230" height="170" />	
+
+		<!-- Perks menu feat details -->
+
+		<texture id="ui_npcd_pda_feat_details_background_lt"    x="8" y="16" width="230" height="50" />
+	    <texture id="ui_npcd_pda_feat_details_background_t"     x="306" y="16" width="170" height="50" />
+	    <texture id="ui_npcd_pda_feat_details_background_rt"    x="540" y="16" width="230" height="50" />
+
+	    <texture id="ui_npcd_pda_feat_details_background_l"     x="8" y="250" width="230" height="50" />
+	    <texture id="ui_npcd_pda_feat_details_background_back"  x="306" y="250" width="170" height="50" />
+	    <texture id="ui_npcd_pda_feat_details_background_r"     x="540" y="250" width="230" height="50" />
+
+	    <texture id="ui_npcd_pda_feat_details_background_lb"    x="8" y="490" width="230" height="50" />
+	    <texture id="ui_npcd_pda_feat_details_background_b"     x="306" y="490" width="170" height="50" />
+	    <texture id="ui_npcd_pda_feat_details_background_rb"    x="540" y="490" width="230" height="50" />	
 
 		<!-- hint and details -->
 		<texture id="ui_npcd_pda_hint_wnd_header_bg"    x="786" y="0" width="558" height="106" />
@@ -210,6 +246,45 @@
 		<texture id="ui_npcd_pda_hint_wnd_perk_type_archetype" x="1671" y="460" width="70" height="70" />
 		<texture id="ui_npcd_pda_hint_wnd_perk_type_main" x="1755" y="460" width="70" height="70" />
 		<texture id="ui_npcd_pda_hint_wnd_perk_type_secondary" x="1838" y="460" width="70" height="70" />
+
+	</file>
+	<file name="ui\npcd\ui_pda_perks_panel">
+		<texture id="ui_npcd_pda_perks_panel_frame" x="0" y="0" width="1553" height="987" />
+		<texture id="ui_npcd_pda_perks_panel_display" x="1566" y="0" width="2271" height="1102" />
+		<texture id="ui_npcd_pda_perks_panel_scroller" x="1565" y="1114" width="453" height="625" />
+
+		<texture id="ui_npcd_pda_perk_details"    x="2039" y="1114" width="1374" height="630" />
+		<texture id="ui_npcd_pda_feat_details_toggle_button"    x="1170" y="1437" width="473" height="73" />
+
+	    <texture id="ui_npcd_pda_perks_details_frame_lt"    x="2039" y="1114" width="60" height="150" />
+	    <texture id="ui_npcd_pda_perks_details_frame_t"     x="60" y="0" width="25" height="150" />
+	    <texture id="ui_npcd_pda_perks_details_frame_rt"    x="211" y="0" width="65" height="150" />
+
+	    <texture id="ui_npcd_pda_perks_details_frame_l"     x="0" y="112" width="60" height="28" />
+	    <texture id="ui_npcd_pda_perks_details_frame_back"  x="60" y="112" width="25" height="28" />
+	    <texture id="ui_npcd_pda_perks_details_frame_r"     x="211" y="112" width="65" height="28" />
+
+	    <texture id="ui_npcd_pda_perks_details_frame_lb"    x="0" y="318" width="60" height="85" />
+	    <texture id="ui_npcd_pda_perks_details_frame_b"     x="60" y="318" width="25" height="85" />
+	    <texture id="ui_npcd_pda_perks_details_frame_rb"    x="211" y="318" width="65" height="85" />
+
+		<texture id="ui_npcd_pda_perks_search_box"    x="464" y="1175" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_search_box_e"    x="464" y="1175" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_search_box_d"    x="464" y="1175" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_search_box_t"    x="464" y="1175" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_search_box_h"    x="464" y="1175" width="443" height="48" />
+
+		<!-- <texture id="ui_npcd_pda_perks_category_filter"    x="464" y="1292" width="443" height="48" /> -->
+		<texture id="ui_npcd_pda_perks_category_filter_e"    x="464" y="1292" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_category_filter_d"    x="464" y="1292" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_category_filter_t"    x="464" y="1292" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_category_filter_h"    x="464" y="1292" width="443" height="48" />
+
+		<!-- <texture id="ui_npcd_pda_perks_category_filter_active"    x="464" y="1240" width="443" height="48" /> -->
+		<texture id="ui_npcd_pda_perks_category_filter_active_e"    x="464" y="1240" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_category_filter_active_d"    x="464" y="1240" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_category_filter_active_t"    x="464" y="1240" width="443" height="48" />
+		<texture id="ui_npcd_pda_perks_category_filter_active_h"    x="464" y="1240" width="443" height="48" />		
 
 	</file>
 	<file name="ui\npcd\ui_npcd_icons">

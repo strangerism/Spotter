@@ -1,5 +1,9 @@
 local npcdu = npcd_utils
 local gc = game.translate_string
+local c_grey = utils_xml.get_color("ui_gray_3")
+local c_blue = utils_xml.get_color("pda_blue")
+local c_yellow = utils_xml.get_color("pda_yellow")
+local c_white  = utils_xml.get_color("ui_white")
 
 function get_printer()
 	if not Printer then
@@ -136,6 +140,7 @@ local APP_MENU = {
     [APP.PERKS] = {
         MENU.DISCOVERED,
         MENU.LEARNED,
+        MENU.ALL,
     },
     [APP.DECK] = {
         MENU.PERKS,
@@ -210,6 +215,83 @@ UI_DETAILS = {
     close_button = nil,
 }
 
+class "npcd_dashboard_search_box" (CUIScriptWnd)
+function npcd_dashboard_search_box:__init() super()
+    Printer:Debug(LOG.INFO, CAT.UI, "Initialising NPCD PDA Dashboard Search Box UI Constructor")
+	self:SetWndRect			(Frect():set(0,0,1024,768))
+	self:SetAutoDelete(true)
+
+    local xml = CScriptXmlInit()
+    xml:ParseFile("npcd_pda_dashboard.xml")
+
+    self.xml = xml
+    self.search_filter = nil
+
+    self:InitControls()
+end
+
+function npcd_dashboard_search_box:InitControls()
+    Printer:Debug(LOG.INFO, CAT.UI, "Initialising NPCD PDA Dashboard Search Box UI")
+    self.dialog = self.xml:InitStatic("perks_browser:search_box", self )
+    self.search = self.xml:InitEditBox("perks_browser:search_box:search", self.dialog )
+    self.search:SetText("")
+    self:Register(self.search, "perks_browser_search_box")
+    self:AddCallback("perks_browser_search_box", ui_events.EDIT_TEXT_COMMIT, function ()
+        local search_text = self.search:GetText()
+        Printer:Debug(LOG.INFO, CAT.UI, "Perks Browser Search Box Text Changed - New Text: " .. tostring(search_text))
+        if search_text == "" then
+            self.search_filter = nil
+        else
+            self.search_filter = search_text:lower()
+        end
+        local ui = npcd_pda_dashboard.get_ui()
+        ui.perks_browser.content.perks_scroller.search:TextControl():SetText(search_text)
+        ui:ClearPerkDetails()
+        ui:UpdatePerksScroller(ui.perks_browser.active_menu)
+    end, self)
+end
+
+function npcd_dashboard_search_box:Update()
+	CUIScriptWnd.Update(self)
+end
+
+function npcd_dashboard_search_box:__finalize()
+end
+
+function npcd_dashboard_search_box:ClearSearch()
+    Printer:Debug(LOG.INFO, CAT.UI, "Clearing NPCD PDA Dashboard Search Box UI Text and Filter")
+    self.search:Show(false)
+    self.search:SetText("")
+    self.search_filter = nil
+    self.search:Show(true)
+end
+
+function npcd_dashboard_search_box:Close()
+    Printer:Debug(LOG.INFO, CAT.UI, "Destroying NPCD PDA Dashboard Search Box UI")
+
+	self:HideDialog()
+	
+	Unregister_UI("npcd_dashboard_search_box")
+end
+
+function npcd_dashboard_search_box:OnKeyboard(dik, keyboard_action)
+	local res = CUIScriptWnd.OnKeyboard(self,dik,keyboard_action)
+	if (res == false) then
+		local bind = dik_to_bind(dik)					
+		if keyboard_action == ui_events.WINDOW_KEY_PRESSED then
+			if dik == DIK_keys.DIK_ESCAPE or bind == key_bindings.kACTIVE_JOBS or bind == key_bindings.kCUSTOM20 then
+                local ui = npcd_pda_dashboard.get_ui()
+                if self.search:GetText() == "" then
+                    ui.perks_browser.content.perks_scroller.search:TextControl():SetText(game.translate_string("ui_npcd_details_perk_search"))
+                end
+                ui.perks_browser.content.perks_scroller.search:Show(true)
+				self:Close()
+			end        
+		end
+	end
+	return res
+end
+
 -- Constructor.
 class "npcd_dashboard_tab" (CUIScriptWnd)
 function npcd_dashboard_tab:__init() super()
@@ -226,7 +308,7 @@ function npcd_dashboard_tab:InitControls()
 
 -- FX: Flickering Manager 
     self.flickering_manager = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING_MANAGER)
-    npcd_ui_fx.add_fx(self.flickering_manager)
+    npcd_ui_fx.add_fx(self.flickering_manager, "dashboard_flickering_manager")
     npcd_ui_fx.resume_fx(self.flickering_manager.id)
     
     -- Apps Bar
@@ -240,6 +322,7 @@ function npcd_dashboard_tab:InitControls()
     self:InitAppsMenu()
     self:InitItemScroller()
     self:InitNPCPanelInfo()
+    self:InitPerksBrowser()
     self:ActivateAppPanel(APP.HOME)
     xml:InitStatic("right_side", self)
     -- Footer
@@ -263,7 +346,46 @@ function npcd_dashboard_tab:InitControls()
 
 	self.tg_hint         = nil
 	self.tg_hint_step    = 1000 --[ms]
-    
+end
+
+function npcd_dashboard_tab:InitSearchBox()
+
+    self.perks_browser.content.perks_scroller.search:Show(false)
+	if (not self.search_box) then
+		self.search_box = npcd_dashboard_search_box()
+	end
+	
+	if (self.search_box) and (not self.search_box:IsShown()) then
+		self.search_box:ShowDialog(true)
+		Register_UI("npcd_dashboard_search_box","item_backpack")
+        self.search_box.search:CaptureFocus(true)
+	end
+
+    return self.search_box
+end
+
+function npcd_dashboard_tab:GetSearchFilter()
+    return self.search_box and self.search_box.search_filter or nil
+end
+
+function npcd_dashboard_tab:ClearSearchBox()
+    if self.search_box then
+        Printer:Debug(LOG.INFO, CAT.UI, "Clearing NPCD PDA Dashboard Search Box UI Text and Filter")
+        self.search_box:ClearSearch()
+        self:ClearPerkDetails()
+        self:UpdatePerksScroller(self.perks_browser.active_menu)
+    end
+end
+
+function npcd_dashboard_tab:CloseSearchBox()
+    if self.search_box then
+        Printer:Debug(LOG.INFO, CAT.UI, "Closing NPCD PDA Dashboard Search Box UI")
+        if self.search_box.search:GetText() == "" then
+            self.perks_browser.content.perks_scroller.search:TextControl():SetText(game.translate_string("ui_npcd_details_perk_search"))
+        end
+        self.perks_browser.content.perks_scroller.search:Show(true)
+        self.search_box:Close()
+    end
 end
 
 -- destroy UI
@@ -293,7 +415,7 @@ function npcd_dashboard_tab:InitAppsBar()
     scanlines.intensity = 0.3
     scanlines.random_accel = true
     scanlines.accel_length = 5
-    npcd_ui_fx.add_fx(scanlines)
+    npcd_ui_fx.add_fx(scanlines, "apps_bar_scanlines")
     self.apps_bar_scanline = scanlines
 
 -- FX: FLickering on scanline
@@ -313,7 +435,7 @@ function npcd_dashboard_tab:InitAppsBar()
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     flickering.dialog = background
     flickering.speed = 0.02
-    npcd_ui_fx.add_fx(flickering)
+    npcd_ui_fx.add_fx(flickering, "apps_bar_flickering")
     self.apps_bar_flickering = flickering
 
     self.app = {}
@@ -380,7 +502,7 @@ function npcd_dashboard_tab:InitItemScroller()
     glass_showing.dialog = self.menu_scroller.ui.glass
     glass_showing.speed = 0.02
     glass_showing.on_showing_complete = {"npcd_pda_dashboard", "items_scroller_glass_showing_fx_stop"}
-    npcd_ui_fx.add_fx(glass_showing)
+    npcd_ui_fx.add_fx(glass_showing, "menu_scroller_glass_showing")
     self.menu_scroller.fx.glass_showing = glass_showing
 
 -- FX: Scanlines on scroller
@@ -392,7 +514,7 @@ function npcd_dashboard_tab:InitItemScroller()
     scanlines.margin_v = -5
     scanlines.margin_h = 0
     scanlines.orientation = 1
-    npcd_ui_fx.add_fx(scanlines)
+    npcd_ui_fx.add_fx(scanlines, "menu_scroller_scanlines")
     self.menu_scroller.fx.scanline = scanlines
 
 -- FX: Wide Scanlines on scroller
@@ -405,7 +527,7 @@ function npcd_dashboard_tab:InitItemScroller()
     wide_scanlines.orientation = 1
     wide_scanlines.scale = 5
     wide_scanlines.intensity = 0.05
-    npcd_ui_fx.add_fx(wide_scanlines)
+    npcd_ui_fx.add_fx(wide_scanlines, "menu_scroller_wide_scanlines")
     self.menu_scroller.fx.wide_scanline = wide_scanlines
 
     local wide_scanlines_2 = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SCANLINES)
@@ -418,7 +540,7 @@ function npcd_dashboard_tab:InitItemScroller()
     wide_scanlines_2.orientation = 1
     wide_scanlines_2.scale = 5
     wide_scanlines_2.intensity = 0.05
-    npcd_ui_fx.add_fx(wide_scanlines_2)
+    npcd_ui_fx.add_fx(wide_scanlines_2, "menu_scroller_wide_scanlines_2")
     self.menu_scroller.fx.wide_scanline_2 = wide_scanlines_2
 
 -- FX: Flickering on scroller
@@ -569,7 +691,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 -- FX: Flickering Manager for content elements
     self.npc_panel.info.content.fx = {}
     self.npc_panel.info.content.fx.flickering_manager = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING_MANAGER)
-    npcd_ui_fx.add_fx(self.npc_panel.info.content.fx.flickering_manager)
+    npcd_ui_fx.add_fx(self.npc_panel.info.content.fx.flickering_manager, "npc_info_content_flickering_manager")
 
     -- Id Card
     -- ------------------------------
@@ -589,7 +711,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     showing.dialog = self.npc_panel.info.content.idcard.portrait
     showing.speed = 0.005
     -- showing.on_showing_complete = {"npcd_pda_dashboard", "npc_panel_info_showing_fx_stop"}
-    npcd_ui_fx.add_fx(showing)
+    npcd_ui_fx.add_fx(showing, "npc_panel_info_portrait_showing")
     self.npc_panel.info.content.fx.portrait_showing = showing
 -- FX: Flickering on portrait
     local flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
@@ -650,7 +772,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 -- FX: Flickering on characteristics group
     local char_flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
     char_flickering.dialog = self.npc_panel.info.content.characteristics.char_group
-    npcd_ui_fx.add_fx(char_flickering, "char")
+    npcd_ui_fx.add_fx(char_flickering, "npc_panel_info_characteristics_flickering")
     self.npc_panel.info.content.fx.char_flickering = char_flickering
 
     self.npc_panel.info.content.characteristics.dialog:Show(false)
@@ -691,7 +813,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     specs_terminal.xml_init = "npcd_pda_dashboard.xml"
     specs_terminal.parent = specs
     specs_terminal.display = "npc_panel:specs:terminal_display"
-    specs_terminal.display_showing = 0 -- from bottom
+    specs_terminal.display_showing = 0 -- from middle
     specs_terminal.start_timer = 0.45
 
     -- tabs
@@ -1298,7 +1420,7 @@ function npcd_dashboard_tab:InitDetailsWindow()
     showing.show_on_position = 300
     -- showing.show_on_position = 120
     showing.on_showing_complete = {"npcd_pda_dashboard", "details_window_showing_complete"}
-    npcd_ui_fx.add_fx(showing)
+    npcd_ui_fx.add_fx(showing, "details_window_showing")
     UI_DETAILS.fx = {}
     UI_DETAILS.fx.showing = showing
 
@@ -1371,9 +1493,9 @@ local color_grey = GetARGB(255, 100, 100, 100)
 local color_red = GetARGB(255, 255, 0, 0)
 local color_black = GetARGB(255, 0, 0, 0)
 
-function npcd_dashboard_tab:UpdateFeatStats(feat_id)
+function npcd_dashboard_tab:UpdateFeatStats(feat_uid)
     Printer:Debug(LOG.START, CAT.UI, "Updating Details Window Feat Stats - Rank: " .. tostring(UI_DETAILS.rank or 1))
-    local feat = npcd.get_ability_feat(feat_id)
+    local feat = npcd.get_ability_feat(feat_uid)
     if feat then
         for stat_name, stat_el in pairs(UI_DETAILS.stats or {}) do
             local ranked_stats = feat.stats[UI_DETAILS.rank]
@@ -1433,12 +1555,12 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
             )
             UI_DETAILS.scroll:AddWindow(feat_mode, true)
 
-            local feat_mode = self:CreateDetailsAttribute(
+            local feat_category = self:CreateDetailsAttribute(
                 npcd.FEAT_CATEGORY_UI[feat.category].icon,
                 gc("ui_mcm_st_npcd_feat_category"),
                 gc("ui_mcm_lst_" .. feat.category)
             )
-            UI_DETAILS.scroll:AddWindow(feat_mode, true)
+            UI_DETAILS.scroll:AddWindow(feat_category, true)
 
             local feat_target = self:CreateDetailsAttribute(
                 npcd.FEAT_TARGET_UI[feat.target].icon,
@@ -1468,7 +1590,7 @@ function npcd_dashboard_tab:UpdateDetailsWindow(id, hint_type)
                         local suffix = self:__GetStatSuffix(stat_name)
                         local stat_attr = self:CreateDetailsStat(
                             npcd.FEAT_STAT[stat_name].icon,
-                            gc(npcd.FEAT_STAT[stat_name].desc),
+                            gc(npcd.FEAT_STAT[stat_name].name),
                             tostring(stat_value) .. suffix
                         )
                         UI_DETAILS.scroll:AddWindow(stat_attr, true)
@@ -1699,6 +1821,762 @@ function npcd_dashboard_tab:On_Menu_Button_Clicked(app, menu)
 end
 
 
+function npcd_dashboard_tab:InitPerksBrowser()
+    Printer:Debug(LOG.START, CAT.UI, "Initializing Perks Browser")
+    self.perks_browser = {}
+    self.perks_browser.dialog = xml:InitStatic("perks_browser", self)
+    self.perks_browser.dialog:Show(false)
+    local browser_content = xml:InitStatic("perks_browser:terminal_display:content", nil)
+    self.perks_browser.content = {}
+    self.perks_browser.content.dialog = browser_content
+    self.perks_browser.frame = xml:InitStatic("perks_browser:frame", self.perks_browser.dialog)
+    self.perks_browser.frame:Show(true)
+
+    -- perks terminal
+    -- ------------------------------
+    local perks_terminal = npcd_ui_fx.get_sfx_config(npcd_ui_fx.SFX.VIDEO_TERMINAL, "npc_perks_terminal")
+    perks_terminal.name = "NPC Perks Terminal"
+    perks_terminal.group = "npc_perks_fx"
+    perks_terminal.xml_init = "npcd_pda_dashboard.xml"
+    perks_terminal.parent = self.perks_browser.dialog
+    perks_terminal.display = "perks_browser:terminal_display"
+    perks_terminal.glass = "perks_browser:terminal_display:terminal_glass"
+    perks_terminal.display_showing = 0 -- middle
+    perks_terminal.speed = 0
+    perks_terminal.start_timer = 0
+    perks_terminal.content = self.perks_browser.content.dialog
+    perks_terminal.content_showing = 1 -- none
+    perks_terminal.on_content_displayed_callback = { functor = self.UpdatePerksBrowser, self = self}
+
+    -- instantiate the terminal
+    -- ------------------------------
+    self.perks_browser.terminal = npcd_ui_fx.SFXVideoTerminal_Create(perks_terminal, self)
+
+    -- perk detail window
+    self:InitPerkBrowserContent()
+end
+
+
+function npcd_dashboard_tab:StartPerksBrowser(app_name, menu_name)
+    Printer:Debug(LOG.RUN, CAT.UI, "Start Perks Browser - App: " .. app_name .. " Menu: " .. menu_name)
+    self.perks_browser.dialog:Show(true)
+    if not self.perks_browser.terminal:IsOn() then
+        self.perks_browser.terminal:SwitchOn()
+    else
+        self:ClearPerkDetails()
+        self:UpdatePerksBrowser(menu_name)
+    end
+end
+
+function npcd_dashboard_tab:ClosePerksBrowser()
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Closing Perks Browser")
+    self:ClearPerkDetails()
+    self.perks_browser.terminal:SwitchOff()
+    self.perks_browser.dialog:Show(false)
+    self.perks_browser.content.perks_scroller.scroll:Show(false)
+    self.perks_browser.perk_detail.dialog:Show(false)
+end
+
+function npcd_dashboard_tab:UpdatePerksBrowser(menu_name)
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating Perks Terminal Display")
+    if not menu_name then
+        menu_name = UI_APP[APP.PERKS].default_menu
+    end
+    self.perks_browser.active_menu = menu_name
+    self.perks_browser.frame:Show(false)
+    self.perks_browser.frame = xml:InitStatic("perks_browser:frame", self.perks_browser.dialog)
+    self.perks_browser.frame:Show(true)
+
+    self.perks_browser.content.perks_scroller.scroll:Show(true)
+    self.perks_browser.perk_detail.dialog:Show(true)
+    self:UpdatePerksScroller(menu_name)
+end
+
+function npcd_dashboard_tab:UpdatePerksScroller(menu_name)
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating Perks Scroller")
+    self:ResetPerksScroller()
+    local scroll = self.perks_browser.content.perks_scroller.scroll
+
+    local perks_list = nil
+    if menu_name == MENU.ALL then
+        Printer:Debug(LOG.INFO, CAT.UI, "Loading All Perks into Scroller")
+        perks_list = npcd.get_perks()
+    elseif menu_name == MENU.LEARNED then
+        Printer:Debug(LOG.INFO, CAT.UI, "Loading Learned Perks into Scroller")
+        perks_list = npcd.get_learned_perks()
+    elseif menu_name == MENU.DISCOVERED then
+        Printer:Debug(LOG.INFO, CAT.UI, "Loading Discovered Perks into Scroller")
+        perks_list = npcd.get_discovered_perks()
+    else
+        Printer:Debug(LOG.INFO, CAT.UI, "Loading Perks by Category into Scroller - Category: " .. menu_name)
+        perks_list = npcd.get_perks()
+    end
+
+    if self.perks_browser.category_filter and self.perks_browser.category_filter ~= MENU.ALL then
+        Printer:Debug(LOG.INFO, CAT.UI, "Filtering Perks by Category - Category: " .. self.perks_browser.category_filter)
+        local filtered_perks = {}
+        for perk_id, perk in pairs(perks_list) do
+            if perk.category == self.perks_browser.category_filter then
+                filtered_perks[perk_id] = perk
+            end
+        end
+        perks_list = filtered_perks
+        Printer:Debug(LOG.INFO, CAT.UI, "Filtered Perks Count: " .. tostring(#perks_list))
+    end
+
+    local search_filter = self:GetSearchFilter()
+    Printer:Debug(LOG.INFO, CAT.UI, " search_filter: " .. tostring(search_filter))
+    if search_filter and search_filter ~= "" then
+        Printer:Debug(LOG.INFO, CAT.UI, "Filtering Perks by Search Text - Filter: " .. search_filter)
+        local filtered_perks = {}
+        local filter_text = string.lower(search_filter)
+        for perk_id, perk in pairs(perks_list) do
+            if string.find(string.lower(perk.name), filter_text) then
+                filtered_perks[perk_id] = perk
+            end
+        end
+        perks_list = filtered_perks
+        Printer:Debug(LOG.INFO, CAT.UI, "Filtered Perks Count: " .. tostring(#perks_list))
+    end
+    -- filter perks by search text
+    for index, perk in pairs(perks_list) do
+        Printer:Debug(LOG.INFO, CAT.UI, "Adding Perk to Scroller - Perk: " .. perk.name)
+        self.perks_browser.content.perks_scroller.row[index] = {}
+        self.perks_browser.content.perks_scroller.row[index].button = xml:Init3tButton("perks_browser:scroller:item_button", nil)
+        self.perks_browser.content.perks_scroller.row[index].button:TextControl():SetText(gc(perk.name))
+        self.perks_browser.content.perks_scroller.row[index].button:TextControl():SetFont(GetFontSmall())
+        scroll:AddWindow(self.perks_browser.content.perks_scroller.row[index].button, true)
+        local id = "npcd_perk_button_" .. index -- .. "_" .. math.random(1000,9999)
+        self:Register(self.perks_browser.content.perks_scroller.row[index].button, id)
+        self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+            Printer:Debug(LOG.INFO, CAT.UI, "NPC Perk Button Clicked - Perk: " .. perk.name .. " Index: " .. index .. " perk_id: " .. perk.id)
+            local selected = self.perks_browser.content.perks_scroller.selected
+            if selected and self.perks_browser.content.perks_scroller.row[selected] then
+                self.perks_browser.content.perks_scroller.row[selected].button:Enable(true)
+            end
+            self.perks_browser.content.perks_scroller.selected = index
+            self.perks_browser.content.perks_scroller.row[index].button:Enable(false)
+            self:UpdatePerkDetails(perk.id)
+        end, self)
+        Printer:Debug(LOG.ADD, CAT.UI, "Added Perk to Scroller - Perk: " .. perk.name .. " perk_id: " .. perk.id .. " Button ID: " .. id .. " Index: " .. index)
+    end
+    -- reset feat details window bar
+    local stateless = true
+    self:SetFeatDetailsWindowState(UI_FEAT_DETAILS_WINDOW_STATE.HIDDEN, stateless)
+    UI_FEAT_DETAILS.toggle_button:TextControl():SetText("")
+    UI_FEAT_DETAILS.toggle_button:Show(false)
+
+    self:CloseSearchBox()
+end
+
+function npcd_dashboard_tab:ResetPerksScroller()
+    Printer:Debug(LOG.RUN, CAT.UI, "Resetting Perks Scroller")
+    self.perks_browser.content.perks_scroller.scroll:Clear()
+    self.perks_browser.content.perks_scroller.selected = nil
+end
+
+function npcd_dashboard_tab:RemovePerksBrowser()
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Removing Perks Browser")
+    self.perks_browser.dialog:Show(false)
+    return self:ResetPerksScroller()
+end
+
+--------------------------------
+-- Perk Details Window
+-- -----------------------------
+
+UI_FEAT_DETAILS_WINDOW_STATE = {
+    MAXIMIZED = 1,
+    MINIMIZED = 2,
+    CLOSED = 3,
+    HIDDEN = 4
+}
+UI_FEAT_DETAILS = {}
+
+
+function feat_details_window_showing_complete()
+    Printer:Debug(LOG.COMPLETE, CAT.UI, "Feat Details Window Showing FX Complete")
+    if npcd_pda_dashboard.UI_FEAT_DETAILS then  
+        npcd_pda_dashboard.UI_FEAT_DETAILS.scroll:Show(true)
+        npcd_pda_dashboard.UI_FEAT_DETAILS.close_button:Show(true)
+    end
+
+end
+
+function npcd_dashboard_tab:InitPerkBrowserContent()
+    Printer:Debug(LOG.START, CAT.UI, "Initializing Perk Details Window")
+
+
+    -- pekrs scroller
+    local scroller = xml:InitStatic("perks_browser:scroller", self.perks_browser.content.dialog)
+    self.perks_browser.content.perks_scroller = scroller
+    self.perks_browser.content.perks_scroller.scroll = xml:InitScrollView("perks_browser:scroller:scroll", scroller)
+    self.perks_browser.content.perks_scroller.row = {}
+    self.perks_browser.content.perks_scroller.scroll:Show(false)
+
+    -- perks search button
+    self.perks_browser.content.perks_scroller.search = xml:Init3tButton("perks_browser:search_button", self.perks_browser.content.dialog)
+    self.perks_browser.content.perks_scroller.search:TextControl():SetText(game.translate_string("ui_npcd_details_perk_search"))
+    self:Register(self.perks_browser.content.perks_scroller.search, "perks_browser_search_button")
+    self:AddCallback("perks_browser_search_button", ui_events.BUTTON_CLICKED, function ()
+        self:InitSearchBox()
+    end, self)
+
+    -- pekrs categories scroller
+    self.perks_browser.content.perks_scroller.categories_scroll = xml:InitScrollView("perks_browser:scroller:scroll", scroller)
+    self.perks_browser.content.perks_scroller.categories_scroll.row = {}
+    local categories  = npcd.get_perk_categories_ui_list() or {}
+    -- Printer:DebugTable("PERK CATEGORIES", categories)
+    for i, category in ipairs(categories) do
+        Printer:Debug(LOG.INFO, CAT.UI, "Adding Perk Category to Categories Scroller - Category: " .. category.name)
+        self.perks_browser.content.perks_scroller.categories_scroll.row[i] = {}
+        self.perks_browser.content.perks_scroller.categories_scroll.row[i].button = xml:Init3tButton("perks_browser:scroller:category_button", nil)
+        self.perks_browser.content.perks_scroller.categories_scroll.row[i].button:TextControl():SetText(gc("ui_mcm_lst_" .. category.name))
+        self.perks_browser.content.perks_scroller.categories_scroll.row[i].button:TextControl():SetFont(GetFontSmall())
+        self.perks_browser.content.perks_scroller.categories_scroll:AddWindow(self.perks_browser.content.perks_scroller.categories_scroll.row[i].button, true)
+        local id = "npcd_perk_category_button_" .. category.name -- .. "_" .. math.random(1000,9999)
+        self:Register(self.perks_browser.content.perks_scroller.categories_scroll.row[i].button, id)
+        self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+            Printer:Debug(LOG.INFO, CAT.UI, "NPC Perk Category Button Clicked - Category: " .. category.name .. " Index: " .. i)
+            self.perks_browser.category_filter = category.name
+            self.perks_browser.content.perks_scroller.categories_scroll:Show(false)
+            self.perks_browser.content.perks_scroller.scroll:Show(true)
+            self.perks_browser.content.perks_scroller.categories:TextControl():SetText(self.perks_browser.content.perks_scroller.categories_scroll.row[i].button:TextControl():GetText())
+            self.perks_browser.content.perks_scroller.categories:TextControl():SetTextColor(c_blue)
+            self.perks_browser.content.perks_scroller.categories:InitTexture("ui_npcd_pda_perks_category_filter_active")
+            self:UpdatePerksScroller(self.perks_browser.active_menu)
+        end, self)
+        Printer:Debug(LOG.ADD, CAT.UI, "Added Perk Category to Categories Scroller - Category: " .. category.name .. " Button ID: " .. id .. " Index: " .. i)
+    end
+    -- add all button to categories scroller
+    local all_button_index = #npcd.get_perk_categories_ui_list() + 1
+    self.perks_browser.content.perks_scroller.categories_scroll.row[all_button_index] = {}
+    self.perks_browser.content.perks_scroller.categories_scroll.row[all_button_index].button = xml:Init3tButton("perks_browser:scroller:category_button", nil)
+    self.perks_browser.content.perks_scroller.categories_scroll.row[all_button_index].button:TextControl():SetText(gc("ui_mcm_lst_st_npcd_perk_category_all"))
+    self.perks_browser.content.perks_scroller.categories_scroll.row[all_button_index].button:TextControl():SetFont(GetFontSmall())
+    self.perks_browser.content.perks_scroller.categories_scroll:AddWindow(self.perks_browser.content.perks_scroller.categories_scroll.row[all_button_index].button, true)
+    local all_id = "npcd_perk_category_button_all" -- .. "_" .. math.random(1000,9999)
+    self:Register(self.perks_browser.content.perks_scroller.categories_scroll.row[all_button_index].button, all_id)
+    self:AddCallback(all_id, ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "NPC Perk Category All Button Clicked - Index: " .. all_button_index)
+        self.perks_browser.category_filter = MENU.ALL
+        self.perks_browser.content.perks_scroller.categories_scroll:Show(false)
+        self.perks_browser.content.perks_scroller.scroll:Show(true)
+        self.perks_browser.content.perks_scroller.categories:TextControl():SetText(gc("ui_npcd_details_perk_filter"))
+        self.perks_browser.content.perks_scroller.categories:TextControl():SetTextColor(c_grey)
+        self.perks_browser.content.perks_scroller.categories:InitTexture("ui_npcd_pda_perks_category_filter")
+        self:UpdatePerksScroller(self.perks_browser.active_menu)
+    end, self)
+
+    self.perks_browser.content.perks_scroller.categories_scroll:Show(false)
+
+    -- perks categories button
+    self.perks_browser.content.perks_scroller.categories = xml:Init3tButton("perks_browser:categories_button", self.perks_browser.content.dialog)
+    self.perks_browser.content.perks_scroller.categories:TextControl():SetText(gc("ui_npcd_details_perk_filter"))
+    self:Register(self.perks_browser.content.perks_scroller.categories, "perks_browser_categories_button")
+    self:AddCallback("perks_browser_categories_button", ui_events.BUTTON_CLICKED, function ()
+        local is_showing = self.perks_browser.content.perks_scroller.categories_scroll:IsShown()
+        Printer:Debug(LOG.INFO, CAT.UI, "Perks Browser Categories Button Clicked - Currently Showing: " .. tostring(is_showing))
+        if is_showing then
+            self.perks_browser.content.perks_scroller.categories_scroll:Show(false)
+            self.perks_browser.content.perks_scroller.scroll:Show(true)
+        else
+            self.perks_browser.content.perks_scroller.categories_scroll:Show(true)
+            self.perks_browser.content.perks_scroller.scroll:Show(false)
+        end
+    end, self)
+
+
+    -- perk detail window
+    self.perks_browser.perk_detail = {}
+    self.perks_browser.perk_detail.dialog = xml:InitStatic("perks_browser:perk_detail", self.perks_browser.content.dialog)
+    
+    -- perk card
+    self.perks_browser.perk_detail.perk_card = {}
+    local perk_card = xml:InitStatic("perks_browser:perk_detail:perk_card", self.perks_browser.perk_detail.dialog)
+    self.perks_browser.perk_detail.perk_card.dialog = perk_card
+    local icon_frame = xml:InitStatic("perks_browser:perk_detail:perk_card:icon_frame", perk_card)
+    self.perks_browser.perk_detail.perk_card.icon = xml:InitStatic("perks_browser:perk_detail:perk_card:icon_frame:icon", icon_frame)
+    self.perks_browser.perk_detail.perk_card.name = xml:InitTextWnd("perks_browser:perk_detail:perk_card:name", perk_card)
+    self.perks_browser.perk_detail.perk_card.type = xml:InitTextWnd("perks_browser:perk_detail:perk_card:type", perk_card)
+
+    -- characteristics
+    local characteristics = xml:InitStatic("perks_browser:perk_detail:characteristics", self.perks_browser.perk_detail.dialog)
+    local header = xml:InitTextWnd("perks_browser:perk_detail:characteristics:header", characteristics)
+    header:SetText(gc("ui_npcd_details_perk_characteristics_header"))
+
+    local char_group = xml:InitStatic("perks_browser:perk_detail:characteristics:char_group", characteristics)
+    
+    local type_cap = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:type_cap", char_group)
+    type_cap:SetText(gc("ui_npcd_details_perk_characteristics_type"))
+    self.perks_browser.perk_detail.type = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:type", char_group)
+
+    local category_cap = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:category_cap", char_group)
+    category_cap:SetText(gc("ui_npcd_details_perk_characteristics_category"))
+    self.perks_browser.perk_detail.category = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:category", char_group)
+
+    local chance_cap = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:chance_cap", char_group)
+    chance_cap:SetText(gc("ui_npcd_details_perk_characteristics_chance"))
+    self.perks_browser.perk_detail.chance = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:chance", char_group)
+    self.perks_browser.perk_detail.char_group = char_group
+
+    local faction_cap = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:faction_cap", char_group)
+    faction_cap:SetText(gc("ui_npcd_details_perk_characteristics_faction"))
+    self.perks_browser.perk_detail.faction = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:faction", char_group)
+    self.perks_browser.perk_detail.char_group = char_group
+
+    local requirements_cap = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:requirements_cap", char_group)
+    requirements_cap:SetText(gc("ui_npcd_details_perk_characteristics_requirements"))
+    self.perks_browser.perk_detail.requirements = xml:InitTextWnd("perks_browser:perk_detail:characteristics:char_group:requirements", char_group)
+    self.perks_browser.perk_detail.char_group = char_group
+
+    -- description
+    local details_frame = xml:InitStatic("perks_browser:perk_detail:details_frame", self.perks_browser.perk_detail.dialog)
+    self.perks_browser.perk_detail.details_frame = details_frame
+    local description = xml:InitStatic("perks_browser:perk_detail:details_frame:perk_description", details_frame)
+    local scroll = xml:InitScrollView("perks_browser:perk_detail:details_frame:perk_description:scroll", description)
+    self.perks_browser.perk_detail.description_scroll = scroll
+
+    -- feats
+    local feats = xml:InitStatic("perks_browser:perk_detail:feats", self.perks_browser.perk_detail.dialog)
+    local feats_header = xml:InitTextWnd("perks_browser:perk_detail:feats:header", feats)
+    feats_header:SetText(gc("ui_npcd_details_perk_feats_header"))
+    local feats_frame = xml:InitStatic("perks_browser:perk_detail:feats:frame", feats)
+    local feats_scroll = xml:InitScrollView("perks_browser:perk_detail:feats:frame:scroll", feats_frame)
+    self.perks_browser.perk_detail.feats_scroller = {} 
+    self.perks_browser.perk_detail.feats_scroller.scroll = feats_scroll
+    self.perks_browser.perk_detail.feats_scroller.selected = nil
+    self.perks_browser.perk_detail.feats_scroller.row = {}
+
+    -- feat details
+
+    -- Details Window
+    UI_FEAT_DETAILS = {}
+    UI_FEAT_DETAILS.dialog = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details", details_frame)
+    UI_FEAT_DETAILS.feat_details = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:frame", UI_FEAT_DETAILS.dialog)
+    UI_FEAT_DETAILS.background = xml:InitFrame("perks_browser:perk_detail:details_frame:feat_details:background", UI_FEAT_DETAILS.feat_details)
+    UI_FEAT_DETAILS.scroll = xml:InitScrollView("perks_browser:perk_detail:details_frame:feat_details:scroll", UI_FEAT_DETAILS.feat_details)
+    UI_FEAT_DETAILS.scroll:Show(false)
+    UI_FEAT_DETAILS.toggle_button = xml:Init3tButton("perks_browser:perk_detail:details_frame:feat_details:toggle_button", UI_FEAT_DETAILS.feat_details)
+    UI_FEAT_DETAILS.toggle_button:TextControl():SetFont(GetFontMedium())
+    UI_FEAT_DETAILS.toggle_button:TextControl():SetText("")
+    -- self:Register(UI_FEAT_DETAILS.toggle_button, "feat_details_window_toggle_button")
+    -- self:AddCallback("feat_details_window_toggle_button", ui_events.BUTTON_CLICKED, function ()
+    --     Printer:Debug(LOG.INFO, CAT.UI, "Feat Details Window Toggle Button Clicked")
+    --     self:SetFeatDetailsWindowState(UI_FEAT_DETAILS_WINDOW_STATE.MAXIMIZED)
+    -- end, self)
+    UI_FEAT_DETAILS.toggle_button:Enable(false)
+    UI_FEAT_DETAILS.minimize_button = xml:Init3tButton("perks_browser:perk_detail:details_frame:feat_details:minimize_button", UI_FEAT_DETAILS.dialog)
+    self:Register(UI_FEAT_DETAILS.minimize_button, "feat_details_window_minimize_button")
+    self:AddCallback("feat_details_window_minimize_button", ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "Feat Details Window Minimize Button Clicked")
+        self:SetFeatDetailsWindowState(UI_FEAT_DETAILS_WINDOW_STATE.MINIMIZED)
+    end, self)
+
+    UI_FEAT_DETAILS.maximize_button = xml:Init3tButton("perks_browser:perk_detail:details_frame:feat_details:maximize_button", UI_FEAT_DETAILS.dialog)
+    self:Register(UI_FEAT_DETAILS.maximize_button, "feat_details_window_maximize_button")
+    self:AddCallback("feat_details_window_maximize_button", ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "Feat Details Window Maximize Button Clicked")
+        self:SetFeatDetailsWindowState(UI_FEAT_DETAILS_WINDOW_STATE.MAXIMIZED)
+    end, self)
+
+    UI_FEAT_DETAILS.close_button = xml:Init3tButton("perks_browser:perk_detail:details_frame:feat_details:close_button", UI_FEAT_DETAILS.dialog)
+    self:Register(UI_FEAT_DETAILS.close_button, "feat_details_window_close_button")
+    self:AddCallback("feat_details_window_close_button", ui_events.BUTTON_CLICKED, function ()
+        Printer:Debug(LOG.INFO, CAT.UI, "Feat Details Window Close Button Clicked")
+        self:SetFeatDetailsWindowState(UI_FEAT_DETAILS_WINDOW_STATE.CLOSED)
+    end, self)
+
+
+    UI_FEAT_DETAILS.dialog:Show(false)
+    -- FX: Showing on details window
+    local showing = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.SHOWING)
+    showing.dialog = UI_FEAT_DETAILS.background
+    showing.speed = 0
+    showing.starting_position = 2 -- from bottom
+    -- showing.show_on_position = 300
+    showing.show_on_position = 100
+    showing.on_showing_complete = {"npcd_pda_dashboard", "feat_details_window_showing_complete"}
+    npcd_ui_fx.add_fx(showing, "feat_details_window_showing")
+    UI_FEAT_DETAILS.fx = {}
+    UI_FEAT_DETAILS.fx.showing = showing
+
+    self.perks_browser.perk_detail.dialog:Show(false)
+end
+
+function npcd_dashboard_tab:ClearPerkDetails()
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing Perk Details")
+    self.perks_browser.perk_detail.perk_card.icon:Show(false)
+    self.perks_browser.perk_detail.perk_card.name:SetText("")
+    self.perks_browser.perk_detail.perk_card.type:SetText("")
+    self.perks_browser.perk_detail.type:SetText("")
+    self.perks_browser.perk_detail.category:SetText("")
+    self.perks_browser.perk_detail.chance:SetText("")
+    self.perks_browser.perk_detail.faction:SetText("")
+    self.perks_browser.perk_detail.requirements:SetText("")
+    self.perks_browser.perk_detail.description_scroll:Clear()
+    self.perks_browser.perk_detail.feats_scroller.scroll:Clear()
+end
+
+function npcd_dashboard_tab:SetFeatDetailsWindowState(state, stateless)
+    Printer:Debug(LOG.RUN, CAT.UI, "Setting Feat Details Window State to: " .. tostring(state))
+    if not stateless then
+        Printer:Debug(LOG.ADD, CAT.UI, "Updating Feat Details Window State Variable to: " .. tostring(state))
+        UI_FEAT_DETAILS.state = state
+    end
+    Printer:Debug(LOG.INFO, CAT.UI, "Current Feat Details Window State Variable: " .. tostring(UI_FEAT_DETAILS.state))
+    UI_FEAT_DETAILS.dialog:Show(true)
+    UI_FEAT_DETAILS.scroll:Show(true)
+    UI_FEAT_DETAILS.toggle_button:Show(true)
+    UI_FEAT_DETAILS.hidden_state = false
+    -- reference position and size
+    local window_x = UI_FEAT_DETAILS.dialog:GetWndPos().x
+    local window_y = self.perks_browser.perk_detail.details_frame:GetWndPos().y
+    local window_width = UI_FEAT_DETAILS.dialog:GetWidth()
+    local window_height = self.perks_browser.perk_detail.details_frame:GetHeight() - 5
+
+    if state == UI_FEAT_DETAILS_WINDOW_STATE.MAXIMIZED then
+        Printer:Debug(LOG.INFO, CAT.UI, "Maximizing Feat Details Window")
+        UI_FEAT_DETAILS.dialog:SetWndPos(vector2():set(window_x, window_y))
+        UI_FEAT_DETAILS.dialog:SetWndSize(vector2():set(window_width, window_height))
+        UI_FEAT_DETAILS.feat_details:SetWndSize(vector2():set(window_width, window_height))
+        UI_FEAT_DETAILS.background:SetWndSize(vector2():set(window_width, window_height))
+        UI_FEAT_DETAILS.scroll:SetWndSize(vector2():set(UI_FEAT_DETAILS.scroll:GetWidth(), window_height - 5))
+        -- buttons
+        UI_FEAT_DETAILS.maximize_button:Show(false)
+        UI_FEAT_DETAILS.minimize_button:Show(true)
+        UI_FEAT_DETAILS.close_button:Show(true)
+        self:UpdateFeatDetailsWindow(self.perks_browser.perk_detail.perk_id, self.perks_browser.perk_detail.feat_id)
+    elseif state == UI_FEAT_DETAILS_WINDOW_STATE.MINIMIZED then
+        Printer:Debug(LOG.INFO, CAT.UI, "Minimizing Feat Details Window")
+        local offset = window_height / 3
+        UI_FEAT_DETAILS.dialog:SetWndPos(vector2():set(window_x, window_height / 3 - 30))
+        UI_FEAT_DETAILS.dialog:SetWndSize(vector2():set(window_width, window_height / 3 + 25 + offset))
+        UI_FEAT_DETAILS.feat_details:SetWndSize(vector2():set(window_width, window_height / 3 + 25 + offset))
+        UI_FEAT_DETAILS.background:SetWndSize(vector2():set(window_width, window_height / 3 + 25 + offset))
+        UI_FEAT_DETAILS.scroll:SetWndSize(vector2():set(UI_FEAT_DETAILS.scroll:GetWidth(), window_height / 3 + 25 + offset - 5))
+        self.perks_browser.perk_detail.description_scroll:SetWndSize(vector2():set(self.perks_browser.perk_detail.description_scroll:GetWidth(), offset -30))
+        self:UpdatePerkDescription()
+        -- buttons
+        UI_FEAT_DETAILS.maximize_button:Show(true)
+        UI_FEAT_DETAILS.minimize_button:Show(false)
+        UI_FEAT_DETAILS.close_button:Show(true)
+        self:UpdateFeatDetailsWindow(self.perks_browser.perk_detail.perk_id, self.perks_browser.perk_detail.feat_id)
+    elseif state == UI_FEAT_DETAILS_WINDOW_STATE.CLOSED then
+        Printer:Debug(LOG.INFO, CAT.UI, "Closing Feat Details Window")
+        UI_FEAT_DETAILS.dialog:SetWndPos(vector2():set(window_x, self.perks_browser.perk_detail.dialog:GetWndPos().y + self.perks_browser.perk_detail.dialog:GetHeight() - 70))
+        UI_FEAT_DETAILS.dialog:SetWndSize(vector2():set(window_width, 30))
+        UI_FEAT_DETAILS.feat_details:SetWndSize(vector2():set(window_width, 30))
+        UI_FEAT_DETAILS.background:SetWndSize(vector2():set(window_width, 30))
+        UI_FEAT_DETAILS.scroll:SetWndSize(vector2():set(UI_FEAT_DETAILS.scroll:GetWidth(), 30))
+        self.perks_browser.perk_detail.description_scroll:SetWndSize(vector2():set(self.perks_browser.perk_detail.description_scroll:GetWidth(), window_height))
+        self:UpdatePerkDescription()
+        -- buttons
+        UI_FEAT_DETAILS.maximize_button:Show(false)
+        UI_FEAT_DETAILS.minimize_button:Show(true)
+        UI_FEAT_DETAILS.close_button:Show(true)
+        UI_FEAT_DETAILS.scroll:Show(false)
+    elseif state == UI_FEAT_DETAILS_WINDOW_STATE.HIDDEN then
+        self.perks_browser.perk_detail.description_scroll:SetWndSize(vector2():set(self.perks_browser.perk_detail.description_scroll:GetWidth(), window_height))
+        self:UpdatePerkDescription()
+        UI_FEAT_DETAILS.hidden_state = true
+        UI_FEAT_DETAILS.dialog:Show(false)
+        UI_FEAT_DETAILS.toggle_button:Show(false)
+        UI_FEAT_DETAILS.maximize_button:Show(false)
+        UI_FEAT_DETAILS.minimize_button:Show(false)
+        UI_FEAT_DETAILS.close_button:Show(false)
+        UI_FEAT_DETAILS.scroll:Show(false)
+    end
+end
+
+function npcd_dashboard_tab:UpdateFeatsScroller()
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating Perk Feats Scroller")
+    self.perks_browser.perk_detail.feats_scroller.scroll:Clear()
+    self.perks_browser.perk_detail.feats_scroller.selected = nil
+
+    local perk_id = self.perks_browser.content.perks_scroller.selected or nil
+    if not perk_id then
+        Printer:Debug(LOG.WARN, CAT.UI, "No Perk Selected for Feats Scroller Update")
+        return
+    end 
+
+    local perk = npcd.get_perk(perk_id)
+    if not perk then
+        Printer:Debug(LOG.WARN, CAT.UI, "Invalid Perk ID for Feats Scroller Update: " .. tostring(perk_id))
+        return
+    end
+
+    -- reset feat details window bar
+    local stateless = true
+    self:SetFeatDetailsWindowState(UI_FEAT_DETAILS_WINDOW_STATE.HIDDEN, stateless)
+    UI_FEAT_DETAILS.toggle_button:TextControl():SetText("")
+    -- UI_FEAT_DETAILS.state = nil
+    for index, feat in pairs(perk.feats or {}) do
+        Printer:Debug(LOG.INFO, CAT.UI, "Adding Feat to Scroller - Feat: " .. feat.name)
+        self.perks_browser.perk_detail.feats_scroller.row[index] = {}
+        self.perks_browser.perk_detail.feats_scroller.row[index].button = xml:Init3tButton("perks_browser:perk_detail:feats:frame:item_button", nil)
+        self.perks_browser.perk_detail.feats_scroller.row[index].button:TextControl():SetText(gc(feat.name))
+        self.perks_browser.perk_detail.feats_scroller.row[index].button:TextControl():SetFont(GetFontSmall())
+        self.perks_browser.perk_detail.feats_scroller.scroll:AddWindow(self.perks_browser.perk_detail.feats_scroller.row[index].button, true)
+        local id = "npcd_feat_button_" .. index -- .. "_" .. math.random(1000,9999)
+        self:Register(self.perks_browser.perk_detail.feats_scroller.row[index].button, id)
+        self:AddCallback(id, ui_events.BUTTON_CLICKED, function ()
+            Printer:Debug(LOG.INFO, CAT.UI, "NPC Feat Button Clicked - Feat: " .. feat.name .. " Index: " .. index)
+            local selected = self.perks_browser.perk_detail.feats_scroller.selected
+            if selected and self.perks_browser.perk_detail.feats_scroller.row[selected] then
+                self.perks_browser.perk_detail.feats_scroller.row[selected].button:Enable(true)
+            end
+            self.perks_browser.perk_detail.feats_scroller.selected = index
+            self.perks_browser.perk_detail.feats_scroller.row[index].button:Enable(false)
+            self:UpdateFeatDetailsWindow(self.perks_browser.perk_detail.perk_id, feat.id)
+        end, self)
+        Printer:Debug(LOG.ADD, CAT.UI, "Added Feat to Scroller - Feat: " .. feat.name .. " Button ID: " .. id .. " Index: " .. index)
+    end
+end
+
+function npcd_dashboard_tab:UpdatePerkDetails(perk_id)
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating Perk Details Window - Perk ID: " .. perk_id)
+    self.perks_browser.perk_detail.perk_card.dialog:Show(false)
+    local perk = npcd.get_perk(perk_id)
+    -- Printer:DebugTable("PERK DETAILS", perk)
+    if perk then
+        self.perks_browser.perk_detail.perk_id = perk.id
+        self.perks_browser.perk_detail.description = perk.description
+        self.perks_browser.perk_detail.perk_card.icon:InitTexture(perk.icon)
+        self.perks_browser.perk_detail.perk_card.icon:Show(true)
+        self.perks_browser.perk_detail.perk_card.name:SetText(gc(perk.name))
+        local type_text = gc("ui_mcm_lst_" .. npcd.PERK_TYPE_UI[perk.type].name)
+        self.perks_browser.perk_detail.perk_card.type:SetText(type_text)
+        self.perks_browser.perk_detail.type:SetText(type_text)
+        self.perks_browser.perk_detail.category:SetText(gc("ui_mcm_lst_" .. npcd.PERK_CATEGORY_UI[perk.category].name))
+        self.perks_browser.perk_detail.chance:SetText(tostring(perk.roll_chance) .. " %")
+        -- optional characteristics
+        if perk.depends and npcdu.tablelength(perk.depends) > 0 then
+            self.perks_browser.perk_detail.requirements:SetText("")
+            for _, dep in pairs(perk.depends) do
+                local required_perk = npcd.get_perk(dep)
+                if required_perk then
+                    local requirement_name = gc(required_perk.name)
+                    local current_text = self.perks_browser.perk_detail.requirements:GetText()
+                    if current_text == "" then
+                        self.perks_browser.perk_detail.requirements:SetText(requirement_name)
+                    else
+                        self.perks_browser.perk_detail.requirements:SetText(current_text .. ", " .. requirement_name)
+                    end
+                    self.perks_browser.perk_detail.requirements:Show(true)
+                end
+            end
+        else
+            self.perks_browser.perk_detail.requirements:Show(false)
+            
+        end
+        if perk.faction then
+            self.perks_browser.perk_detail.faction:SetText(perk.faction)
+            self.perks_browser.perk_detail.faction:Show(true)
+        else
+            self.perks_browser.perk_detail.faction:Show(false)
+        end
+
+        self:UpdatePerkDescription()
+        self:UpdateFeatsScroller()
+    end
+    self.perks_browser.perk_detail.perk_card.dialog:Show(true)
+end
+
+function npcd_dashboard_tab:UpdatePerkDescription()
+    Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing Feat Details Window")
+    self.perks_browser.perk_detail.description_scroll:Clear()
+    local description = xml:InitTextWnd("perks_browser:perk_detail:details_frame:perk_description:description", nil)
+    description:SetText(gc(self.perks_browser.perk_detail.description or ""))
+    description:AdjustHeightToText()
+    self.perks_browser.perk_detail.description_scroll:AddWindow(description, true)
+end
+
+function npcd_dashboard_tab:CreateFeatDetailsAttribute(icon_texture, name_text, value_text)
+    local attr = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:attribute", nil)
+    
+    local name = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:attribute:name", attr)
+    name:SetText(name_text)
+
+    local icon = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:attribute:icon", attr)
+    icon:InitTexture(icon_texture)
+    
+    local value = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:attribute:value", attr)
+    value:SetText(value_text)
+
+    return attr
+end
+
+function npcd_dashboard_tab:CreateFeatDetailsStat(icon_texture, name_text, value_text)
+    local attr = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:stat", nil)
+    
+    local icon = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:stat:icon", attr)
+    icon:InitTexture(icon_texture)
+    
+    local name = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:stat:name", attr)
+    name:SetText(name_text)
+    
+    local value = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:stat:value", attr)
+    value:SetText(value_text)
+    attr.value = value
+    return attr
+end
+
+function npcd_dashboard_tab:UpdateFeatDetailsStats(perk_id, feat_id)
+    Printer:Debug(LOG.START, CAT.UI, "Updating Details Window Feat Stats - Rank: " .. tostring(UI_FEAT_DETAILS.rank or 1))
+    local feat = npcd.get_perk_feat(perk_id, feat_id)
+    if feat then
+        for stat_name, stat_el in pairs(UI_FEAT_DETAILS.stats or {}) do
+            local ranked_stats = feat.stats[UI_FEAT_DETAILS.rank]
+            stat_el.value:SetText(tostring(ranked_stats[stat_name] or "0"))
+        end
+        UI_FEAT_DETAILS.rank_ui:SetText(gc("ui_npcd_details_ability_rank") .. " [" .. tostring(UI_FEAT_DETAILS.rank) .. "]")
+        UI_FEAT_DETAILS.rank_ui:SetTextColor(color_black)
+    end
+end
+
+function npcd_dashboard_tab:UpdateFeatDetailsWindow(perk_id, feat_id)
+    Printer:Debug(LOG.START, CAT.UI, "Update Feat Details Window -  perk ID: " .. perk_id .. " feat ID: " .. feat_id)
+    self.show_hint = false
+    self.perks_browser.perk_detail.feat_id = feat_id
+
+    local feat = npcd.get_perk_feat(perk_id, feat_id)
+
+    if feat then
+        -- update the scroll content
+        UI_FEAT_DETAILS.scroll:Clear()
+        UI_FEAT_DETAILS.toggle_button:TextControl():SetText(gc(feat.name))
+
+        -- update header
+        local header = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:header", nil)
+        local icon_frame = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:header:icon_frame", header)
+        local icon = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:header:icon_frame:icon", icon_frame)
+        icon:InitTexture(feat.icon)
+        local name = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:header:name", header)
+        name:SetText(gc(feat.name))
+        local resource = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:header:resource_label", header)
+        resource:SetText(gc("ui_npcd_details_ability_resource") .. "  ---  ")
+        local type = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:header:resource_type", header)
+        type:SetText( gc("ui_npcd_details_ability_cost_unit_stamina"))
+        UI_FEAT_DETAILS.scroll:AddWindow(header, true)
+        -- update attributes
+        local feat_type = self:CreateFeatDetailsAttribute(
+            npcd.FEAT_TYPE_UI[feat.type].icon,
+            gc("ui_mcm_st_npcd_feat_type"),
+            gc("ui_mcm_lst_" .. feat.type)
+        )
+        UI_FEAT_DETAILS.scroll:AddWindow(feat_type, true)
+
+        local feat_mode = self:CreateFeatDetailsAttribute(
+            npcd.FEAT_MODE_UI[feat.mode].icon,
+            gc("ui_mcm_st_npcd_feat_mode"),
+            gc("ui_mcm_lst_" .. feat.mode)
+        )
+        UI_FEAT_DETAILS.scroll:AddWindow(feat_mode, true)
+
+        local feat_category = self:CreateFeatDetailsAttribute(
+            npcd.FEAT_CATEGORY_UI[feat.category].icon,
+            gc("ui_mcm_st_npcd_feat_category"),
+            gc("ui_mcm_lst_" .. feat.category)
+        )
+        UI_FEAT_DETAILS.scroll:AddWindow(feat_category, true)
+
+        local feat_target = self:CreateFeatDetailsAttribute(
+            npcd.FEAT_TARGET_UI[feat.target].icon,
+            gc("ui_mcm_st_npcd_feat_target"),
+            gc(npcd.FEAT_TARGET_UI[feat.target].desc)
+        )
+        UI_FEAT_DETAILS.scroll:AddWindow(feat_target, true)
+
+        -- update description
+        UI_FEAT_DETAILS.description = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:description", nil)
+        UI_FEAT_DETAILS.description:SetText(gc(feat.description))
+        UI_FEAT_DETAILS.description:AdjustHeightToText()
+        UI_FEAT_DETAILS.scroll:AddWindow(UI_FEAT_DETAILS.description, true)
+
+        -- stats section
+        if feat.stats and npcdu.tablelength(feat.stats[1]) > 0 then
+            -- Printer:DebugTable("FEAT STATS", feat.stats)
+            local ranked_stats = feat.stats[UI_FEAT_DETAILS.rank or 1]
+            local stats_header = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:section", nil)
+            local title = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:section:title", stats_header)
+            title:SetText(gc("ui_npcd_details_ability_stats"))
+            title:SetFont(GetFontMedium())
+            UI_FEAT_DETAILS.scroll:AddWindow(stats_header, true)
+            UI_FEAT_DETAILS.stats = {}
+            for stat_name, stat_value in pairs(ranked_stats or {}) do
+                if npcd.FEAT_STAT[stat_name] then
+                    local suffix = self:__GetStatSuffix(stat_name)
+                    local stat_attr = self:CreateFeatDetailsStat(
+                        npcd.FEAT_STAT[stat_name].icon,
+                        gc(npcd.FEAT_STAT[stat_name].name),
+                        tostring(stat_value) .. suffix
+                    )
+                    UI_FEAT_DETAILS.scroll:AddWindow(stat_attr, true)
+                    UI_FEAT_DETAILS.stats[stat_name] = stat_attr
+                end
+            end
+            -- stat paging
+            local stat_page = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:stat_page", nil)
+            local perk_rank = 1
+            UI_FEAT_DETAILS.rank = 1
+            UI_FEAT_DETAILS.rank_ui = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:stat_page:rank", stat_page)
+            UI_FEAT_DETAILS.rank_ui:SetText(gc("ui_npcd_details_ability_rank") .. " [" .. tostring(UI_FEAT_DETAILS.rank) .. "]")
+            UI_FEAT_DETAILS.rank_ui:SetTextColor(color_black)
+
+            local prev_button = xml:Init3tButton("perks_browser:perk_detail:details_frame:feat_details:stat_page:prev_button", stat_page)
+            local next_button = xml:Init3tButton("perks_browser:perk_detail:details_frame:feat_details:stat_page:next_button", stat_page)
+            local cb_id = math.random(1000,9999)
+            self:Register(prev_button, "feat_details_window_stat_prev_button".. cb_id)
+            self:Register(next_button, "feat_details_window_stat_next_button".. cb_id)
+            self:AddCallback("feat_details_window_stat_prev_button".. cb_id, ui_events.BUTTON_CLICKED, function ()
+                Printer:Debug(LOG.INFO, CAT.UI, "Details Window Stat Prev Button Clicked")
+                if UI_FEAT_DETAILS.rank > perk_rank then
+                    UI_FEAT_DETAILS.rank = UI_FEAT_DETAILS.rank - 1
+                    self:UpdateFeatDetailsStats(perk_id, feat_id)
+                end
+                prev_button:Enable(UI_FEAT_DETAILS.rank > perk_rank)
+                next_button:Enable(UI_FEAT_DETAILS.rank < #feat.stats)
+            end, self)
+            self:AddCallback("feat_details_window_stat_next_button".. cb_id, ui_events.BUTTON_CLICKED, function ()
+                Printer:Debug(LOG.INFO, CAT.UI, "Details Window Stat Next Button Clicked")
+                if UI_FEAT_DETAILS.rank < #feat.stats then
+                    UI_FEAT_DETAILS.rank = UI_FEAT_DETAILS.rank + 1
+                    self:UpdateFeatDetailsStats(perk_id, feat_id)
+                end
+                prev_button:Enable(UI_FEAT_DETAILS.rank > perk_rank)
+                next_button:Enable(UI_FEAT_DETAILS.rank < #feat.stats)
+            end, self)
+            prev_button:Enable(UI_FEAT_DETAILS.rank > perk_rank)
+            next_button:Enable(UI_FEAT_DETAILS.rank < #feat.stats)
+            UI_FEAT_DETAILS.scroll:AddWindow(stat_page, true)
+            -- Printer:DebugTable("FEAT", feat)
+
+            -- capstone section
+            if feat.capstone then
+                local capstone_header = xml:InitStatic("perks_browser:perk_detail:details_frame:feat_details:section", nil)
+                local capstone_title = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:section:title", capstone_header)
+                capstone_title:SetText(gc("ui_npcd_details_ability_capstone"))
+                capstone_title:SetFont(GetFontMedium())
+                UI_FEAT_DETAILS.scroll:AddWindow(capstone_header, true)
+                -- update capstone description
+                local capstone = xml:InitTextWnd("perks_browser:perk_detail:details_frame:feat_details:description", nil)
+                capstone:SetText(gc(feat.capstone))
+                capstone:AdjustHeightToText()
+                UI_FEAT_DETAILS.scroll:AddWindow(capstone, true)
+            end
+        end
+    end
+    Printer:Debug(LOG.UPDATED, CAT.UI, "Feat Details Window Update Complete")
+    if not UI_FEAT_DETAILS.state then
+        self:SetFeatDetailsWindowState(UI_FEAT_DETAILS_WINDOW_STATE.MINIMIZED)
+    elseif UI_FEAT_DETAILS.hidden_state then
+        Printer:Debug(LOG.INFO, CAT.UI, "Feat Details Window is Hidden, resuming state")
+        self:SetFeatDetailsWindowState(UI_FEAT_DETAILS.state)
+    end
+
+    UI_FEAT_DETAILS.dialog:Show(true)
+end
 
 --------------------------------
 --- Panels
@@ -1834,7 +2712,7 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
         activated_translate_fx.direction = 1
         activated_translate_fx.length = 10
         activated_translate_fx.stop = {"npcd_pda_dashboard", "enable_active_menu_button", app_name, menu_name, false}
-        npcd_ui_fx.add_fx(activated_translate_fx)
+        npcd_ui_fx.add_fx(activated_translate_fx, "menu_translate_" .. app_name .. "_" .. menu_name)
         npcd_ui_fx.resume_fx(activated_translate_fx.id)
     end
     UI_MENU[app_name][menu_name].active = true
@@ -1842,13 +2720,12 @@ function npcd_dashboard_tab:ActivateAppMenu(app_name, menu_name)
     if app_name == APP.PROFILES then
         self:ClearNPCPanel()
         self.npc_panel.dialog:Show(true)
+        self:ClosePerksBrowser()
         self:UpdateItemScroller(app_name, menu_name)
-        -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
     end
     if app_name == APP.PERKS then
         self:RemoveNPCPanel()
-        self:UpdateItemScroller(app_name, menu_name)
-        -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
+        self:StartPerksBrowser(app_name, menu_name)
     end
 end
 
@@ -1865,7 +2742,7 @@ function npcd_dashboard_tab:DeactivateOtherMenus(app_name, menu_name)
                 deactivated_translate_fx.direction = -1
                 deactivated_translate_fx.length = 10
                 deactivated_translate_fx.stop = {"npcd_pda_dashboard", "enable_active_menu_button", app_name, name, true}
-                npcd_ui_fx.add_fx(deactivated_translate_fx)
+                npcd_ui_fx.add_fx(deactivated_translate_fx, "menu_translate_" .. app_name .. "_" .. name)
                 npcd_ui_fx.resume_fx(deactivated_translate_fx.id)
             end
             UI_MENU[app_name][name].active = false
@@ -1904,7 +2781,7 @@ function npcd_dashboard_tab:On_Profiles_Button_Clicked()
     self.menu_scroller.ui.dialog:Show(true)
 
     self:ActivateAppPanel(APP.PROFILES)
-
+    -- TODO move it from here
     npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
 end
 
@@ -1915,13 +2792,7 @@ function npcd_dashboard_tab:On_Perks_Button_Clicked()
     self.app[APP.PERKS].button:Enable(false)
     self.app[APP.DECK].button:Enable(true)
 
-    self.menu_scroller.ui.bg:Show(false)
-    self.menu_scroller.ui.glass:Show(false)
-    self.menu_scroller.ui.dialog:Show(true)
-
     self:ActivateAppPanel(APP.PERKS)
-
-    npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
 end
 
 function npcd_dashboard_tab:On_Deck_Button_Clicked()
@@ -1936,8 +2807,6 @@ function npcd_dashboard_tab:On_Deck_Button_Clicked()
     self.menu_scroller.ui.dialog:Show(false)
 
     self:ActivateAppPanel(APP.DECK)
-
-    -- npcd_ui_fx.resume_fx(self.menu_scroller.fx.glass_showing.id)
 end
 
 function npcd_dashboard_tab:EnableAppButtons(enable)
@@ -2149,9 +3018,27 @@ function on_key_release(key)
             end
         end
     end
+    if key == DIK_keys.MOUSE_2 then
+        Printer:Debug(LOG.INFO, CAT.UI, "Right Mouse Button Released")
+        local ui = npcd_pda_dashboard.get_ui()
+        if ui.perks_browser.content.perks_scroller.search:IsCursorOverWindow() then
+            ui.perks_browser.content.perks_scroller.search:TextControl():SetText(game.translate_string("ui_npcd_details_perk_search"))
+            ui:ClearSearchBox()
+        end
+        if ui.perks_browser.content.perks_scroller.categories:IsCursorOverWindow() then
+            ui.perks_browser.category_filter = MENU.ALL
+            ui.perks_browser.content.perks_scroller.categories_scroll:Show(false)
+            ui.perks_browser.content.perks_scroller.scroll:Show(true)
+            ui.perks_browser.content.perks_scroller.categories:TextControl():SetText(gc("ui_npcd_details_perk_filter"))
+            ui.perks_browser.content.perks_scroller.categories:TextControl():SetTextColor(c_grey)
+            ui.perks_browser.content.perks_scroller.categories:InitTexture("ui_npcd_pda_perks_category_filter")
+            ui:UpdatePerksScroller(ui.perks_browser.active_menu)
+        end
+    end
 end
 
 function on_key_press_feat_hint(key)
+    -- Printer:Debug(LOG.INFO, CAT.UI, "on_key_press_feat_hint - Key: " .. tostring(key))
     if key == DIK_keys.MOUSE_2 then
         local ui = npcd_pda_dashboard.get_ui()
         if not ui then
@@ -2168,6 +3055,7 @@ function on_key_press_feat_hint(key)
 end
 
 function on_key_press_perk_hint(key)
+    -- Printer:Debug(LOG.INFO, CAT.UI, "on_key_press_perk_hint - Key: " .. tostring(key))
     if key == DIK_keys.MOUSE_2 then
         local ui = npcd_pda_dashboard.get_ui()
         if not ui then
@@ -2182,37 +3070,6 @@ function on_key_press_perk_hint(key)
         ui.hint_perk_uid = nil
     end
 end
-
--- function npcd_dashboard_tab:OnKeyboard(dik, keyboard_action)
--- 	local res = CUIScriptWnd.OnKeyboard(self,dik,keyboard_action)
--- 	if (res == false) then
--- 		local bind = dik_to_bind(dik)
--- 		if keyboard_action == ui_events.WINDOW_KEY_PRESSED then
-		
--- 			if dik == DIK_keys.DIK_ESCAPE then
--- 				-- if self.k_binder then
--- 				-- 	self.k_binder(-1)
--- 				-- else
--- 				-- 	self:OnButton_Cancel()
--- 				-- end
--- 			elseif self.k_binder and display_key(dik) and not blockedkeys[dik] then
--- 				self.k_binder(dik)
--- 			end
--- 		end
--- 		if keyboard_action == ui_events.WINDOW_KEY_RELEASED then
--- 			-- if dik == DIK_keys.MOUSE_2 then
--- 			-- 	if self.mod_search:IsCursorOverWindow() then
--- 			-- 		self.mod_search:SetText("")
--- 			-- 		self.mod_search:CaptureFocus(true)
--- 			-- 	end
--- 			-- end
--- 		end
--- 	end
--- 	if self.k_binder and ((time_continual() - self.k_timer)  > 500) then --clear k_binder on any other input after half a second.
--- 		self.k_binder()
--- 	end
--- 	return res
--- end
 
 
 function on_game_start()
