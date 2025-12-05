@@ -185,3 +185,9 @@ function get_ui_element_color(ele)
 		-- end
 	end
 end
+
+function format_npc_time(npc_time)
+	if not npc_time then return "" end
+	local Y, M, D, h, m, s, ms = npc_time:get()
+	return string.format("%04d-%02d-%02d %02d:%02d:%02d", Y, M, D, h, m, s)
+end            

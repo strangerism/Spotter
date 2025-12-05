@@ -412,6 +412,75 @@
 	<string id="pda_btn_npcd_menu_logs">
 		<text>Logs</text>
 	</string>	
+	<!-- NPC INFO panel	 -->
+	<string id="ui_npcd_npc_info_characteristics">
+		<text>Characteristics</text>
+	</string>
+	<string id="ui_npcd_npc_info_data">
+		<text>Info</text>
+	</string>	
+	<string id="ui_npcd_npc_info_statistics">
+		<text>Statistics</text>
+	</string>
+	<string id="ui_npcd_npc_info_tracking">
+		<text>Tracking</text>
+	</string>
+	<string id="ui_npcd_npc_info_standings">
+		<text>Standings</text>
+	</string>
+
+
+	<string id="st_npcd_npc_info_group_data_id">
+		<text>Id</text>
+	</string>
+	<string id="st_npcd_npc_info_group_data_faction">
+		<text>Faction</text>
+	</string>
+	<string id="st_npcd_npc_info_group_data_rank">
+		<text>Rank</text>
+	</string>
+	<string id="st_npcd_npc_info_group_data_reputation">
+		<text>Reputation</text>
+	</string>
+	<string id="st_npcd_npc_info_group_data_squad_id">
+		<text>Squad Id</text>
+	</string>
+	<string id="st_npcd_npc_info_group_data_commander">
+		<text>Commander</text>
+	</string>
+	<string id="st_npcd_npc_info_group_data_alive">
+		<text>Alive</text>
+	</string>
+	<string id="st_npcd_npc_info_group_data_recruitable">
+		<text>Recruitable</text>
+	</string>
+	<string id="st_npcd_npc_info_group_data_codec_frequency">
+		<text>Codec</text>
+	</string>	
+	<string id="st_npcd_npc_info_group_stats_last_joined">
+		<text>Last joined</text>
+	</string>
+	<string id="st_npcd_npc_info_group_stats_last_seen">
+		<text>Last seen</text>
+	</string>
+	<string id="st_npcd_npc_info_group_stats_last_place_seen">
+		<text>Last met</text>
+	</string>	
+	<string id="st_npcd_npc_info_group_stats_last_place_tracked">
+		<text>Last tracked</text>
+	</string>	
+	<string id="st_npcd_npc_info_group_standings_attitude">
+		<text>Attitude</text>
+	</string>	
+	<string id="st_npcd_npc_info_group_standings_relation">
+		<text>Relation</text>
+	</string>
+	<string id="st_npcd_npc_info_group_standings_goodwill_personal">
+		<text>Personal goodwill</text>
+	</string>	
+	<string id="st_npcd_npc_info_group_standings_goodwill_actor_faction">
+		<text>Faction goodwill</text>
+	</string>	
 	<!-- NPCS Characteristics-->
 	<string id="st_npcd_char_survival">
 		<text>Survival</text>

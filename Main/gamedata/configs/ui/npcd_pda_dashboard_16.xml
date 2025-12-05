@@ -221,7 +221,7 @@
 				</terminal_glass>
 				<content x="0" y="0" width="347" height="147" stretch="1">
 					<idcard x="10" y="10" width="150" height="187"/>
-					<characteristics x="124" y="0" width="210" height="150"/>
+					<npc_info_group x="124" y="0" width="210" height="150"/>
 				</content>			
 			</terminal_display>		
 			<idcard_group x="0" y="0" width="150" height="187">
@@ -255,7 +255,7 @@
 					<texture a="50">ui_npcd_pda_scroller_item_green_button_d</texture>
 				</char_bg>				
 				<char_header x="08" y="18" width="210" height="16">
-					<text align="c" font="letterica18" color="pda_green">Characteristics</text>
+					<text align="c" font="letterica18" color="pda_green">ui_npcd_npc_info_characteristics</text>
 				</char_header>		
 				<bottom_line x="08" y="145" width="210" height="1" stretch="1">
 					<texture a="150">ui_npcd_codec_750_scanline</texture>
@@ -268,16 +268,36 @@
 						<text align="l" font="letterica18" color="pda_green"></text>
 					</label>		
 					<value x="75" y="25" width="30" height="16">
-						<text align="r" font="letterica18" color="pda_green"></text>
+						<text align="r" font="letterica18" color="pda_green" ></text>
 					</value>
-				</char_group>								
+					<value1 x="75" y="25" width="30" height="16">
+						<text align="r" font="letterica18" color="pda_white" ></text>
+					</value1>					
+					<value_cx x="75" y="25" width="30" height="16">
+						<text align="r" font="letterica18" color="pda_white" complex_mode="1"></text>
+					</value_cx>					
+					<value2 x="28" y="25" width="135" height="16">
+						<text align="r" font="letterica18" color="pda_white" complex_mode="1"></text>
+					</value2>							
+				</char_group>											
 			</char_frame>
 			<rank x="402" y="19" width="140" height="14">
 				<text align="l" font="letterica25" color="ui_black"/>
 			</rank>
 			<rank_cap x="398" y="34" width="140" height="14">
 				<text align="l" font="letterica18" color="ui_black">rank</text>
-			</rank_cap>				
+			</rank_cap>		
+			<!-- x="192"		 -->
+			<toggle x="193" y="8" width="30" height="13" stretch="1">
+				<texture>ui_npcd_pda_npc_detail_info_toggle_button</texture>
+				<text align="c" vert_align="c" x="0" y="1" font="letterica16"></text>
+				<text_color>
+					<e r="200" g="200" b="200"/>
+					<t color ="ui_white"/>
+					<d r="200" g="200" b="200"/>
+					<h r="255" g="255" b="255"/>
+				</text_color>				
+			</toggle>						
 		</info>	
 		<specs x="0" y="188" width="433" height="275" stretch="1">
 			<specs_frame x="0" y="0" width="433" height="275" stretch="1">

@@ -35,7 +35,7 @@ ideas for archetypes
     * extra wagers
     * la zhola (active auto random proc) + dispersion
     * curva sud (active auto random) + resistence 
-- smuggler
+-  b
     * enable trade with all npc
     * black market discount 
     * workshop parts inventory
@@ -98,7 +98,7 @@ ideas for archetypes
  * mind control
 
 stuff to do
-- change feat.category to feat.field. define feat category as (defense, offense, support, archetype, etc.)
+- add implementation for npc characteristics
 - make misc items give buffs, improve perks and feat effects, etc..
 - add artifact perk mutators
 - reworkd all script on game start to depend on NPCD_BOOTED
@@ -106,20 +106,19 @@ stuff to do
 - spotter combat events are a bit delayed. probably due to npcd_squad.squad_get_combat() not very reliable
 - add to mcm menu actor active effects page
 - add way to change ability slot regardless of preceeding slots being filled
-- add custom NPCD menu, e,g, squad menu in inventory trade window
-- add actor id in npcs by default to manage actor buffs (granted by abilities)
-- add in npcd mcm, a new tab called perks (discovered, favorite, main deck subtabs)
+- add squad NPCD menu for HUD
 - add custom npc progression and npcd configuration menu
 - rework squad ranking (min or max npc rank based instead of section)
 - add npc identification widget
 - check correct usage of objects_id instead of passing objects
 - module_mcm must update npdc.perk from mcm settings changes (keybind, stats done - anything else?)
+- add Perk categories api for modules
+- add Feat settings api for modules
 - implement enable NPCD
 - implements uninstall modules
 - add feat resources consumption for actor (power, health, psy)
 - add reserve resource when using stance feats 
 - add 
-- add npc stats (power, recovery)
 - add active feat to use npc power
 - add power consumption to feat stat
 - add power regen ??? 

@@ -210,6 +210,39 @@ UI_TALENTS_VIEW = {
     },
 }
 
+NPC_INFO_GROUP = {
+    CHARACTERISTICS = "I",
+    DATA = "II",
+    TRACKING = "III",
+    STANDINGS = "IV",
+}
+
+NPC_INFO_GROUP_LIST = {
+    [NPC_INFO_GROUP.DATA] = {
+        [1] = { id = "id" , label = "st_npcd_npc_info_group_data_id" },
+        [2] = { id = "community" , label = "st_npcd_npc_info_group_data_faction" },
+        [3] = { id = "rank" , label = "st_npcd_npc_info_group_data_rank" },
+        [4] = { id = "reputation" , label = "st_npcd_npc_info_group_data_reputation" },
+        [5] = { id = "squad_id" , label = "st_npcd_npc_info_group_data_squad_id" },
+        [6] = { id = "squad_commander" , label = "st_npcd_npc_info_group_data_commander" },
+        [7] = { id = "alive" , label = "st_npcd_npc_info_group_data_alive" },
+        [8] = { id = "recruitable" , label = "st_npcd_npc_info_group_data_recruitable" },
+        [9] = { id = "codec_frequency" , label = "st_npcd_npc_info_group_data_codec_frequency" },
+    },
+    [NPC_INFO_GROUP.TRACKING] = {
+        [1] = { id = "last_joined" , label = "st_npcd_npc_info_group_stats_last_joined" },
+        [2] = { id = "last_time_seen" , label = "st_npcd_npc_info_group_stats_last_seen" },
+        [3] = { id = "last_place_seen" , label = "st_npcd_npc_info_group_stats_last_place_seen" },
+        [4] = { id = "last_place_tracked" , label = "st_npcd_npc_info_group_stats_last_place_tracked" },
+    },
+    [NPC_INFO_GROUP.STANDINGS] = {
+        [1] = { id ="attitude" , label = "st_npcd_npc_info_group_standings_attitude" },
+        [2] = { id = "relation" , label = "st_npcd_npc_info_group_standings_relation" },
+        [3] = { id = "goodwill_personal" , label = "st_npcd_npc_info_group_standings_goodwill_personal" },
+        [4] = { id = "goodwill_actor_faction" , label = "st_npcd_npc_info_group_standings_goodwill_actor_faction" },
+    },
+}
+
 
 UI_DETAILS = {
     dialog = nil,
@@ -762,24 +795,25 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 
     -- Characteristics
     -- ------------------------------
-    self.npc_panel.info.content.characteristics = {}
-    local characteristics = xml:InitStatic("npc_panel:info:terminal_display:content:characteristics", info_content)
-    self.npc_panel.info.content.characteristics.dialog = characteristics
+    self.npc_panel.info.content.npc_info_group = {}
+    local npc_info_group = xml:InitStatic("npc_panel:info:terminal_display:content:npc_info_group", info_content)
+    self.npc_panel.info.content.npc_info_group.dialog = npc_info_group
 
 
     -- char frame
     -- ------------------------------
-    local char_frame = xml:InitStatic("npc_panel:info:char_frame", characteristics)
+    local char_frame = xml:InitStatic("npc_panel:info:char_frame", npc_info_group)
     xml:InitStatic("npc_panel:info:char_frame:vseparator", char_frame)
     xml:InitStatic("npc_panel:info:char_frame:top_line", char_frame)
     xml:InitStatic("npc_panel:info:char_frame:char_bg", char_frame)
-    xml:InitTextWnd("npc_panel:info:char_frame:char_header", char_frame)
+    self.npc_panel.info.content.npc_info_group.header = xml:InitTextWnd("npc_panel:info:char_frame:char_header", char_frame)
     xml:InitStatic("npc_panel:info:char_frame:bottom_line", char_frame)
 
     -- characteristics group
     -- ------------------------------
+    self.npc_panel.info.content.characteristics = {}
     local char_group = xml:InitFrame("npc_panel:info:char_frame:char_group", char_frame)
-    self.npc_panel.info.content.characteristics.char_group = char_group
+    self.npc_panel.info.content.characteristics.dialog = char_group
     local i = 1
     local x_offset = 0
     for _, char_name in pairs(NPCS_CHARACTERISTICS) do
@@ -796,7 +830,7 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
 
         local value = xml:InitTextWnd("npc_panel:info:char_frame:char_group:value", char_group)
         self.npc_panel.info.content.characteristics[char_name.id].value = value
-        self.npc_panel.info.content.characteristics[char_name.id].value:SetText("null")
+        self.npc_panel.info.content.characteristics[char_name.id].value:SetText("")
         self.npc_panel.info.content.characteristics[char_name.id].value:SetWndPos(vector2():set(value:GetWndPos().x + x_offset, value:GetWndPos().y + i * icon:GetHeight()))
         self.npc_panel.info.content.characteristics[char_name.id].value:SetFont(GetFontSmall())
         i = i + 1
@@ -805,13 +839,98 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
             x_offset = x_offset + 105
         end
     end
+
+    -- data group
+    self.npc_panel.info.content.data = {}
+    local data_group = xml:InitFrame("npc_panel:info:char_frame:char_group", char_frame)
+    self.npc_panel.info.content.data.dialog = data_group
+    i = 1
+    x_offset = 0
+    for _, data in ipairs(NPC_INFO_GROUP_LIST[NPC_INFO_GROUP.DATA]) do
+        self.npc_panel.info.content.data[data.id] = {}
+        local label = xml:InitTextWnd("npc_panel:info:char_frame:char_group:label", data_group)
+        self.npc_panel.info.content.data[data.id].label = label
+        self.npc_panel.info.content.data[data.id].label:SetText(gc(data.label))
+        self.npc_panel.info.content.data[data.id].label:SetWndPos(vector2():set(label:GetWndPos().x - 20 + x_offset, label:GetWndPos().y + i * label:GetHeight()))
+        local value = xml:InitTextWnd("npc_panel:info:char_frame:char_group:value1", data_group)
+        self.npc_panel.info.content.data[data.id].value = value
+        self.npc_panel.info.content.data[data.id].value:SetWndPos(vector2():set(value:GetWndPos().x + x_offset, value:GetWndPos().y + i * value:GetHeight()))
+        self.npc_panel.info.content.data[data.id].value:SetText("")
+        i = i + 1
+        if i > 6 then
+            i = 1
+            x_offset = x_offset + 105
+        end        
+    end
+    self.npc_panel.info.content.data.dialog:Show(false)
+    
+    -- statistics group
+    self.npc_panel.info.content.statistics = {}
+    local stats_group = xml:InitFrame("npc_panel:info:char_frame:char_group", char_frame)
+    self.npc_panel.info.content.statistics.dialog = stats_group
+    i = 1
+    x_offset = 0
+    for _, stat in ipairs(NPC_INFO_GROUP_LIST[NPC_INFO_GROUP.TRACKING]) do
+        self.npc_panel.info.content.statistics[stat.id] = {}
+        local label = xml:InitTextWnd("npc_panel:info:char_frame:char_group:label", stats_group)
+        self.npc_panel.info.content.statistics[stat.id].label = label
+        self.npc_panel.info.content.statistics[stat.id].label:SetWndPos(vector2():set(label:GetWndPos().x - 20 + x_offset, label:GetWndPos().y + i * label:GetHeight()))
+        self.npc_panel.info.content.statistics[stat.id].label:SetText(gc(stat.label))
+        local value 
+        if stat.id == "last_place_seen" or stat.id == "last_place_tracked" then
+            value = xml:InitTextWnd("npc_panel:info:char_frame:char_group:value2", stats_group)
+            value:SetWndPos(vector2():set(value:GetWndPos().x + 50 + x_offset, value:GetWndPos().y + i * value:GetHeight()))
+            i = i + 1
+        else
+            value = xml:InitTextWnd("npc_panel:info:char_frame:char_group:value2", stats_group)
+            value:SetWndPos(vector2():set(value:GetWndPos().x + 50 + x_offset, value:GetWndPos().y + i * value:GetHeight()))
+        end
+        value:SetText("")
+        i = i + 1
+        self.npc_panel.info.content.statistics[stat.id].value = value
+        if i > 6 then
+            i = 1
+            x_offset = x_offset + 105
+        end
+    end
+    self.npc_panel.info.content.statistics.dialog:Show(false)
+
+    -- standings group
+    self.npc_panel.info.content.standings = {}
+    local standings_group = xml:InitFrame("npc_panel:info:char_frame:char_group", char_frame)
+    self.npc_panel.info.content.standings.dialog = standings_group
+    i = 1
+    x_offset = 0
+    for _, standing in ipairs(NPC_INFO_GROUP_LIST[NPC_INFO_GROUP.STANDINGS]) do
+        self.npc_panel.info.content.standings[standing.id] = {}
+        local label = xml:InitTextWnd("npc_panel:info:char_frame:char_group:label", standings_group)
+        self.npc_panel.info.content.standings[standing.id].label = label
+        self.npc_panel.info.content.standings[standing.id].label:SetWndPos(vector2():set(label:GetWndPos().x - 20 + x_offset, label:GetWndPos().y + i * label:GetHeight()))
+        self.npc_panel.info.content.standings[standing.id].label:SetText(gc(standing.label))
+        local value
+        if standing.id == "relation" then
+            value = xml:InitTextWnd("npc_panel:info:char_frame:char_group:value_cx", standings_group)
+        else
+            value = xml:InitTextWnd("npc_panel:info:char_frame:char_group:value1", standings_group)
+        end
+        self.npc_panel.info.content.standings[standing.id].value = value
+        self.npc_panel.info.content.standings[standing.id].value:SetWndPos(vector2():set(value:GetWndPos().x + x_offset, value:GetWndPos().y + i * value:GetHeight()))
+        self.npc_panel.info.content.standings[standing.id].value:SetText("")
+        i = i + 1
+        if i > 6 then
+            i = 1
+            x_offset = x_offset + 105
+        end        
+    end
+    self.npc_panel.info.content.standings.dialog:Show(false)
+
 -- FX: Flickering on characteristics group
     local char_flickering = npcd_ui_fx.get_fx_config(npcd_ui_fx.FX.FLICKERING)
-    char_flickering.dialog = self.npc_panel.info.content.characteristics.char_group
+    char_flickering.dialog = self.npc_panel.info.content.npc_info_group.dialog
     npcd_ui_fx.add_fx(char_flickering, "npc_panel_info_characteristics_flickering")
     self.npc_panel.info.content.fx.char_flickering = char_flickering
 
-    self.npc_panel.info.content.characteristics.dialog:Show(false)
+    self.npc_panel.info.content.npc_info_group.dialog:Show(false)
 
     --------------------------------
     -- frame
@@ -826,6 +945,24 @@ function npcd_dashboard_tab:InitNPCPanelInfo()
     self.npc_panel.info.rank = xml:InitTextWnd("npc_panel:info:rank", info)
     self.npc_panel.info.rank_cap = xml:InitTextWnd("npc_panel:info:rank_cap", info)
 
+    self.npc_panel.info.toggle = xml:Init3tButton("npc_panel:info:toggle", info)
+    self.npc_panel.info.toggle:TextControl():SetFont(GetFontSmall())
+    self.npc_panel.info.toggle_state = NPC_INFO_GROUP.CHARACTERISTICS
+    self.npc_panel.info.toggle:TextControl():SetText(self.npc_panel.info.toggle_state)
+    self:Register(self.npc_panel.info.toggle, "npc_panel_info_toggle_button")
+    self:AddCallback("npc_panel_info_toggle_button", ui_events.BUTTON_CLICKED, function ()
+        -- cycle through the NPC_INFO_GROUPS on each click
+        if self.npc_panel.info.toggle_state == NPC_INFO_GROUP.CHARACTERISTICS then
+            self:UpdateInfoGroup(NPC_INFO_GROUP.DATA)
+        elseif self.npc_panel.info.toggle_state == NPC_INFO_GROUP.DATA then
+            self:UpdateInfoGroup(NPC_INFO_GROUP.TRACKING)
+        elseif self.npc_panel.info.toggle_state == NPC_INFO_GROUP.TRACKING then
+            self:UpdateInfoGroup(NPC_INFO_GROUP.STANDINGS)
+        elseif self.npc_panel.info.toggle_state == NPC_INFO_GROUP.STANDINGS then
+            self:UpdateInfoGroup(NPC_INFO_GROUP.CHARACTERISTICS)
+        end
+    end, self)
+    
     -- instantiate the terminal
     -- ------------------------------
     self.npc_panel.info.terminal = npcd_ui_fx.SFXVideoTerminal_Create(info_terminal, self)
@@ -919,7 +1056,8 @@ function npcd_dashboard_tab:ClearInfoTerminalDisplay()
     Printer:Debug(LOG.REMOVE, CAT.UI, "Clearing NPC Panel Info Display")
     self.npc_panel.info.content.dialog:Show(false)
     self.npc_panel.info.content.idcard.dialog:Show(false)
-    self.npc_panel.info.content.characteristics.dialog:Show(false)
+    self.npc_panel.info.content.npc_info_group.dialog:Show(false)
+    self:UpdateInfoGroup(NPC_INFO_GROUP.CHARACTERISTICS)
 end
 
 function npcd_dashboard_tab:UpdateInfoTerminalDisplay(npc_id)
@@ -930,7 +1068,8 @@ function npcd_dashboard_tab:UpdateInfoTerminalDisplay(npc_id)
         self.npc_panel.info.content.idcard.dialog:Show(true)
         self.npc_panel.info.content.idcard.name:Show(true)
         self.npc_panel.info.content.idcard.community:Show(true)
-        self.npc_panel.info.content.characteristics.dialog:Show(true)
+        self.npc_panel.info.content.npc_info_group.dialog:Show(true)
+        self.npc_panel.info.toggle_state = NPC_INFO_GROUP.CHARACTERISTICS
     end
     Printer:Debug(LOG.RUN, CAT.UI, "Updating NPC Panel Info - NPC ID: " .. npc_id)
     -- Update the NPC panel info with the new NPC data
@@ -949,10 +1088,24 @@ function npcd_dashboard_tab:UpdateInfoTerminalDisplay(npc_id)
         end
         self.npc_panel.info.rank:SetText(npc_data.perk_rank)
         -- self.npc_panel.info.rank:SetFont(GetFontMedium())
+
+        -- update data group
+        self.npc_panel.info.content.data["id"].value:SetText(npc_data.id)
+        self.npc_panel.info.content.data["community"].value:SetText(npc_data.community)
+        self.npc_panel.info.content.data["rank"].value:SetText(tostring(npc_data.rank))
+        self.npc_panel.info.content.data["reputation"].value:SetText(tostring(npc_data.reputation))
+        self.npc_panel.info.content.data["squad_id"].value:SetText(tostring(npc_data.squad_id))
+        self.npc_panel.info.content.data["squad_commander"].value:SetText(npc_data.squad_commander)
+
+        -- update standings group
+        self.npc_panel.info.content.standings["attitude"].value:SetText(tostring(npc_data.standings.attitude))
+        self.npc_panel.info.content.standings["relation"].value:SetText(npcd_relations.get_relation_desc(npc_data.standings.relation))
+        self.npc_panel.info.content.standings["goodwill_personal"].value:SetText(tostring(npc_data.standings.goodwill_personal))
+        self.npc_panel.info.content.standings["goodwill_actor_faction"].value:SetText(tostring(npc_data.standings.goodwill_actor_faction))
     end
 
     local npc_deck = npcd.get_npc(npc_id)
-    Printer:DebugTable("NPC DECK", npc_deck)
+    -- Printer:DebugTable("NPC DECK", npc_deck)
     if npc_deck then
         for name, value in pairs(npc_deck.Characteristics or {}) do
             Printer:Debug(LOG.INFO, CAT.UI, "NPC Characteristic[" .. name .. "]: " .. value)
@@ -969,10 +1122,60 @@ function npcd_dashboard_tab:UpdateInfoTerminalDisplay(npc_id)
             self.npc_panel.info.content.idcard.locked:Show(false)
             self.npc_panel.info.content.idcard.unlocked:Show(true)
         end
+
+        -- cont data group
+        self.npc_panel.info.content.data["alive"].value:SetText(tostring(npc_deck.alive))
+        self.npc_panel.info.content.data["recruitable"].value:SetText(tostring(npc_deck.Info.can_recruit))
+        
+        -- statistics group
+        self.npc_panel.info.content.statistics["last_joined"].value:SetText(npcdu.format_npc_time(npc_deck.Info.last_joined))
+        self.npc_panel.info.content.statistics["last_time_seen"].value:SetText(npcdu.format_npc_time(npc_deck.Info.last_time_seen))
+        self.npc_panel.info.content.statistics["last_place_seen"].value:SetText(npc_deck.Info.last_place_seen or "")
+        self.npc_panel.info.content.statistics["last_place_tracked"].value:SetText(npc_deck.Info.last_place_tracked or "")
+        self.npc_panel.info.content.data["codec_frequency"].value:SetText(tostring(""))
+
     end
+    self:UpdateInfoGroup(self.npc_panel.info.toggle_state)
     self.npc_panel.info.content.fx.char_flickering.flickering_duration = 100
     npcd_ui_fx.resume_fx(self.npc_panel.info.content.fx.char_flickering.id)
     npcd_ui_fx.resume_fx(self.npc_panel.info.content.fx.portrait_showing.id)
+end
+
+function npcd_dashboard_tab:UpdateInfoGroup(state)
+    Printer:Debug(LOG.RUN, CAT.UI, "Updating NPC Info Group to: " .. state)
+    self.npc_panel.info.toggle_state = state
+    self.npc_panel.info.toggle:TextControl():SetText(self.npc_panel.info.toggle_state)
+    if state == NPC_INFO_GROUP.CHARACTERISTICS then
+        Printer:Debug(LOG.RUN, CAT.UI, "Showing Characteristics Group")
+        self.npc_panel.info.content.data.dialog:Show(false)
+        self.npc_panel.info.content.statistics.dialog:Show(false)
+        self.npc_panel.info.content.standings.dialog:Show(false)
+        self.npc_panel.info.content.characteristics.dialog:Show(true)
+        self.npc_panel.info.content.npc_info_group.header:SetText(gc("ui_npcd_npc_info_characteristics"))
+    elseif state == NPC_INFO_GROUP.DATA then
+        Printer:Debug(LOG.RUN, CAT.UI, "Showing Data Group")
+        self.npc_panel.info.content.characteristics.dialog:Show(false)
+        self.npc_panel.info.content.statistics.dialog:Show(false)
+        self.npc_panel.info.content.standings.dialog:Show(false)
+        self.npc_panel.info.content.data.dialog:Show(true)
+        self.npc_panel.info.content.npc_info_group.header:SetText(gc("ui_npcd_npc_info_data"))
+    elseif state == NPC_INFO_GROUP.TRACKING then
+        Printer:Debug(LOG.RUN, CAT.UI, "Showing Tracking Group")
+        self.npc_panel.info.content.characteristics.dialog:Show(false)
+        self.npc_panel.info.content.data.dialog:Show(false)
+        self.npc_panel.info.content.standings.dialog:Show(false)
+        self.npc_panel.info.content.statistics.dialog:Show(true)
+        self.npc_panel.info.content.npc_info_group.header:SetText(gc("ui_npcd_npc_info_tracking"))
+    elseif state == NPC_INFO_GROUP.STANDINGS then
+        Printer:Debug(LOG.RUN, CAT.UI, "Showing Standings Group")
+        self.npc_panel.info.content.characteristics.dialog:Show(false)
+        self.npc_panel.info.content.data.dialog:Show(false)
+        self.npc_panel.info.content.statistics.dialog:Show(false)
+        self.npc_panel.info.content.standings.dialog:Show(true)
+        self.npc_panel.info.content.npc_info_group.header:SetText(gc("ui_npcd_npc_info_standings"))
+    else
+        Printer:Debug(LOG.WARN, CAT.UI, "Unknown NPC Info Group State: " .. state)
+    end
 end
 
 function npcd_dashboard_tab:OnTerminalTabClicked(tab_index, spec_name)

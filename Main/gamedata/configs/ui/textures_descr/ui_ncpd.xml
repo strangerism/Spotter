@@ -114,6 +114,12 @@
 		<texture id="ui_npcd_pda_npc_detail_info_locked" x="1690" y="1163" width="60" height="28" />
 		<texture id="ui_npcd_pda_npc_detail_info_unlocked" x="1626" y="1163" width="60" height="28" />
 
+		<texture id="ui_npcd_pda_npc_detail_info_toggle_button_d" x="1628" y="1236" width="43" height="19" />
+		<texture id="ui_npcd_pda_npc_detail_info_toggle_button_e" x="1628" y="1236" width="43" height="19" />
+		<texture id="ui_npcd_pda_npc_detail_info_toggle_button_h" x="1628" y="1257" width="43" height="19" />
+		<texture id="ui_npcd_pda_npc_detail_info_toggle_button_t" x="1628" y="1257" width="43" height="19" />
+
+
 		<!-- npc specs -->
 		<texture id="ui_npcd_pda_npc_detail_info_spec_frame" x="2162" y="1136" width="669" height="392" />
 		<texture id="ui_npcd_pda_npc_detail_info_spec_tab_button_d" x="1220" y="203" width="85" height="85" />

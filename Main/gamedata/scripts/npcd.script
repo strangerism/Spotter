@@ -563,6 +563,7 @@ function set_recruited(npc_id, enlist)
 	npcs[npc_id].recruited = enlist
 	if enlist then
 		npcs[npc_id].Info.last_joined = game.get_game_time()
+		npcs[npc_id].show_profile = true
 	end
 end
 
