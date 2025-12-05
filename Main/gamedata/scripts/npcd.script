@@ -810,6 +810,31 @@ local function add_random_perk(npc_id, perk_type, amount)
 	end
 end
 
+-- codec frequency generator and library
+
+codec_frequency_map = {}
+
+-- build map from npcs
+local function build_codec_frequency_map()
+	codec_frequency_map = {}
+	for npc_id, npc in pairs(npcs) do
+		if npc.Info and npc.Info.codec_frequency then
+			codec_frequency_map[npc.Info.codec_frequency] = npc_id
+		end
+	end
+end
+
+function get_new_codec_frequency()
+	if npcdu.tablelength(codec_frequency_map) == 0 then
+		build_codec_frequency_map()
+	end
+	local frequency = nil
+	repeat
+		frequency = math.random(0, 999)
+	until not codec_frequency_map[frequency]
+	return frequency
+end
+
 function add_characteristics(npc_id)
 	-- characteristics can be further customized here
 	-- for now they are randomly generated within a range
@@ -832,6 +857,8 @@ function create_profile(npc_id)
 	add_random_perk(npc_id, PERK_TYPE.SECONDARY, MAX_SECONDARY_PERKS)
 
 	add_characteristics(npc_id)
+
+	npcs[npc_id].Info.codec_frequency = get_new_codec_frequency()
 
 	npcs[npc_id].has_profile = true
 	Printer:LogTable(string.format("Create Profile NPC %s", npc_id), npcs[npc_id])

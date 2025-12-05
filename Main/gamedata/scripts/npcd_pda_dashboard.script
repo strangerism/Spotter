@@ -1132,7 +1132,7 @@ function npcd_dashboard_tab:UpdateInfoTerminalDisplay(npc_id)
         self.npc_panel.info.content.statistics["last_time_seen"].value:SetText(npcdu.format_npc_time(npc_deck.Info.last_time_seen))
         self.npc_panel.info.content.statistics["last_place_seen"].value:SetText(npc_deck.Info.last_place_seen or "")
         self.npc_panel.info.content.statistics["last_place_tracked"].value:SetText(npc_deck.Info.last_place_tracked or "")
-        self.npc_panel.info.content.data["codec_frequency"].value:SetText(tostring(""))
+        self.npc_panel.info.content.data["codec_frequency"].value:SetText(tostring(npc_deck.Info.codec_frequency or "N/A"))
 
     end
     self:UpdateInfoGroup(self.npc_panel.info.toggle_state)
